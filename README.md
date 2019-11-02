@@ -4,13 +4,11 @@ Opinionated CLI for continuous delivery of npm packages.
 
 ## Installation
 
-`libre` was already taken on npm so we publish it under `librelibre`.
+`libre` was already taken on npm so we publish it under `librelibre`. But once installed you access it simply as `libre`.
 
 ```
 npm install librelibre
 ```
-
-Then you can access it in your terminal:
 
 ```
 libre help
