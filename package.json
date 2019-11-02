@@ -10,8 +10,7 @@
   "private": false,
   "files": [
     "src",
-    "dist",
-    "bin"
+    "dist"
   ],
   "scripts": {
     "libre": "ts-node src/main",
