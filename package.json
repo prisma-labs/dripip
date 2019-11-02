@@ -1,5 +1,5 @@
 {
-  "name": "libre",
+  "name": "librelibre",
   "version": "0.0.0-see-git-tags",
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/main",
