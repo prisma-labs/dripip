@@ -1,0 +1,47 @@
+{
+  "name": "libre",
+  "version": "0.0.0",
+  "description": "Opinionated CLI for continuous delivery of npm packages",
+  "main": "dist/main",
+  "bin": "dist/main",
+  "repository": "git@github.com:prisma-labs/libre.git",
+  "author": "Jason Kuhrt <jasonkuhrt@me.com>",
+  "license": "MIT",
+  "private": false,
+  "files": [
+    "src",
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@oclif/command": "^1.5.19",
+    "globby": "^10.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.21",
+    "@types/node": "^12.12.5",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
+  },
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "oclif": {
+    "commands": "./dist/commands",
+    "bin": "libre"
+  }
+}
