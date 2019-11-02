@@ -14,6 +14,7 @@
     "bin"
   ],
   "scripts": {
+    "libre": "ts-node src/main",
     "clean": "rm -rf dist",
     "build": "tsc",
     "dev": "tsc --watch",
