@@ -11,16 +11,21 @@
   "license": "MIT",
   "private": false,
   "files": [
-    "src",
-    "dist"
+    "/src",
+    "/dist",
+    "/oclif.manifest.json"
   ],
   "scripts": {
     "libre": "ts-node src/main",
-    "clean": "rm -rf dist",
-    "build": "tsc",
+    "clean": "rm -rf dist oclif.manifest.json",
+    "build": "oclif-dev manifest && tsc",
     "dev": "tsc --watch",
     "test": "jest",
-    "prepublishOnly": "npm -s run build"
+    "build:doc:toc": "doctoc README.md",
+    "build:doc:commands": "oclif-dev readme",
+    "build:doc": "yarn -s build:doc:commands && yarn -s build:doc:toc",
+    "postpublish": "yarn -s run clean",
+    "prepublishOnly": "yarn -s run build"
   },
   "dependencies": {
     "@oclif/command": "^1.5.19",
@@ -29,8 +34,10 @@
     "globby": "^10.0.1"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1.22.2",
     "@types/jest": "^24.0.21",
     "@types/node": "^12.12.5",
+    "doctoc": "^1.4.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.1.0",
