@@ -47,6 +47,9 @@
   },
   "oclif": {
     "commands": "./dist/commands",
-    "bin": "libre"
+    "bin": "libre",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   }
 }
