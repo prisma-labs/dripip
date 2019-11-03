@@ -62,3 +62,4 @@ typings/
 
 # app
 dist
+oclif.manifest.json
