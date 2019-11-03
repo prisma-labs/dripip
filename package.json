@@ -3,7 +3,7 @@
   "version": "0.0.0-see-git-tags",
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/main",
-  "bin": "dist/main",
+  "bin": "dist/main.js",
   "repository": "git@github.com:prisma-labs/libre.git",
   "author": "Jason Kuhrt <jasonkuhrt@me.com>",
   "license": "MIT",
@@ -17,7 +17,8 @@
     "clean": "rm -rf dist",
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm -s run build"
   },
   "dependencies": {
     "@oclif/command": "^1.5.19",
