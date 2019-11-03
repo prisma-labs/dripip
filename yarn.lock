@@ -319,7 +319,7 @@
     debug "^4.1.1"
     semver "^5.6.0"
 
-"@oclif/config@^1":
+"@oclif/config@^1", "@oclif/config@^1.13.3":
   version "1.13.3"
   resolved "https://registry.yarnpkg.com/@oclif/config/-/config-1.13.3.tgz#1b13e18d0e4242ddbd9cbd100f0eec819aa2bf8c"
   integrity sha512-qs5XvGRw+1M41abOKCjd0uoeHCgsMxa2MurD2g2K8CtQlzlMXl0rW5idVeimIg5208LLuxkfzQo8TKAhhRCWLg==
@@ -353,7 +353,7 @@
     chalk "^2.4.2"
     tslib "^1.9.3"
 
-"@oclif/plugin-help@^2":
+"@oclif/plugin-help@^2", "@oclif/plugin-help@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-2.2.1.tgz#cb4d23e453b19340b07c48fb299948b7c74366d3"
   integrity sha512-psEA3t41MSGBErLk6xCaAq2jKrRtx3Br+kHpd43vZeGEeZ7Gos4wgK0JAaHBbvhvUQskCHg8dzoqv4XEeTWeVQ==
