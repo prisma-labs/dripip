@@ -16,6 +16,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
+    "format": "prettier --write '*/**/*.ts'",
     "libre": "ts-node src/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build": "oclif-dev manifest && tsc",
@@ -57,7 +58,8 @@
   },
   "prettier": {
     "semi": false,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "singleQuote": true
   },
   "jest": {
     "preset": "ts-jest",

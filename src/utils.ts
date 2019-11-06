@@ -1,5 +1,5 @@
-import * as Git from "simple-git/promise"
-import * as Semver from "semver"
+import * as Git from 'simple-git/promise'
+import * as Semver from 'semver'
 
 // const emptyCommit = (git:Git.SimpleGit, options: string[]): Promise<Git.CommitSummary> => {
 //   git.commit(["--allow-empty", "--message", "initial commit"])
@@ -7,11 +7,11 @@ import * as Semver from "semver"
 
 const getReleaseTagsAtCommit = (ref: string): Promise<Semver.SemVer[]> =>
   Git()
-    .tag({ "--points-at": ref })
+    .tag({ '--points-at': ref })
     .then(result =>
       result
         .trim()
-        .split("\n")
+        .split('\n')
         .map(tag => Semver.parse(tag))
         .filter((parsed): parsed is Semver.SemVer => parsed !== null)
     )
@@ -20,14 +20,14 @@ const indentBlock4 = (block: string): string => indentBlock(4, block)
 
 const indentBlock = (size: number, block: string): string => {
   return block
-    .split("\n")
+    .split('\n')
     .map(
       line =>
         range(size)
-          .map(constant(" "))
-          .join("") + line
+          .map(constant(' '))
+          .join('') + line
     )
-    .join("\n")
+    .join('\n')
 }
 
 const constant = <T>(x: T): (() => T) => {

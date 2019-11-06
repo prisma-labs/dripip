@@ -1,7 +1,7 @@
-import Command from "@oclif/command"
-import * as Git from "simple-git/promise"
-import { getReleaseTagsAtCommit, indentBlock4 } from "../utils"
-import { stripIndent } from "common-tags"
+import Command from '@oclif/command'
+import * as Git from 'simple-git/promise'
+import { getReleaseTagsAtCommit, indentBlock4 } from '../utils'
+import { stripIndent } from 'common-tags'
 
 export class Preview extends Command {
   async run() {
@@ -14,8 +14,8 @@ export class Preview extends Command {
      * a preview of something that has already been released (be it just preview
      * or preview and stable).
      */
-    const currentCommitShortSha = await Git().revparse(["--short", "HEAD"])
-    const releaseTags = await getReleaseTagsAtCommit("HEAD")
+    const currentCommitShortSha = await Git().revparse(['--short', 'HEAD'])
+    const releaseTags = await getReleaseTagsAtCommit('HEAD')
     if (releaseTags.length) {
       // TODO nicer tag rendering:
       //    1. for annotated tags should the messge
@@ -27,16 +27,16 @@ export class Preview extends Command {
 
           The releases present are:
 
-          ${indentBlock4(releaseTags.map(rt => rt.format()).join("\n"))}
+          ${indentBlock4(releaseTags.map(rt => rt.format()).join('\n'))}
         `,
         {
           // TODO what is code for? How shuold we use it?
-          code: "foo code",
+          code: 'foo code',
           exit: 100,
         }
       )
     }
 
-    process.stdout.write("todo")
+    process.stdout.write('todo')
   }
 }

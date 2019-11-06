@@ -1,10 +1,10 @@
-import { createLibreRunner } from "../__helpers"
-import { dirSync, DirResult } from "tmp"
-import { basename } from "path"
-import * as Git from "simple-git/promise"
-import * as path from "path"
-import { unlinkSync } from "fs"
-import { tmpdir } from "os"
+import { createLibreRunner } from '../__helpers'
+import { dirSync, DirResult } from 'tmp'
+import { basename } from 'path'
+import * as Git from 'simple-git/promise'
+import * as path from 'path'
+import { unlinkSync } from 'fs'
+import { tmpdir } from 'os'
 
 let git: Git.SimpleGit
 let libre: ReturnType<typeof createLibreRunner>
@@ -21,16 +21,16 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   try {
-    unlinkSync(path.join(tmpdir.name, ".git"))
+    unlinkSync(path.join(tmpdir.name, '.git'))
   } catch (e) {
     /*ignore if git folder was not present for some reason */
   }
   await git.init()
-  await git.raw(["commit", "--allow-empty", "--message", "initial commit"])
+  await git.raw(['commit', '--allow-empty', '--message', 'initial commit'])
 })
 
-it("can be run", async () => {
-  expect(libre("preview")).toMatchInlineSnapshot(`
+it('can be run', async () => {
+  expect(libre('preview')).toMatchInlineSnapshot(`
     Object {
       "status": 0,
       "stderr": "",
@@ -39,11 +39,11 @@ it("can be run", async () => {
   `)
 })
 
-describe("preflight assertion no-release-tags", () => {
-  it("fails if there is already a release tag on the commit", async () => {
-    await git.addTag("v1.2.3")
-    const result = libre("preview")
-    result.stderr = result.stderr.replace(/\(.{7}\)/g, "(__SHORT_SHA__)")
+describe('preflight assertion no-release-tags', () => {
+  it('fails if there is already a release tag on the commit', async () => {
+    await git.addTag('v1.2.3')
+    const result = libre('preview')
+    result.stderr = result.stderr.replace(/\(.{7}\)/g, '(__SHORT_SHA__)')
     expect(result).toMatchInlineSnapshot(`
           Object {
             "status": 100,
@@ -59,9 +59,9 @@ describe("preflight assertion no-release-tags", () => {
       `)
   })
 
-  it("does not include non-release tags", async () => {
-    await git.addTag("foobar")
-    expect(libre("preview")).toMatchInlineSnapshot(`
+  it('does not include non-release tags', async () => {
+    await git.addTag('foobar')
+    expect(libre('preview')).toMatchInlineSnapshot(`
       Object {
         "status": 0,
         "stderr": "",
