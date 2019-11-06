@@ -1,31 +1,61 @@
 import * as Git from "nodegit"
 
-async function getTags(repo: Git.Repository): Promise<Git.Reference[]> {
+type TagWithCommits = {
+  commit: Git.Object
+  tags: Git.Reference[]
+}
+
+async function getTaggedCommits(
+  repo: Git.Repository,
+): Promise<TagWithCommits[]> {
   const refs: Git.Reference[] = await (repo.getReferences as any)()
-  const tags = refs.filter(ref => ref.isTag())
-  return tags
+  const commitsWithTags: Record<string, TagWithCommits> = {}
+
+  for (const ref of refs) {
+    if (!ref.isTag()) continue
+    const commit = await ref.peel(Git.Object.TYPE.COMMIT)
+    const id = commit.id().tostrS()
+    let entry = commitsWithTags[id]
+    if (!entry) {
+      commitsWithTags[id] = entry = { tags: [], commit }
+    }
+    entry.tags.push(ref)
+  }
+
+  return Object.values(commitsWithTags)
 }
 
-async function getTaggedCommits(repo: Git.Repository): Promise<Git.Object[]> {
-  const tags = await getTags(repo)
-  const taggedCommits = await Promise.all(
-    tags.map(t => t.peel(Git.Object.TYPE.COMMIT)),
-  )
-  return taggedCommits
-}
-
-async function getTagsOnCommit(c: Git.Commit): Promise<Git.Object[]> {
+async function getTagsOnCommit(c: Git.Commit): Promise<Git.Reference[]> {
   const repo = c.owner()
   const taggedCommits = await getTaggedCommits(repo)
-  const tagsOnCommit = taggedCommits.filter(
-    c => c.id().tostrS() === c.id().tostrS(),
+  const taggedCommit = taggedCommits.filter(
+    tc => tc.commit.id().tostrS() === c.id().tostrS(),
   )
-  return tagsOnCommit
+
+  if (taggedCommit.length > 1) {
+    throw new Error(
+      "Found multiple tagged commit matches which should be impossible",
+    )
+  } else if (taggedCommit.length === 1) {
+    return taggedCommit[0].tags
+  } else {
+    return []
+  }
 }
 
 Git.Repository.open(".")
   .then(async repo => {
-    const tagsOnCommit = await getTagsOnCommit(await repo.getHeadCommit())
-    console.log(tagsOnCommit)
+    const commit = await repo.getHeadCommit()
+    const tagsOnCommit = await getTagsOnCommit(commit)
+
+    if (tagsOnCommit.length) {
+      console.log(
+        "The current commit (%s) has tags: %s",
+        commit,
+        tagsOnCommit.map(r => r.shorthand()).join(", "),
+      )
+    } else {
+      console.log("The current commit (%s) has no tags", commit)
+    }
   })
   .catch(console.error)
