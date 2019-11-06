@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require("@oclif/command")
+require('@oclif/command')
   .run()
-  .then(require("@oclif/command/flush"))
-  .catch(require("@oclif/errors/handle"))
+  .then(require('@oclif/command/flush'))
+  .catch(require('@oclif/errors/handle'))
