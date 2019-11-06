@@ -21,6 +21,7 @@
     "build": "oclif-dev manifest && tsc",
     "dev": "tsc --watch",
     "test": "jest",
+    "test:dev": "jest --watch",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",
     "build:doc": "yarn -s build:doc:commands && yarn -s build:doc:toc",
@@ -31,25 +32,32 @@
     "@oclif/command": "^1.5.19",
     "@oclif/config": "^1.13.3",
     "@oclif/plugin-help": "^2.2.1",
+    "common-tags": "^1.8.0",
     "globby": "^10.0.1",
     "nodegit": "^0.26.2",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "semver": "^6.3.0",
+    "simple-git": "^1.126.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.2",
+    "@types/common-tags": "^1.8.0",
     "@types/jest": "^24.0.21",
     "@types/node": "^12.12.5",
     "@types/nodegit": "^0.24.13",
+    "@types/semver": "^6.2.0",
+    "@types/tmp": "^0.1.0",
     "doctoc": "^1.4.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
+    "tmp": "^0.1.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
   "prettier": {
     "semi": false,
-    "trailingComma": "all"
+    "trailingComma": "es5"
   },
   "jest": {
     "preset": "ts-jest",
