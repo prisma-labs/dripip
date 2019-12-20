@@ -1,22 +1,11 @@
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import * as path from 'path'
+import * as proc from '../src/lib/proc'
 
-type RunResult = { stderr: string; stdout: string; status: null | number }
-type RunOptions = Omit<SpawnSyncOptions, 'encoding'>
-
-const run = (command: string, options?: RunOptions): RunResult => {
-  const [name, ...args] = command.split(' ')
-  const { stderr, stdout, status } = spawnSync(name, args, {
-    ...options,
-    encoding: 'utf8',
-  })
-  return { stderr, stdout, status }
-}
-
-const createLibreRunner = (optionsBase?: RunOptions) => (
+const createLibreRunner = (optionsBase?: proc.RunOptions) => (
   command: string,
-  options?: RunOptions
-) => {
+  options?: proc.RunOptions
+): Promise<Omit<proc.SuccessfulRunResult, 'command'>> => {
   const mergedOptions = { ...optionsBase, ...options }
   // TODO Why is the extra `../` needed...
   const pathToProject =
@@ -26,10 +15,15 @@ const createLibreRunner = (optionsBase?: RunOptions) => (
       path.join(__dirname, '..')
     )
   // console.log(pathToProject)
-  return run(
-    `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command}`,
-    mergedOptions
-  )
+  return proc
+    .run(
+      `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command}`,
+      mergedOptions
+    )
+    .then(result => {
+      delete result.command
+      return result
+    })
 }
 
-export { run, createLibreRunner }
+export { createLibreRunner }

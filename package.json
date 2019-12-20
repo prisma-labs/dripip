@@ -19,9 +19,9 @@
     "format": "prettier --write '*/**/*.ts'",
     "libre": "ts-node src/main",
     "clean": "rm -rf dist oclif.manifest.json",
-    "build": "oclif-dev manifest && tsc",
-    "dev": "tsc --watch",
-    "test": "jest",
+    "build": "oclif-dev manifest && tsdx build",
+    "dev": "tsdx watch",
+    "test": "tsdx test",
     "test:dev": "jest --watch",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",
@@ -49,21 +49,19 @@
     "@types/semver": "^6.2.0",
     "@types/tmp": "^0.1.0",
     "doctoc": "^1.4.0",
+    "fs-jetpack": "^2.2.3",
     "jest": "^24.9.0",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "tmp": "^0.1.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
+    "tsdx": "^0.12.0",
     "typescript": "^3.6.4"
   },
   "prettier": {
     "semi": false,
     "trailingComma": "es5",
     "singleQuote": true
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
   },
   "oclif": {
     "commands": "./dist/commands",
