@@ -3,11 +3,7 @@ import * as Semver from 'semver'
 
 export type SimpleGit = ReturnType<typeof createGit>
 
-// const emptyCommit = (git:Git.SimpleGit, options: string[]): Promise<Git.CommitSummary> => {
-//   git.commit(["--allow-empty", "--message", "initial commit"])
-// }
-
-const getReleaseTagsAtCommit = (ref: string): Promise<Semver.SemVer[]> =>
+export const getReleaseTagsAtCommit = (ref: string): Promise<Semver.SemVer[]> =>
   createGit()
     .tag({ '--points-at': ref })
     .then(result =>
@@ -18,9 +14,9 @@ const getReleaseTagsAtCommit = (ref: string): Promise<Semver.SemVer[]> =>
         .filter((parsed): parsed is Semver.SemVer => parsed !== null)
     )
 
-const indentBlock4 = (block: string): string => indentBlock(4, block)
+export const indentBlock4 = (block: string): string => indentBlock(4, block)
 
-const indentBlock = (size: number, block: string): string => {
+export const indentBlock = (size: number, block: string): string => {
   return block
     .split('\n')
     .map(
@@ -46,8 +42,6 @@ const range = (times: number): number[] => {
   return list
 }
 
-export { getReleaseTagsAtCommit, indentBlock, indentBlock4 }
-
 export async function gitReset(git: SimpleGit): Promise<void> {
   await Promise.all([
     git.raw(['clean', '-d', '-x', '-f']),
@@ -71,13 +65,15 @@ export async function gitResetToInitialCommit(git: SimpleGit): Promise<void> {
 /**
  * Reset not only the working directory but the git repo itself.
  */
-
 export async function gitRepo(git: SimpleGit): Promise<void> {
   await git.init()
   await git.raw(['add', '-A'])
   await gitEmptyCommit(git, 'initial commit')
 }
 
+/**
+ * Create an empty commit in the repo.
+ */
 export async function gitEmptyCommit(
   git: SimpleGit,
   messge: string
@@ -85,6 +81,9 @@ export async function gitEmptyCommit(
   await git.raw(['commit', '--allow-empty', '--message', messge])
 }
 
+/**
+ * Delete all tags in the repo.
+ */
 export async function gitDeleteAllTags(git: SimpleGit): Promise<void> {
   const tagsFound: string | null = await git.raw(['tag'])
   if (tagsFound === null) return
