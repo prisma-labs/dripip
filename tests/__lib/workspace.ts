@@ -5,7 +5,6 @@ import {
   gitRepo,
   SimpleGit,
   gitResetToInitialCommit,
-  gitEmptyCommit,
 } from '../../src/lib/utils'
 import { createRunner } from '../../src/lib/proc'
 
