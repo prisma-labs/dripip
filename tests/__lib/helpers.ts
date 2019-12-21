@@ -1,6 +1,24 @@
 import * as path from 'path'
 import * as proc from '../../src/lib/proc'
+import * as WS from '../__lib/workspace'
 
+/**
+ * Helper for creating a specialized workspace
+ */
+export function createWorkspace(command: 'preview') {
+  return addLibreToWorkspace(
+    WS.createWorkspace({
+      name: command,
+      cache: {
+        version: '7',
+      },
+    })
+  )
+}
+
+/**
+ * Add the libre cli to the workspace, ready to use.
+ */
 export function addLibreToWorkspace<T extends {}>(
   ws: T
 ): T & { libre: ReturnType<typeof createLibreRunner> } {
@@ -12,10 +30,22 @@ export function addLibreToWorkspace<T extends {}>(
   return ws as T & { libre: ReturnType<typeof createLibreRunner> }
 }
 
+/**
+ * Certain parts of libre output are highly dynamic, making it difficult to
+ * snapshot. This function strips out those dynamic parts.
+ */
+function sanitizeResultForSnap(result: RunLibreResult): void {
+  const shortSHAPattern = /\(.{7}\)/g
+  result.stderr = result.stderr!.replace(shortSHAPattern, '(__SHORT_SHA__)')
+  result.stdout = result.stdout!.replace(shortSHAPattern, '(__SHORT_SHA__)')
+}
+
+type RunLibreResult = Omit<proc.SuccessfulRunResult, 'command'>
+
 const createLibreRunner = (optionsBase?: proc.RunOptions) => (
   command: string,
   options?: proc.RunOptions
-): Promise<Omit<proc.SuccessfulRunResult, 'command'>> => {
+): Promise<RunLibreResult> => {
   const mergedOptions = { ...optionsBase, ...options }
   // TODO Why is the extra `../` needed...
   const pathToProject =
@@ -32,6 +62,7 @@ const createLibreRunner = (optionsBase?: proc.RunOptions) => (
     )
     .then(result => {
       delete result.command
+      sanitizeResultForSnap(result)
       return result
     })
 }
