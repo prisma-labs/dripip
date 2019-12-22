@@ -35,9 +35,8 @@
     "@oclif/plugin-help": "^2.2.1",
     "common-tags": "^1.8.0",
     "globby": "^10.0.1",
-    "nodegit": "^0.26.2",
     "request": "^2.88.0",
-    "semver": "^6.3.0",
+    "semver": "^7.1.1",
     "simple-git": "^1.126.0"
   },
   "devDependencies": {
