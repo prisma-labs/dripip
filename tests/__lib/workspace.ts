@@ -1,18 +1,14 @@
 import * as jetpack from 'fs-jetpack'
 import * as Path from 'path'
 import createGit from 'simple-git/promise'
-import {
-  gitRepo,
-  SimpleGit,
-  gitResetToInitialCommit,
-} from '../../src/lib/utils'
+import { gitInitRepo, Simple, gitResetToInitialCommit } from '../../src/lib/git'
 import { createRunner } from '../../src/lib/proc'
 
 type Workspace = {
   dir: { path: string; pathRelativeToGraphqlSanta: string; cacheHit: boolean }
   run: ReturnType<typeof createRunner>
   fs: ReturnType<typeof jetpack.dir>
-  git: SimpleGit
+  git: Simple
 }
 
 type Options = {
@@ -102,7 +98,7 @@ async function doCreateWorkspace(config: Options): Promise<Workspace> {
         license: 'MIT',
       }),
     ])
-    await gitRepo(git)
+    await gitInitRepo(git)
   }
 
   //

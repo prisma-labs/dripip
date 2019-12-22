@@ -1,18 +1,22 @@
-import createGit from 'simple-git/promise'
 import * as Semver from 'semver'
 
-export type SimpleGit = ReturnType<typeof createGit>
+export type ParsedTag =
+  | { type: 'unknown'; value: string }
+  | { type: 'stable_release'; value: Semver.SemVer }
+  | { type: 'pre_release'; value: Semver.SemVer }
 
-export const getReleaseTagsAtCommit = (ref: string): Promise<Semver.SemVer[]> =>
-  createGit()
-    .tag({ '--points-at': ref })
-    .then(result =>
-      result
-        .trim()
-        .split('\n')
-        .map(tag => Semver.parse(tag))
-        .filter((parsed): parsed is Semver.SemVer => parsed !== null)
-    )
+export function parseTag(rawTag: string): ParsedTag {
+  const semverParseResult = Semver.parse(rawTag)
+  if (semverParseResult !== null) {
+    if (semverParseResult.prerelease.length > 0) {
+      return { type: 'pre_release', value: semverParseResult } as const
+    } else {
+      return { type: 'stable_release', value: semverParseResult } as const
+    }
+  } else {
+    return { type: 'unknown', value: rawTag } as const
+  }
+}
 
 export const indentBlock4 = (block: string): string => indentBlock(4, block)
 
@@ -42,57 +46,43 @@ const range = (times: number): number[] => {
   return list
 }
 
-export async function gitReset(git: SimpleGit): Promise<void> {
-  await Promise.all([
-    git.raw(['clean', '-d', '-x', '-f']),
-    gitDeleteAllTags(git),
-    git.raw(['reset', '--hard']),
-  ])
+type IndexableKeyTypes = string | number | symbol
+
+type Indexable<T = unknown> = Record<string | number, T>
+
+type JustIndexableTypes<T> = T extends IndexableKeyTypes ? T : never
+
+type KeysMatching<Rec, Keys> = NonNullable<
+  {
+    [RecKey in keyof Rec]: Rec[RecKey] extends Keys ? RecKey : never
+  }[keyof Rec]
+>
+
+export type GroupBy<T extends Indexable, K extends IndexableKeys<T>> = {
+  [KV in JustIndexableTypes<T[K]>]?: Array<T extends Record<K, KV> ? T : never>
 }
 
-export async function gitResetToInitialCommit(git: SimpleGit): Promise<void> {
-  await Promise.all([
-    git.raw(['clean', '-d', '-x', '-f']),
-    git
-      .raw('rev-list --max-parents=0 HEAD'.split(' '))
-      .then(initialCommitSHA => {
-        git.raw(['reset', '--hard', initialCommitSHA.trim()])
-      }),
-    gitDeleteAllTags(git),
-  ])
-}
+type IndexableKeys<Rec> = KeysMatching<Rec, IndexableKeyTypes>
 
-/**
- * Reset not only the working directory but the git repo itself.
- */
-export async function gitRepo(git: SimpleGit): Promise<void> {
-  await git.init()
-  await git.raw(['add', '-A'])
-  await gitEmptyCommit(git, 'initial commit')
-}
+export function groupByProp<
+  Obj extends Indexable,
+  KeyName extends IndexableKeys<Obj>
+>(xs: Obj[], keyName: KeyName): GroupBy<Obj, KeyName> {
+  type KeyValue = JustIndexableTypes<Obj[KeyName]>
+  const seed = {} as GroupBy<Obj, KeyName>
 
-/**
- * Create an empty commit in the repo.
- */
-export async function gitEmptyCommit(
-  git: SimpleGit,
-  messge: string
-): Promise<void> {
-  await git.raw(['commit', '--allow-empty', '--message', messge])
-}
+  return xs.reduce((groupings, x) => {
+    const groupName = x[keyName] as KeyValue
 
-/**
- * Delete all tags in the repo.
- */
-export async function gitDeleteAllTags(git: SimpleGit): Promise<void> {
-  const tagsFound: string | null = await git.raw(['tag'])
-  if (tagsFound === null) return
+    if (groupings[groupName] === undefined) {
+      groupings[groupName] = []
+    }
 
-  const tags = tagsFound
-    .trim()
-    .split('\n')
-    .map(t => t.trim())
-  if (tags.length) {
-    await git.raw(['tag', '-d', ...tags])
-  }
+    // We know the group will exist, given above initializer.
+    groupings[groupName]!.push(
+      x as Obj extends Record<KeyName, KeyValue> ? Obj : never
+    )
+
+    return groupings
+  }, seed)
 }
