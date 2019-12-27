@@ -7,7 +7,7 @@ import {
   ParsedTag,
   GroupBy,
 } from '../lib/utils'
-import { stripIndent, stripIndents } from 'common-tags'
+import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 
 export class Preview extends Command {
@@ -59,103 +59,25 @@ export class Preview extends Command {
       })
     }
 
-    // Detect if commit is on a PR
-    // 1. look for CI environment variables that tip off if is a PR
-    // 2. if no, use whatever trick hub is doing to implement $ git pr show
-    // 3. if no, accept no
-    const prCheck = await checkIsThisCommitForAPullRequest(git)
-    console.log(prCheck)
+    const prCheck = await Git.checkBranchPR(git)
 
-    /**
-     * Now that we've validated the environment, run our preview release
-     *
-     * Non-PR flow:
-     *
-     * 1. Find the last pre-release on the current branch. Take its build number. If none use 1.
-     * 2. Calculate the semver bump type. Do this by analyizing the commits on the branch between HEAD and the last stable git tag. The highest change type found is used. If no previous stable git tag use 0.0.1.
-     * 3. Bump last stable version by bump type, thus producing the next version.
-     * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
-     */
-
-    process.stdout.write('todo')
-    //
-  }
-}
-
-import Octokit from '@octokit/rest'
-import parseGitConfig from 'parse-git-config'
-import parseGitHubURL from 'parse-github-url'
-
-async function checkIsThisCommitForAPullRequest(
-  git: Git.Simple
-): Promise<{
-  answer: boolean
-  reason: 'ci_env_var' | 'git_branch_github_api' | 'nil'
-}> {
-  if (
-    typeof process.env.CIRCLE_PULL_REQUEST === 'string' &&
-    process.env.CIRCLE_PULL_REQUEST !== ''
-  ) {
-    return {
-      answer: true,
-      reason: 'ci_env_var',
+    if (prCheck.isPR) {
+      // TODO
+      process.stdout.write('todo: pr preview release')
+    } else {
+      /**
+       * Now that we've validated the environment, run our preview release
+       *
+       * Non-PR flow:
+       *
+       * 1. Find the last pre-release on the current branch. Take its build number. If none use 1.
+       * 2. Calculate the semver bump type. Do this by analyizing the commits on the branch between HEAD and the last stable git tag. The highest change type found is used. If no previous stable git tag use 0.0.1.
+       * 3. Bump last stable version by bump type, thus producing the next version.
+       * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
+       */
+      process.stdout.write('todo: trunk preview release')
     }
   }
-
-  // Inspiration from how `$ hub pr show` works
-  // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
-
-  const gitConfig = await parseGitConfig()
-  if (gitConfig === null) {
-    throw new Error('Could not parse your git config')
-  }
-
-  const gitOrigin = gitConfig['remote "origin"']
-  if (gitOrigin === undefined) {
-    throw new Error('Could not find a configured origin in your git config')
-  }
-
-  const gitOriginURL: string = gitOrigin['url']
-  if (gitOriginURL === undefined) {
-    throw new Error(
-      'Could not find a URL in your remote origin config in your git config'
-    )
-  }
-
-  const githubRepoURL = parseGitHubURL(gitOriginURL)
-  if (githubRepoURL === null) {
-    throw new Error(
-      'Could not parse the URL in your remote origin config in your git config'
-    )
-  }
-  if (githubRepoURL.owner === null) {
-    throw new Error(
-      'Could not parse out the GitHub owner from the URL in your remote origin config in your git config'
-    )
-  }
-  if (githubRepoURL.name === null) {
-    throw new Error(
-      'Could not parse out the GitHub repo name from the URL in your remote origin config in your git config'
-    )
-  }
-
-  const octokit = new Octokit()
-  const pullsRes = await octokit.pulls.list({
-    owner: githubRepoURL.owner,
-    repo: githubRepoURL.name,
-  })
-
-  const branchSummary = await git.branch({})
-  if (pullsRes.data.length > 0) {
-    for (const pull of pullsRes.data) {
-      // todo
-      if (pull.head.ref === branchSummary.current) {
-        return { answer: true, reason: 'git_branch_github_api' }
-      }
-    }
-  }
-
-  return { answer: false, reason: 'nil' }
 }
 
 /**
