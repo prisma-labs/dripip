@@ -3,6 +3,9 @@
  */
 
 import createGit from 'simple-git/promise'
+import Octokit from '@octokit/rest'
+import parseGitConfig from 'parse-git-config'
+import parseGitHubURL from 'parse-github-url'
 
 export type Simple = ReturnType<typeof createGit>
 
@@ -107,4 +110,101 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
   if (tags.length) {
     await git.raw(['tag', '-d', ...tags])
   }
+}
+
+/**
+ * Detect if there is a pull-request for the current branch. The CI environment
+ * is checked for well-known environment variables providing sufficient signal
+ * to answer the question first, as this is cheap. If not confirmed is PR, we
+ * next go through the GitHub API and local Git config to see if the current
+ * branch has an associated pull-request. If not confirmed is PR, we finally
+ * accept that there is no PR for the current branch.
+ *
+ * TODO private repo support
+ */
+export async function checkBranchPR(
+  git: Simple
+): Promise<
+  | {
+      isPR: false
+      inferredBy: 'circle_sans_pr_var' | 'branch_no_pr'
+    }
+  | {
+      isPR: true
+      inferredBy: 'ci_env_var' | 'git_branch_github_api'
+    }
+> {
+  // CircleCI Environment variables docs:
+  // https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+  if (process.env.CIRCLECI === 'true') {
+    if (
+      typeof process.env.CIRCLE_PULL_REQUEST === 'string' &&
+      process.env.CIRCLE_PULL_REQUEST !== ''
+    ) {
+      return {
+        isPR: true,
+        inferredBy: 'ci_env_var',
+      }
+    } else {
+      return {
+        isPR: false,
+        inferredBy: 'circle_sans_pr_var',
+      }
+    }
+  }
+
+  // Inspiration from how `$ hub pr show` works
+  // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
+
+  const gitConfig = await parseGitConfig()
+  if (gitConfig === null) {
+    throw new Error('Could not parse your git config')
+  }
+
+  const gitOrigin = gitConfig['remote "origin"']
+  if (gitOrigin === undefined) {
+    throw new Error('Could not find a configured origin in your git config')
+  }
+
+  const gitOriginURL: string = gitOrigin['url']
+  if (gitOriginURL === undefined) {
+    throw new Error(
+      'Could not find a URL in your remote origin config in your git config'
+    )
+  }
+
+  const githubRepoURL = parseGitHubURL(gitOriginURL)
+  if (githubRepoURL === null) {
+    throw new Error(
+      'Could not parse the URL in your remote origin config in your git config'
+    )
+  }
+  if (githubRepoURL.owner === null) {
+    throw new Error(
+      'Could not parse out the GitHub owner from the URL in your remote origin config in your git config'
+    )
+  }
+  if (githubRepoURL.name === null) {
+    throw new Error(
+      'Could not parse out the GitHub repo name from the URL in your remote origin config in your git config'
+    )
+  }
+
+  const octokit = new Octokit()
+  const pullsRes = await octokit.pulls.list({
+    owner: githubRepoURL.owner,
+    repo: githubRepoURL.name,
+  })
+
+  const branchSummary = await git.branch({})
+  if (pullsRes.data.length > 0) {
+    for (const pull of pullsRes.data) {
+      // todo
+      if (pull.head.ref === branchSummary.current) {
+        return { isPR: true, inferredBy: 'git_branch_github_api' }
+      }
+    }
+  }
+
+  return { isPR: false, inferredBy: 'branch_no_pr' }
 }

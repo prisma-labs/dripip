@@ -7,7 +7,7 @@ import {
   ParsedTag,
   GroupBy,
 } from '../lib/utils'
-import { stripIndent, stripIndents } from 'common-tags'
+import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 
 export class Preview extends Command {
@@ -59,7 +59,24 @@ export class Preview extends Command {
       })
     }
 
-    process.stdout.write('todo')
+    const prCheck = await Git.checkBranchPR(git)
+
+    if (prCheck.isPR) {
+      // TODO
+      process.stdout.write('todo: pr preview release')
+    } else {
+      /**
+       * Now that we've validated the environment, run our preview release
+       *
+       * Non-PR flow:
+       *
+       * 1. Find the last pre-release on the current branch. Take its build number. If none use 1.
+       * 2. Calculate the semver bump type. Do this by analyizing the commits on the branch between HEAD and the last stable git tag. The highest change type found is used. If no previous stable git tag use 0.0.1.
+       * 3. Bump last stable version by bump type, thus producing the next version.
+       * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
+       */
+      process.stdout.write('todo: trunk preview release')
+    }
   }
 }
 
