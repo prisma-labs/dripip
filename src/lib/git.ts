@@ -6,8 +6,18 @@ import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
+import { Refspec } from 'nodegit'
 
 export type Simple = ReturnType<typeof createGit>
+
+function parseGitTags(tagsString: null | string): string[] {
+  if (tagsString === null) return []
+  const tags = tagsString
+    .trim()
+    .split('\n')
+    .map(t => t.trim())
+  return tags
+}
 
 /**
  * Get tags at the given commit or HEAD by default.
@@ -18,11 +28,7 @@ export async function gitGetTags(
 ): Promise<string[]> {
   const ref = opts?.ref ?? 'HEAD'
   const tagsString: string | null = await git.tag({ '--points-at': ref })
-  if (tagsString === null) return []
-  const tags = tagsString
-    .trim()
-    .split('\n')
-    .map(t => t.trim())
+  const tags = parseGitTags(tagsString)
   return tags
 }
 
@@ -190,6 +196,7 @@ export async function checkBranchPR(
     )
   }
 
+  // TODO Refactor this to have instance passed as arg.
   const octokit = new Octokit()
   // TODO we could fetch all pull-requests and check against `state` later. One
   // benefit would be better feedback for users, like: "The branch you are on
@@ -228,4 +235,102 @@ export async function checkBranchPR(
 export async function isTrunk(git: Simple): Promise<boolean> {
   const branchSumamry = await git.branch({})
   return branchSumamry.current === 'master'
+}
+
+/**
+ * Get the last tag in the current branch that matches the given pattern.
+ * Returns null if no tag can be found.
+ */
+export async function findTag(
+  git: Simple,
+  ops: { matcher: (x: string) => boolean; since?: string }
+): Promise<null | string> {
+  // References about ordering:
+  // - https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to
+  // - https://git-scm.com/docs/git-for-each-ref#_field_names
+  // References about by-branch:
+  // - https://stackoverflow.com/a/39084124/499537
+  const branchSummary = await git.branch({})
+
+  let tagsByCommits: string[][]
+  if (ops.since) {
+    const logs = await log(git, { since: ops?.since ?? undefined })
+    tagsByCommits = logs.map(log => log.tags)
+  } else {
+    // TODO this method flattens tags on same commit to appear as adjacent tags
+    // in the list. Seems incidentally technically ok for our current algorithm but dubious...
+    const tagsString = await git.tag({
+      '--sort': 'taggerdate',
+      '--merged': branchSummary.current,
+    })
+    tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
+  }
+
+  let lastTag: null | string = null
+
+  for (const tbc of tagsByCommits) {
+    for (const tag of tbc) {
+      if (ops.matcher(tag)) {
+        lastTag = tag
+        break
+      }
+    }
+  }
+
+  return lastTag
+}
+
+/**
+ * Version of native simple git func tailored for us, especially accurate types.
+ */
+export async function log(
+  git: Simple,
+  ops?: { since?: string }
+): Promise<
+  {
+    sha: string
+    tags: string[]
+    body: string
+    subject: string
+    message: string
+  }[]
+> {
+  // TODO tags or bodies or subjects with double quotes in them or commas will
+  // break parsing... consider using native git.log func?
+  const logsStrings = await git.raw([
+    'git',
+    'log',
+    '--format=\'{ "sha": "%H", "refs": "%D", subject: "%s", body: "%b", message: "%B" }\'',
+    `${ops?.since ? `${ops.since}..head` : ''}`,
+  ])
+
+  return logsStrings
+    .trim()
+    .split('\n')
+    .map(logString => JSON.parse(logString))
+    .map(
+      ({
+        refs,
+        ...rest
+      }: {
+        sha: string
+        refs: string
+        body: string
+        subject: string
+        message: string
+      }) => {
+        return {
+          ...rest,
+          tags: refs
+            .trim()
+            .split(', ')
+            .map(ref => {
+              const result = ref.match(/tag: (.+)/)
+              if (!result) return null
+              return result[1]
+            })
+            .filter((tagRef): tagRef is string => typeof tagRef === 'string'),
+        }
+      }
+    )
 }

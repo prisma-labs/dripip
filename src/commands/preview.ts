@@ -6,9 +6,12 @@ import {
   groupByProp,
   ParsedTag,
   GroupBy,
+  calcBump,
+  calcBumpTypeFromConventionalCommits,
 } from '../lib/utils'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
+import * as SemVer from 'semver'
 
 export class Preview extends Command {
   async run() {
@@ -68,9 +71,47 @@ export class Preview extends Command {
        * 3. Bump last stable version by bump type, thus producing the next version.
        * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
        */
-      // const maybeLatestStableVer =
-      // const maybeLatestPreReleaseSinceRef =
-      process.stdout.write('todo: trunk preview release')
+      const maybeLatestStableVer = await Git.findTag(git, {
+        matcher: candidate => {
+          const maybeSemVer = SemVer.parse(candidate)
+          if (maybeSemVer === null) return false
+          return maybeSemVer.prerelease.length === 0
+        },
+      })
+      const maybeLatestPreReleaseSinceRef = await Git.findTag(git, {
+        matcher: candidate => {
+          const maybeSemVer = SemVer.parse(candidate)
+          if (maybeSemVer === null) return false
+          return (
+            maybeSemVer.prerelease[0] === 'next' &&
+            String(maybeSemVer.prerelease[1]).match(/\d+/) !== null
+          )
+        },
+        since: maybeLatestStableVer ?? undefined,
+      })
+
+      const nextBuildNum: number =
+        maybeLatestPreReleaseSinceRef === null
+          ? 1
+          : parseInt(
+              maybeLatestPreReleaseSinceRef.match(/.+next.(\d+)/)![1],
+              10
+            )
+
+      const commitsSinceLastStable = await Git.log(git, {
+        since: maybeLatestStableVer ?? undefined,
+      })
+
+      const nextVerStable = maybeLatestStableVer
+        ? calcBump(
+            calcBumpTypeFromConventionalCommits(
+              commitsSinceLastStable.map(c => c.message)
+            ),
+            SemVer.parse(maybeLatestStableVer)! // TODO not actually guaranteed!
+          )
+        : '0.0.1'
+      const nextVer = `${nextVerStable}-next.${nextBuildNum}`
+      process.stdout.write(`todo: release ${nextVer}`)
     }
 
     const prCheck = await Git.checkBranchPR(git)

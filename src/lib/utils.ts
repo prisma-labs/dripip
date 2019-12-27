@@ -1,4 +1,5 @@
 import * as Semver from 'semver'
+import { Preview } from '../commands/preview'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }
@@ -85,4 +86,36 @@ export function groupByProp<
 
     return groupings
   }, seed)
+}
+
+export type SemverStableVerParts = 'major' | 'minor' | 'patch'
+
+/**
+ * Calculate the stable bump to a given semver version.
+ */
+export function calcBump(
+  bumpType: SemverStableVerParts,
+  prevVer: Semver.SemVer
+): Semver.SemVer {
+  switch (bumpType) {
+    case 'major':
+      return Semver.parse(
+        `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}`
+      )!
+    case 'minor':
+      return Semver.parse(
+        `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}`
+      )!
+    case 'patch':
+      return Semver.parse(
+        `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
+      )!
+  }
+}
+
+export function calcBumpTypeFromConventionalCommits(
+  commitMessages: string[]
+): SemverStableVerParts {
+  // TODO
+  return 'patch'
 }
