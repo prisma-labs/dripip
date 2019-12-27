@@ -63,8 +63,8 @@ export class Preview extends Command {
     // 1. look for CI environment variables that tip off if is a PR
     // 2. if no, use whatever trick hub is doing to implement $ git pr show
     // 3. if no, accept no
-    const prCheck = await checkIsThisCommitForAPullRequest()
-    console.log('1')
+    const prCheck = await checkIsThisCommitForAPullRequest(git)
+    console.log(prCheck)
 
     /**
      * Now that we've validated the environment, run our preview release
@@ -86,7 +86,9 @@ import Octokit from '@octokit/rest'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
 
-async function checkIsThisCommitForAPullRequest(): Promise<{
+async function checkIsThisCommitForAPullRequest(
+  git: Git.Simple
+): Promise<{
   answer: boolean
   reason: 'ci_env_var' | 'git_branch_github_api' | 'nil'
 }> {
@@ -143,10 +145,13 @@ async function checkIsThisCommitForAPullRequest(): Promise<{
     repo: githubRepoURL.name,
   })
 
+  const branchSummary = await git.branch({})
   if (pullsRes.data.length > 0) {
     for (const pull of pullsRes.data) {
       // todo
-      console.log(pull)
+      if (pull.head.ref === branchSummary.current) {
+        return { answer: true, reason: 'git_branch_github_api' }
+      }
     }
   }
 
