@@ -1,4 +1,4 @@
-import Command from '@oclif/command'
+import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
 import {
   indentBlock4,
@@ -14,7 +14,16 @@ import * as Git from '../lib/git'
 import * as SemVer from 'semver'
 
 export class Preview extends Command {
+  static flags = {
+    'show-type': flags.boolean({
+      default: false,
+      description:
+        'output the kind of preview release that would be made and why',
+    }),
+  }
+
   async run() {
+    const { flags } = this.parse(Preview)
     const git = createGit()
     // TODO handle edge case: not a git repo
     // TODO handle edge case: a git repo with no commits
@@ -63,6 +72,10 @@ export class Preview extends Command {
     }
 
     if (await Git.isTrunk(git)) {
+      if (flags['show-type']) {
+        console.log(JSON.stringify({ type: 'stable', reason: 'is_trunk' }))
+        return
+      }
       /**
        * Non-PR flow:
        *
@@ -117,11 +130,15 @@ export class Preview extends Command {
     const prCheck = await Git.checkBranchPR(git)
 
     if (prCheck.isPR) {
+      if (flags['show-type']) {
+        console.log(JSON.stringify({ type: 'pr', reason: prCheck.inferredBy }))
+        return
+      }
       // TODO
       process.stdout.write('todo: pr preview release')
     }
 
-    throw new Error(
+    this.error(
       'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests'
     )
   }

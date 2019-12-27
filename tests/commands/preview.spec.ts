@@ -2,19 +2,24 @@ import { createWorkspace } from '../__lib/helpers'
 
 const ws = createWorkspace('preview')
 
-it('can be run', async () => {
-  expect(await ws.libre('preview')).toMatchInlineSnapshot(`
-    Object {
-      "error": null,
-      "exitCode": 0,
-      "signal": null,
-      "stderr": "",
-      "stdout": "todo",
-    }
-  `)
+describe('pr preview releases', () => {
+  it.todo(
+    'treats release as a pr preview if circleci env vars signify there is a pr',
+    () => {}
+  )
+  it.todo('treats releaes as a pr preview if on branch with open pr', () => {})
 })
 
-describe('preflight assertion no-release-tags', () => {
+describe('stable preview releases', () => {
+  it.todo('treats release as stable preview if on trunk', () => {})
+})
+
+describe('preflight assertions', () => {
+  it.todo(
+    'fails semantically if not on trunk and branch has no open pr',
+    () => {}
+  )
+
   it('fails semantically if there is a preview release', async () => {
     await ws.git.addTag('v1.2.3-next.1')
     const result = await ws.libre('preview')
