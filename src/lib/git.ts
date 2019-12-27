@@ -127,7 +127,7 @@ export async function checkBranchPR(
 ): Promise<
   | {
       isPR: false
-      inferredBy: 'circle_sans_pr_var' | 'branch_no_pr'
+      inferredBy: 'circle_sans_pr_var' | 'branch_no_open_pr'
     }
   | {
       isPR: true
@@ -191,20 +191,41 @@ export async function checkBranchPR(
   }
 
   const octokit = new Octokit()
+  // TODO we could fetch all pull-requests and check against `state` later. One
+  // benefit would be better feedback for users, like: "The branch you are on
+  // had a pull a request but it has been closed [...]" which is more precise
+  // than e.g. "No open pull-requests found [...]". We could go further yet,
+  // checking if the PR was closed via merge or not, "Did you forget to switch
+  // to trunk branch?", etc.
+  //
+  // To attain this level of feedback users would need to accept potentially
+  // higher levels of latentcy to pagination through all pull-requests.
+  // TODO pagination https://octokit.github.io/rest.js/#pagination
   const pullsRes = await octokit.pulls.list({
     owner: githubRepoURL.owner,
     repo: githubRepoURL.name,
+    state: 'open',
   })
 
   const branchSummary = await git.branch({})
   if (pullsRes.data.length > 0) {
     for (const pull of pullsRes.data) {
-      // todo
       if (pull.head.ref === branchSummary.current) {
         return { isPR: true, inferredBy: 'git_branch_github_api' }
       }
     }
   }
 
-  return { isPR: false, inferredBy: 'branch_no_pr' }
+  return { isPR: false, inferredBy: 'branch_no_open_pr' }
+}
+
+/**
+ * Determin if the current branch is trunk or not. Currently a simple check
+ * against if current branch is master or not but TODO in the future will
+ * account for checking against the remote Git repo for if the so-called `base`
+ * branch of the repo is set to something else than `master`.
+ */
+export async function isTrunk(git: Simple): Promise<boolean> {
+  const branchSumamry = await git.branch({})
+  return branchSumamry.current === 'master'
 }

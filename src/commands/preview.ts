@@ -59,15 +59,8 @@ export class Preview extends Command {
       })
     }
 
-    const prCheck = await Git.checkBranchPR(git)
-
-    if (prCheck.isPR) {
-      // TODO
-      process.stdout.write('todo: pr preview release')
-    } else {
+    if (await Git.isTrunk(git)) {
       /**
-       * Now that we've validated the environment, run our preview release
-       *
        * Non-PR flow:
        *
        * 1. Find the last pre-release on the current branch. Take its build number. If none use 1.
@@ -75,8 +68,21 @@ export class Preview extends Command {
        * 3. Bump last stable version by bump type, thus producing the next version.
        * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
        */
+      // const maybeLatestStableVer =
+      // const maybeLatestPreReleaseSinceRef =
       process.stdout.write('todo: trunk preview release')
     }
+
+    const prCheck = await Git.checkBranchPR(git)
+
+    if (prCheck.isPR) {
+      // TODO
+      process.stdout.write('todo: pr preview release')
+    }
+
+    throw new Error(
+      'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests'
+    )
   }
 }
 
