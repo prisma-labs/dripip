@@ -115,8 +115,12 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 /**
  * Detect if there is a pull-request for the current branch. The CI environment
  * is checked for well-known environment variables providing sufficient signal
- * to answer the question first, as this is cheap. Next
- * @param git
+ * to answer the question first, as this is cheap. If not confirmed is PR, we
+ * next go through the GitHub API and local Git config to see if the current
+ * branch has an associated pull-request. If not confirmed is PR, we finally
+ * accept that there is no PR for the current branch.
+ *
+ * TODO private repo support
  */
 export async function checkBranchPR(
   git: Simple
