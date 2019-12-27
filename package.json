@@ -33,8 +33,13 @@
     "@oclif/command": "^1.5.19",
     "@oclif/config": "^1.13.3",
     "@oclif/plugin-help": "^2.2.1",
+    "@octokit/rest": "^16.35.2",
+    "@types/parse-git-config": "^3.0.0",
+    "@types/parse-github-url": "^1.0.0",
     "common-tags": "^1.8.0",
     "globby": "^10.0.1",
+    "parse-git-config": "^3.0.0",
+    "parse-github-url": "^1.0.2",
     "request": "^2.88.0",
     "semver": "^7.1.1",
     "simple-git": "^1.126.0"
