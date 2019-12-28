@@ -34,7 +34,8 @@ export function createWorkspace(config: Options): Workspace {
   })
 
   beforeEach(async () => {
-    await gitResetToInitialCommit(ws.git)
+    await ws.fs.removeAsync('.git')
+    await gitInitRepo(ws.git)
   })
 
   return ws

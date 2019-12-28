@@ -113,6 +113,11 @@ export function calcBump(
   }
 }
 
+/**
+ * Given a list of conventional commit messages (subject and body, the entire
+ * message for the commit) calculate what the package version containing these
+ * changes should be.
+ */
 export function calcBumpTypeFromConventionalCommits(
   commitMessages: string[]
 ): SemverStableVerParts {

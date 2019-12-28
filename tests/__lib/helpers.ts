@@ -3,6 +3,17 @@ import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
 
 /**
+ * Reset the environment before each test, allowing each test to modify it to
+ * its needs.
+ */
+export function resetEnvironmentBeforeEachTest() {
+  const originalEnvironment = Object.assign({}, process.env)
+  beforeEach(() => {
+    process.env = Object.assign({}, originalEnvironment)
+  })
+}
+
+/**
  * Helper for creating a specialized workspace
  */
 export function createWorkspace(command: 'preview') {
@@ -40,7 +51,9 @@ function sanitizeResultForSnap(result: RunLibreResult): void {
   result.stdout = result.stdout!.replace(shortSHAPattern, '(__SHORT_SHA__)')
 }
 
-type RunLibreResult = Omit<proc.SuccessfulRunResult, 'command'>
+export type RunLibreResult = Omit<proc.SuccessfulRunResult, 'command'> & {
+  stderr: string
+}
 
 const createLibreRunner = (optionsBase?: proc.RunOptions) => (
   command: string,
@@ -62,8 +75,8 @@ const createLibreRunner = (optionsBase?: proc.RunOptions) => (
     )
     .then(result => {
       delete result.command
-      sanitizeResultForSnap(result)
-      return result
+      sanitizeResultForSnap(result as RunLibreResult)
+      return result as RunLibreResult // force TS to ignore the stderr: null possibility
     })
 }
 

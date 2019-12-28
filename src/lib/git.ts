@@ -61,15 +61,15 @@ export async function gitReset(git: Simple): Promise<void> {
  * Reset a git repository to its initial commit
  */
 export async function gitResetToInitialCommit(git: Simple): Promise<void> {
-  await Promise.all([
-    git.raw(['clean', '-d', '-x', '-f']),
-    git
-      .raw('rev-list --max-parents=0 HEAD'.split(' '))
-      .then(initialCommitSHA => {
-        git.raw(['reset', '--hard', initialCommitSHA.trim()])
-      }),
-    gitDeleteAllTagsInRepo(git),
-  ])
+  await git.raw(['clean', '-d', '-x', '-f'])
+  const trunkBranch = 'master'
+  await git.raw(`checkout ${trunkBranch}`.split(' '))
+  await git
+    .raw('rev-list --max-parents=0 HEAD'.split(' '))
+    .then(initialCommitSHA => {
+      git.raw(['reset', '--hard', initialCommitSHA.trim()])
+    }),
+    gitDeleteAllTagsInRepo(git)
 }
 
 /**
@@ -280,34 +280,56 @@ export async function findTag(
   return lastTag
 }
 
+type LogEntry = {
+  sha: string
+  tags: string[]
+  body: string
+  subject: string
+  message: string
+}
+
 /**
  * Version of native simple git func tailored for us, especially accurate types.
  */
 export async function log(
   git: Simple,
   ops?: { since?: string }
-): Promise<
-  {
-    sha: string
-    tags: string[]
-    body: string
-    subject: string
-    message: string
-  }[]
-> {
+): Promise<LogEntry[]> {
   // TODO tags or bodies or subjects with double quotes in them or commas will
   // break parsing... consider using native git.log func?
-  const logsStrings = await git.raw([
-    'git',
+  git.log()
+  const logSeparator = '$@<!____LOG____!>@$'
+  const partSeparator = '$@<!____PROP____!>@$'
+  const formatParts = [
+    { prop: 'sha', code: '%H' },
+    { prop: 'refs', code: '%D' },
+    { prop: 'subject', code: '%s' },
+    { prop: 'body', code: '%b' },
+    { prop: 'message', code: '%B' },
+  ]
+  const formatProps = formatParts.map(part => part.prop)
+  const args = [
     'log',
-    '--format=\'{ "sha": "%H", "refs": "%D", subject: "%s", body: "%b", message: "%B" }\'',
-    `${ops?.since ? `${ops.since}..head` : ''}`,
-  ])
+    `--format=${formatParts.map(part => part.code).join(partSeparator)}`,
+  ]
+  if (ops?.since) args.push(`${ops.since}..head`)
+  const logsStrings = await git.raw(args)
 
   return logsStrings
     .trim()
-    .split('\n')
-    .map(logString => JSON.parse(logString))
+    .split(logSeparator)
+    .reduce((logs, logString) => {
+      let log: any = {}
+      // propsRemaining and logParts are guaranteed to be the same length
+      // TODO should be a zip...
+      const propsRemaining = [...formatProps]
+      const logParts = logString.split(partSeparator)
+      while (propsRemaining.length > 0) {
+        log[propsRemaining.shift()!] = logParts.shift()!
+      }
+      logs.push(log)
+      return logs
+    }, [] as (Omit<LogEntry, 'tags'> & { refs: string })[])
     .map(
       ({
         refs,
