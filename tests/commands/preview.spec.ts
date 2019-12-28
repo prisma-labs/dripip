@@ -3,15 +3,33 @@ import {
   resetEnvironmentBeforeEachTest,
   RunLibreResult,
 } from '../__lib/helpers'
+import Octokit = require('@octokit/rest')
+import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
+
 resetEnvironmentBeforeEachTest()
 
 describe('pr preview releases', () => {
+  let instanceId: string
+  let branchName: string
+
+  beforeEach(async () => {
+    instanceId = String(Math.random()).replace('0.', '')
+    branchName = 'feat/foo-' + instanceId
+    // https://github.com/steveukx/git-js/issues/14#issuecomment-45430322
+    await ws.git.checkout(['-b', branchName])
+    await gitCreateEmptyCommit(ws.git, 'some work on new branch')
+    // await ws.git.addRemote(
+    //   'origin',
+    //   'https://github.com/prisma-labs/system-tests-repo.git'
+    // )
+    await ws.git.push('origin', branchName)
+  })
+
   it('treats release as a pr preview if circleci env vars signify there is a pr', async () => {
     process.env.CIRCLECI = 'true'
     process.env.CIRCLE_PULL_REQUEST = 'true'
-    await ws.git.checkoutLocalBranch('feat/foo')
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -25,7 +43,33 @@ describe('pr preview releases', () => {
     `)
   })
 
-  it.todo('treats releaes as a pr preview if on branch with open pr')
+  it('treats releases as a pr preview if on branch with open pr', async () => {
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    })
+    try {
+      await octokit.pulls.create({
+        head: branchName,
+        base: 'master',
+        owner: 'prisma-labs',
+        repo: 'system-tests-repo',
+        title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
+      })
+    } catch (e) {
+      console.log(e)
+    }
+    const result = await ws.libre('preview --show-type')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"type\\":\\"pr\\",\\"reason\\":\\"git_branch_github_api\\"}
+      ",
+      }
+    `)
+  })
 })
 
 describe('stable preview releases', () => {
@@ -125,7 +169,6 @@ describe('preflight assertions', () => {
 
   it('does not include non-release tags', async () => {
     await ws.git.addTag('foobar')
-    ws.git.addRemote('origin', 'https://github.com/foo-org/bar-repo.git')
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {

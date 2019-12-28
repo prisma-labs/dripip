@@ -13,6 +13,7 @@ type Workspace = {
 
 type Options = {
   name: string
+  repo?: string
   cache?: {
     on?: boolean
     version?: string
@@ -34,8 +35,13 @@ export function createWorkspace(config: Options): Workspace {
   })
 
   beforeEach(async () => {
-    await ws.fs.removeAsync('.git')
-    await gitInitRepo(ws.git)
+    await ws.fs.removeAsync(ws.dir.path)
+    await ws.fs.dirAsync(ws.dir.path)
+    if (config.repo) {
+      await ws.git.clone(config.repo, ws.dir.path)
+    } else {
+      await gitInitRepo(ws.git)
+    }
   })
 
   return ws
@@ -59,7 +65,7 @@ async function doCreateWorkspace(config: Options): Promise<Workspace> {
           checksum: 'md5',
         })!.md5
       : 'off'
-  const ver = '5'
+  const ver = '8'
   const testVer = config.cache?.version ?? 'off'
   const currentGitBranch = (
     await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])
@@ -93,13 +99,11 @@ async function doCreateWorkspace(config: Options): Promise<Workspace> {
   // Setup Project (if needed, cacheable)
   //
   if (!dir.cacheHit) {
-    await Promise.all([
-      fs.writeAsync('package.json', {
-        name: 'test-app',
-        license: 'MIT',
-      }),
-    ])
-    await gitInitRepo(git)
+    if (config.repo) {
+      await git.clone(config.repo, dir.path)
+    } else {
+      await gitInitRepo(git)
+    }
   }
 
   //

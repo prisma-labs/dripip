@@ -17,14 +17,27 @@ export function resetEnvironmentBeforeEachTest() {
  * Helper for creating a specialized workspace
  */
 export function createWorkspace(command: 'preview') {
-  return addLibreToWorkspace(
+  const ws = addLibreToWorkspace(
     WS.createWorkspace({
       name: command,
+      repo: 'git@github.com:prisma-labs/system-tests-repo.git',
       cache: {
         version: '7',
       },
     })
   )
+
+  beforeEach(async () => {
+    await Promise.all([
+      ws.fs.writeAsync('package.json', {
+        name: 'test-app',
+        license: 'MIT',
+      }),
+    ])
+    await ws.git.commit('chore: add package.json')
+  })
+
+  return ws
 }
 
 /**
