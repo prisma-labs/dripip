@@ -26,8 +26,14 @@ export function calcBumpTypeFromConventionalCommits(
       break
     }
 
+    // If already at minor continue, now looking only for major changes
+    if (semverPart === 'minor') {
+      continue
+    }
+
     if (isMinorChange(m)) {
       semverPart = 'minor'
+      continue
     }
 
     semverPart = 'patch'
@@ -37,7 +43,7 @@ export function calcBumpTypeFromConventionalCommits(
 }
 
 function isMinorChange(message: string): boolean {
-  return message.match(/^feat: /) !== null
+  return message.match(/^(?:feat|feature): /) !== null
 }
 
 function isBreakingchange(message: string): boolean {
@@ -45,7 +51,7 @@ function isBreakingchange(message: string): boolean {
 }
 
 function isMetaChange(message: string): boolean {
-  return message.match(/^chore: /) === null
+  return message.match(/^chore: /) !== null
 }
 
 function isValidConventionalCommit(message: string): boolean {

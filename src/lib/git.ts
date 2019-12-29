@@ -310,14 +310,15 @@ export async function log(
   const formatProps = formatParts.map(part => part.prop)
   const args = [
     'log',
-    `--format=${formatParts.map(part => part.code).join(partSeparator)}`,
+    `--format=${formatParts
+      .map(part => part.code)
+      .join(partSeparator)}${logSeparator}`,
   ]
   if (ops?.since) args.push(`${ops.since}..head`)
-  const logsStrings = await git.raw(args)
-
-  return logsStrings
-    .trim()
-    .split(logSeparator)
+  const rawLogString = await git.raw(args)
+  const logStrings = rawLogString.trim().split(logSeparator)
+  logStrings.pop() // trailing separator
+  return logStrings
     .reduce((logs, logString) => {
       let log: any = {}
       // propsRemaining and logParts are guaranteed to be the same length
@@ -325,7 +326,7 @@ export async function log(
       const propsRemaining = [...formatProps]
       const logParts = logString.split(partSeparator)
       while (propsRemaining.length > 0) {
-        log[propsRemaining.shift()!] = logParts.shift()!
+        log[propsRemaining.shift()!] = logParts.shift()!.trim()
       }
       logs.push(log)
       return logs

@@ -107,6 +107,7 @@ export class Preview extends Command {
       }
 
       process.stdout.write(`todo: release ${nextRelease.nextVersion}`)
+      return
     }
 
     const prCheck = await Git.checkBranchPR(git)
@@ -118,6 +119,7 @@ export class Preview extends Command {
       }
       // TODO
       process.stdout.write('todo: pr preview release')
+      return
     }
 
     this.error(
@@ -139,7 +141,7 @@ async function calcNextStablePreview(
   git: Git.Simple
 ): Promise<null | {
   currentVersion: null | string
-  currentStable: string
+  currentStable: null | string
   currentPreviewNumber: null | number
   nextStable: string
   nextPreviewNumber: number
@@ -178,13 +180,13 @@ async function calcNextStablePreview(
   const commitsSinceLastStable = await Git.log(git, {
     since: maybeLatestStableVer ?? undefined,
   })
+
   const commitMessagesSinceLastStable = commitsSinceLastStable.map(
     c => c.message
   )
 
   // Calculate the next version
 
-  const initialVer = '0.0.1'
   const stablePreReleaseIdentifier = 'next'
   const bumpType = calcBumpTypeFromConventionalCommits(
     commitMessagesSinceLastStable
@@ -199,26 +201,36 @@ async function calcNextStablePreview(
       ? null
       : (SemVer.parse(maybeLatestPreVerSinceStable)!.prerelease[1] as number)
 
-  const latestStableVer = maybeLatestStableVer ?? initialVer
   maybeLatestPreVerSinceStable !== null
     ? SemVer.parse(maybeLatestPreVerSinceStable)!
     : maybeLatestStableVer !== null
 
   const nextVerBuildNum = (maybeLatestBuildNum ?? 0) + 1
 
-  const nextStable = bumpVer(bumpType, SemVer.parse(latestStableVer)!).version
+  const nextStable = bumpVer(
+    bumpType,
+    SemVer.parse(maybeLatestStableVer ?? '0.0.0')!
+  ).version
+
   const nextVer =
     nextStable + `-${stablePreReleaseIdentifier}.${nextVerBuildNum}`
 
+  // TODO refactor, expensive re-calc of log when its already a subset of the above
+  // filter on tags? commitsInRelease[0].tags
+  const commitsInRelease = await Git.log(git, {
+    since: maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? undefined,
+  })
+  const commitMessagesInRelease = commitsInRelease.map(m => m.message)
+
   return {
-    currentStable: latestStableVer,
+    currentStable: maybeLatestStableVer,
     currentPreviewNumber: maybeLatestBuildNum,
-    nextStable: nextVer,
+    nextStable: nextStable,
     nextPreviewNumber: nextVerBuildNum,
     currentVersion:
       maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? null,
     nextVersion: nextVer,
-    commitsInRelease: commitMessagesSinceLastStable,
+    commitsInRelease: commitMessagesInRelease,
     bumpType,
     isFirstVer:
       maybeLatestPreVerSinceStable === null && maybeLatestStableVer === null,
