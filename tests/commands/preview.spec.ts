@@ -37,7 +37,8 @@ describe('pr preview releases', () => {
           "reason": "ci_env_var",
           "type": "pr",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -64,7 +65,8 @@ describe('pr preview releases', () => {
           "reason": "git_branch_github_api",
           "type": "pr",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -79,7 +81,8 @@ describe('stable preview releases', () => {
           "reason": "is_trunk",
           "type": "stable",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -94,9 +97,9 @@ describe('stable preview releases', () => {
         "data": Object {
           "context": Object {},
           "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
-          "identifier": "no_release_to_make",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "no_release_to_make",
       }
     `)
   })
@@ -111,9 +114,9 @@ describe('stable preview releases', () => {
         "data": Object {
           "context": Object {},
           "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
-          "identifier": "no_release_to_make",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "no_release_to_make",
       }
     `)
   })
@@ -139,7 +142,8 @@ describe('stable preview releases', () => {
           "nextStable": "0.0.1",
           "nextVersion": "0.0.1-next.1",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -165,7 +169,8 @@ describe('stable preview releases', () => {
           "nextStable": "0.1.0",
           "nextVersion": "0.1.0-next.1",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -193,7 +198,8 @@ describe('stable preview releases', () => {
           "nextStable": "0.1.0",
           "nextVersion": "0.1.0-next.1",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -228,7 +234,8 @@ describe('stable preview releases', () => {
           "nextStable": "1.0.0",
           "nextVersion": "1.0.0-next.1",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -260,7 +267,8 @@ describe('stable preview releases', () => {
           "nextStable": "0.1.1",
           "nextVersion": "0.1.1-next.1",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -289,7 +297,8 @@ describe('stable preview releases', () => {
           "nextStable": "0.0.1",
           "nextVersion": "0.0.1-next.2",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -319,10 +328,10 @@ describe('preflight assertions', () => {
       Object {
         "data": Object {
           "context": Object {},
-          "summary": "Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests",
-          "identifier": "invalid_pre_release_case",
+          "summary": "Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests. If you want to make a preview release for this branch then open a pull-request for it.",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "invalid_branch_for_pre_release",
       }
     `)
   })
@@ -338,15 +347,10 @@ describe('preflight assertions', () => {
             "preReleaseTag": "1.2.3-next.1",
             "sha": "__sha__",
           },
-          "summary": "You cannot make a preview release for this commit because a preview release was already made.
-
-          The commit is:           __sha__
-          The stable release is:   N/A
-          The preview release is:  1.2.3-next.1
-          Other tags present:      N/A",
-          "identifier": "invalid_pre_release_case",
+          "summary": "You cannot make a preview release for this commit because a preview release was already made.",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
       }
     `)
   })
@@ -362,15 +366,10 @@ describe('preflight assertions', () => {
             "sha": "__sha__",
             "stableReleaseTag": "1.2.3",
           },
-          "summary": "You cannot make a preview release for this commit because a stable release was already made.
-
-          The commit is:           __sha__
-          The stable release is:   1.2.3
-          The preview release is:  N/A
-          Other tags present:      N/A",
-          "identifier": "invalid_pre_release_case",
+          "summary": "You cannot make a preview release for this commit because a stable release was already made.",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
       }
     `)
   })
@@ -388,15 +387,10 @@ describe('preflight assertions', () => {
             "sha": "__sha__",
             "stableReleaseTag": "1.2.3",
           },
-          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made
-
-          The commit is:           __sha__
-          The stable release is:   1.2.3
-          The preview release is:  1.2.3-next.1
-          Other tags present:      N/A",
-          "identifier": "invalid_pre_release_case",
+          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
       }
     `)
   })
@@ -419,15 +413,10 @@ describe('preflight assertions', () => {
             "sha": "__sha__",
             "stableReleaseTag": "1.2.3",
           },
-          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made
-
-          The commit is:           __sha__
-          The stable release is:   1.2.3
-          The preview release is:  1.2.3-next.1
-          Other tags present:      bar, foo",
-          "identifier": "invalid_pre_release_case",
+          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made",
         },
-        "type": "exception",
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
       }
     `)
   })
@@ -441,7 +430,8 @@ describe('preflight assertions', () => {
           "reason": "is_trunk",
           "type": "stable",
         },
-        "type": "ok",
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })

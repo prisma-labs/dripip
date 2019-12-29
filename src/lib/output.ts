@@ -1,3 +1,31 @@
+import { assertAllCasesHandled } from './utils'
+import { stripIndent } from 'common-tags'
+import { format } from 'util'
+
+type Ok<D = Record<string, any>> = {
+  kind: 'ok'
+  type: string
+  data: D
+}
+
+type Exception<C = Record<string, any>> = {
+  kind: 'exception'
+  type: string
+  data: {
+    summary: string
+    context: C
+  }
+}
+
+type Message = Ok | Exception
+
+/**
+ * Passthrough to the underlying output mechanism.
+ */
+export function outputRaw(message: string): void {
+  console.log(message)
+}
+
 /**
  * This module encapsulates the various structures that libre may output.
  * Precise data details stay local throughout the codebase but core concerns
@@ -7,8 +35,8 @@
 /**
  * Output Ok data to stdout. Use this to handle general output.
  */
-export function outputOk(data: Record<string, any>): void {
-  outputJson(createOk(data))
+export function outputOk(type: string, data: Record<string, any>): void {
+  outputJson(createOk(type, data))
 }
 
 /**
@@ -29,33 +57,69 @@ export function outputException(
   summary: string,
   context: Record<string, any>
 ): void {
-  outputJson(createException(identifier, summary, context))
+  outputJson(createException(identifier, { summary, context }))
 }
 
-/**
- * See output version docs.
- */
-function createOk(data: Record<string, any>) {
-  return {
-    data,
-    type: 'ok',
+type OutputOptions = {
+  json: boolean
+}
+
+export function output(message: Message, opts: OutputOptions): void {
+  if (opts.json) {
+    outputJson(message)
+  } else {
+    if (message.kind === 'exception') {
+      let s = ''
+      s += `An exception occured: ${message.type}\n`
+      s += `\n`
+      s += message.data.summary
+      if (
+        message.data.context &&
+        Object.keys(message.data.context).length > 0
+      ) {
+        s += `\n`
+        s += format('%j', message.data.context)
+      }
+      outputRaw(s)
+    } else if (message.kind === 'ok') {
+      let s = ''
+      s += message.data
+    } else {
+      assertAllCasesHandled(message)
+    }
   }
 }
 
 /**
  * See output version docs.
  */
-function createException(
-  identifier: string,
-  description: string,
-  context: Record<string, any>
-): Record<string, any> {
+export function createOk(type: string, data: Record<string, any>): Ok {
   return {
-    type: 'exception',
+    kind: 'ok',
+    type,
+    data,
+  }
+}
+
+/**
+ * See output version docs.
+ */
+export function createException(
+  type: string,
+  {
+    summary,
+    context,
+  }: {
+    summary: string
+    context?: Record<string, any>
+  }
+): Exception {
+  return {
+    kind: 'exception',
+    type,
     data: {
-      identifier,
-      description,
-      context,
+      summary,
+      context: context ?? {},
     },
   }
 }
@@ -63,6 +127,6 @@ function createException(
 /**
  * Output JSON to stdout.
  */
-function outputJson(object: Record<string, any>): void {
-  console.log(JSON.stringify(object))
+function outputJson(msg: Message): void {
+  console.log(JSON.stringify(msg))
 }
