@@ -33,12 +33,12 @@ describe('pr preview releases', () => {
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"type\\":\\"pr\\",\\"reason\\":\\"ci_env_var\\"}
-      ",
+        "data": Object {
+          "reason": "ci_env_var",
+          "type": "pr",
+        },
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -61,12 +61,12 @@ describe('pr preview releases', () => {
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"type\\":\\"pr\\",\\"reason\\":\\"git_branch_github_api\\"}
-      ",
+        "data": Object {
+          "reason": "git_branch_github_api",
+          "type": "pr",
+        },
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -77,12 +77,12 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"type\\":\\"stable\\",\\"reason\\":\\"is_trunk\\"}
-      ",
+        "data": Object {
+          "reason": "is_trunk",
+          "type": "stable",
+        },
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })
@@ -94,12 +94,12 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"message\\":\\"All commits are either meta or not conforming to conventional commit. No release will be made.\\"}
-      ",
+        "data": Object {
+          "context": Object {},
+          "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
+        },
+        "kind": "exception",
+        "type": "no_release_to_make",
       }
     `)
   })
@@ -111,12 +111,12 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"message\\":\\"All commits are either meta or not conforming to conventional commit. No release will be made.\\"}
-      ",
+        "data": Object {
+          "context": Object {},
+          "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
+        },
+        "kind": "exception",
+        "type": "no_release_to_make",
       }
     `)
   })
@@ -126,12 +126,24 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.0.1\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.0.1-next.1\\",\\"commitsInRelease\\":[\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
-      ",
+        "data": Object {
+          "bumpType": "patch",
+          "commitsInRelease": Array [
+            "fix: 1",
+            "Initial commit",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": null,
+          "currentVersion": null,
+          "isFirstVer": true,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": true,
+          "nextPreviewNumber": 1,
+          "nextStable": "0.0.1",
+          "nextVersion": "0.0.1-next.1",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -141,12 +153,24 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.1.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"minor\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
-      ",
+        "data": Object {
+          "bumpType": "minor",
+          "commitsInRelease": Array [
+            "feat: 1",
+            "Initial commit",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": null,
+          "currentVersion": null,
+          "isFirstVer": true,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": true,
+          "nextPreviewNumber": 1,
+          "nextStable": "0.1.0",
+          "nextVersion": "0.1.0-next.1",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -157,12 +181,25 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.1.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 1\\",\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"minor\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
-      ",
+        "data": Object {
+          "bumpType": "minor",
+          "commitsInRelease": Array [
+            "feat: 1",
+            "fix: 1",
+            "Initial commit",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": null,
+          "currentVersion": null,
+          "isFirstVer": true,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": true,
+          "nextPreviewNumber": 1,
+          "nextStable": "0.1.0",
+          "nextVersion": "0.1.0-next.1",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -177,12 +214,28 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"1.0.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"1.0.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 2\\\\nBREAKING CHANGE:\\\\nblah blah blah\\",\\"feat: 1\\",\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"major\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
-      ",
+        "data": Object {
+          "bumpType": "major",
+          "commitsInRelease": Array [
+            "feat: 2
+      BREAKING CHANGE:
+      blah blah blah",
+            "feat: 1",
+            "fix: 1",
+            "Initial commit",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": null,
+          "currentVersion": null,
+          "isFirstVer": true,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": true,
+          "nextPreviewNumber": 1,
+          "nextStable": "1.0.0",
+          "nextVersion": "1.0.0-next.1",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -198,12 +251,24 @@ describe('stable preview releases', () => {
     // see 0.2.0
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":\\"0.1.0\\",\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.1\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":\\"0.1.0\\",\\"nextVersion\\":\\"0.1.1-next.1\\",\\"commitsInRelease\\":[\\"fix: 2\\",\\"fix: 1\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":false,\\"isFirstVerStable\\":false,\\"isFirstVerPreRelease\\":true}
-      ",
+        "data": Object {
+          "bumpType": "patch",
+          "commitsInRelease": Array [
+            "fix: 2",
+            "fix: 1",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": "0.1.0",
+          "currentVersion": "0.1.0",
+          "isFirstVer": false,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": false,
+          "nextPreviewNumber": 1,
+          "nextStable": "0.1.1",
+          "nextVersion": "0.1.1-next.1",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -216,20 +281,33 @@ describe('stable preview releases', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":1,\\"nextStable\\":\\"0.0.1\\",\\"nextPreviewNumber\\":2,\\"currentVersion\\":\\"0.0.1-next.1\\",\\"nextVersion\\":\\"0.0.1-next.2\\",\\"commitsInRelease\\":[\\"fix: 3\\",\\"fix: 2\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":false,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":false}
-      ",
+        "data": Object {
+          "bumpType": "patch",
+          "commitsInRelease": Array [
+            "fix: 3",
+            "fix: 2",
+          ],
+          "currentPreviewNumber": 1,
+          "currentStable": null,
+          "currentVersion": "0.0.1-next.1",
+          "isFirstVer": false,
+          "isFirstVerPreRelease": false,
+          "isFirstVerStable": true,
+          "nextPreviewNumber": 2,
+          "nextStable": "0.0.1",
+          "nextVersion": "0.0.1-next.2",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
 })
 
 describe('preflight assertions', () => {
-  function replaceSHA(result: RunLibreResult): RunLibreResult {
-    result.stderr = result.stderr.replace(
+  function replaceSHA(result: any): any {
+    result.data.context.sha = '__sha__'
+    result.data.summary = result.data.summary.replace(
       /(commit is:\s*)[\w\d]+/g,
       '$1__sha__'
     )
@@ -248,82 +326,72 @@ describe('preflight assertions', () => {
     const result = await ws.libre('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": [Error: The following command failed to complete successfully:
-
-             ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/node_modules/.bin/ts-node --project ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/tsconfig.json ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/src/main preview --dry-run
-
-         It ended with this exit code:
-
-             2
-
-         This underlying error occured (null = none occured):
-
-             null
-
-         It received signal (null = no signal received):
-
-             null
-
-         It output on stderr (null = not spawned in pipe mode):
-
-              [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
-      [31m›[39m   branches with _open_ pull-requests
-
-
-         It output on stdout (null = not spawned in pipe mode):],
-        "exitCode": 2,
-        "signal": null,
-        "stderr": " [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
-       [31m›[39m   branches with _open_ pull-requests
-      ",
-        "stdout": "",
+        "data": Object {
+          "context": Object {},
+          "summary": "Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests. If you want to make a preview release for this branch then open a pull-request for it.",
+        },
+        "kind": "exception",
+        "type": "invalid_branch_for_pre_release",
       }
     `)
   })
 
-  it('fails semantically if there is a preview release', async () => {
+  it('fails semantically if there is already a preview release present', async () => {
     await ws.git.addTag('v1.2.3-next.1')
-    const result = await ws.libre('preview')
-    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
-      " [31m›[39m   Error: You cannot make a preview release for this commit because a preview 
-       [31m›[39m   release was already made.
-       [31m›[39m
-       [31m›[39m        The commit is:           __sha__
-       [31m›[39m        The stable release is:   N/A
-       [31m›[39m        The preview release is:  1.2.3-next.1
-       [31m›[39m        Other tags present:      N/A
-      "
+    const result: any = await ws.libre('preview')
+    expect(replaceSHA(result)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "context": Object {
+            "otherTags": Array [],
+            "preReleaseTag": "1.2.3-next.1",
+            "sha": "__sha__",
+          },
+          "summary": "You cannot make a preview release for this commit because a preview release was already made.",
+        },
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
+      }
     `)
   })
 
-  it('fails semantically if there is a stable release', async () => {
+  it('fails semantically if there is already a stable release present', async () => {
     await ws.git.addTag('v1.2.3')
-    const result = await ws.libre('preview')
-    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
-      " [31m›[39m   Error: You cannot make a preview release for this commit because a stable 
-       [31m›[39m   release was already made.
-       [31m›[39m
-       [31m›[39m        The commit is:           __sha__
-       [31m›[39m        The stable release is:   1.2.3
-       [31m›[39m        The preview release is:  N/A
-       [31m›[39m        Other tags present:      N/A
-      "
+    const result: any = await ws.libre('preview')
+    expect(replaceSHA(result)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "context": Object {
+            "otherTags": Array [],
+            "sha": "__sha__",
+            "stableReleaseTag": "1.2.3",
+          },
+          "summary": "You cannot make a preview release for this commit because a stable release was already made.",
+        },
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
+      }
     `)
   })
 
   it('fails semantically if there is a stable AND preview release', async () => {
     await ws.git.addTag('v1.2.3')
     await ws.git.addTag('v1.2.3-next.1')
-    const result = await ws.libre('preview')
-    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
-      " [31m›[39m   Error: You cannot make a preview release for this commit because stable 
-       [31m›[39m   and preview releases were already made
-       [31m›[39m
-       [31m›[39m        The commit is:           __sha__
-       [31m›[39m        The stable release is:   1.2.3
-       [31m›[39m        The preview release is:  1.2.3-next.1
-       [31m›[39m        Other tags present:      N/A
-      "
+    const result: any = await ws.libre('preview')
+    expect(replaceSHA(result)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "context": Object {
+            "otherTags": Array [],
+            "preReleaseTag": "1.2.3-next.1",
+            "sha": "__sha__",
+            "stableReleaseTag": "1.2.3",
+          },
+          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made",
+        },
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
+      }
     `)
   })
 
@@ -332,16 +400,24 @@ describe('preflight assertions', () => {
     await ws.git.addTag('v1.2.3-next.1')
     await ws.git.addTag('foo')
     await ws.git.addTag('bar')
-    const result = await ws.libre('preview')
-    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
-      " [31m›[39m   Error: You cannot make a preview release for this commit because stable 
-       [31m›[39m   and preview releases were already made
-       [31m›[39m
-       [31m›[39m        The commit is:           __sha__
-       [31m›[39m        The stable release is:   1.2.3
-       [31m›[39m        The preview release is:  1.2.3-next.1
-       [31m›[39m        Other tags present:      bar, foo
-      "
+    const result: any = await ws.libre('preview')
+    expect(replaceSHA(result)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "context": Object {
+            "otherTags": Array [
+              "bar",
+              "foo",
+            ],
+            "preReleaseTag": "1.2.3-next.1",
+            "sha": "__sha__",
+            "stableReleaseTag": "1.2.3",
+          },
+          "summary": "You cannot make a preview release for this commit because stable and preview releases were already made",
+        },
+        "kind": "exception",
+        "type": "invalid_pre_release_case",
+      }
     `)
   })
 
@@ -350,12 +426,12 @@ describe('preflight assertions', () => {
     const result = await ws.libre('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "error": null,
-        "exitCode": 0,
-        "signal": null,
-        "stderr": "",
-        "stdout": "{\\"type\\":\\"stable\\",\\"reason\\":\\"is_trunk\\"}
-      ",
+        "data": Object {
+          "reason": "is_trunk",
+          "type": "stable",
+        },
+        "kind": "ok",
+        "type": "release_type",
       }
     `)
   })

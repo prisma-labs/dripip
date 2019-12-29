@@ -12,7 +12,13 @@ import {
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as SemVer from 'semver'
+import * as Output from '../lib/output'
 import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
+
+type ReleaseTypeInfo = {
+  type: string
+  reason: string
+}
 
 export class Preview extends Command {
   static flags = {
@@ -30,10 +36,16 @@ export class Preview extends Command {
       default: false,
       description: 'output what the next version would be if released now',
     }),
+    // TODO currently all output is JSON, regardless of this flag
+    json: flags.boolean({
+      default: false,
+      description: 'format output as JSON',
+    }),
   }
 
   async run() {
     const { flags } = this.parse(Preview)
+    const send = createOutputters({ json: flags.json })
     const git = createGit()
     // TODO validate for found releases that fall outside the subset we support.
     // For example #.#.#-foobar.1 is something we would not know what to do
@@ -60,72 +72,60 @@ export class Preview extends Command {
     const hasReleaseTags = tags.stable_release || tags.pre_release
 
     if (hasReleaseTags) {
-      let message = ''
-
-      message += `You cannot make a preview release for this commit because ${
-        (tags.pre_release?.length ?? 0) > 0 &&
-        (tags.stable_release?.length ?? 0) > 0
-          ? 'stable and preview releases were already made'
-          : (tags.pre_release?.length ?? 0) > 0
-          ? 'a preview release was already made.'
-          : 'a stable release was already made.'
-      }\n`
-      message += '\n'
-      message += indentBlock4(stripIndents`
-        The commit is:           ${currentCommitShortSha}
-        ${renderTagsPresent(tags)}
-      `)
-
-      this.error(message, {
-        // TODO what is code for? How shuold we use it?
-        code: 'foo code',
-        exit: 100,
-      })
+      return send.commitAlreadyPreAndOrStableReleased(
+        currentCommitShortSha,
+        tags
+      )
     }
 
     if (await Git.isTrunk(git)) {
       if (flags['show-type']) {
-        console.log(JSON.stringify({ type: 'stable', reason: 'is_trunk' }))
-        return
+        return send.releaseType({ type: 'stable', reason: 'is_trunk' })
       }
 
       const nextRelease = await calcNextStablePreview(git)
 
       if (nextRelease === null) {
-        console.log(
-          JSON.stringify({
-            message:
-              'All commits are either meta or not conforming to conventional commit. No release will be made.',
-          })
-        )
-        return
+        return send.noReleaseToMake()
       }
 
       if (flags['dry-run']) {
-        console.log(JSON.stringify(nextRelease))
-        return
+        return send.dryRun(nextRelease)
       }
 
-      process.stdout.write(`todo: release ${nextRelease.nextVersion}`)
-      return
+      return process.stdout.write(`todo: release ${nextRelease.nextVersion}`)
     }
 
     const prCheck = await Git.checkBranchPR(git)
 
-    if (prCheck.isPR) {
-      if (flags['show-type']) {
-        console.log(JSON.stringify({ type: 'pr', reason: prCheck.inferredBy }))
-        return
-      }
-      // TODO
-      process.stdout.write('todo: pr preview release')
-      return
+    if (prCheck.isPR === false) {
+      return send.invalidBranchForPreRelease()
     }
 
-    this.error(
-      'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests'
-    )
+    if (flags['show-type']) {
+      return send.releaseType({
+        type: 'pr',
+        reason: prCheck.inferredBy,
+      })
+    }
+
+    // TODO
+    return process.stdout.write('todo: pr preview release')
   }
+}
+
+type ReleaseBrief = {
+  currentVersion: null | string
+  currentStable: null | string
+  currentPreviewNumber: null | number
+  nextStable: string
+  nextPreviewNumber: number
+  nextVersion: string
+  commitsInRelease: string[]
+  bumpType: SemverStableVerParts
+  isFirstVer: boolean
+  isFirstVerPreRelease: boolean
+  isFirstVerStable: boolean
 }
 
 /**
@@ -139,19 +139,7 @@ export class Preview extends Command {
  */
 async function calcNextStablePreview(
   git: Git.Simple
-): Promise<null | {
-  currentVersion: null | string
-  currentStable: null | string
-  currentPreviewNumber: null | number
-  nextStable: string
-  nextPreviewNumber: number
-  nextVersion: string
-  commitsInRelease: string[]
-  bumpType: SemverStableVerParts
-  isFirstVer: boolean
-  isFirstVerPreRelease: boolean
-  isFirstVerStable: boolean
-}> {
+): Promise<null | ReleaseBrief> {
   const maybeLatestStableVer = await Git.findTag(git, {
     matcher: candidate => {
       const maybeSemVer = SemVer.parse(candidate)
@@ -254,6 +242,94 @@ function isStablePreview(release: SemVer.SemVer): boolean {
     release.prerelease[0] === 'next' &&
     String(release.prerelease[1]).match(/\d+/) !== null
   )
+}
+
+type OutputterOptions = {
+  json: boolean
+}
+
+function createOutputters(opts: OutputterOptions) {
+  /**
+   * Output the release type.
+   */
+  function releaseType(info: ReleaseTypeInfo): void {
+    if (opts.json) {
+      Output.outputOk('release_type', info)
+    } else {
+      Output.outputRaw(
+        `The release type that would be made right now is ${info.type} becuase ${info.reason}.`
+      )
+    }
+  }
+
+  /**
+   * Output no release to make notice.
+   */
+  function noReleaseToMake(): void {
+    Output.output(
+      Output.createException('no_release_to_make', {
+        summary:
+          'All commits are either meta or not conforming to conventional commit. No release will be made.',
+      }),
+      { json: opts.json }
+    )
+  }
+
+  /**
+   * Output that current conditions do not permit a preview release.
+   */
+  function invalidBranchForPreRelease(): void {
+    Output.output(
+      Output.createException('invalid_branch_for_pre_release', {
+        summary:
+          'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests. If you want to make a preview release for this branch then open a pull-request for it.',
+      }),
+      { json: opts.json }
+    )
+  }
+
+  function commitAlreadyPreAndOrStableReleased(
+    sha: string,
+    tags: GroupBy<ParsedTag, 'type'>
+  ): void {
+    const baseMessage = `You cannot make a preview release for this commit because ${
+      (tags.pre_release?.length ?? 0) > 0 &&
+      (tags.stable_release?.length ?? 0) > 0
+        ? 'stable and preview releases were already made'
+        : (tags.pre_release?.length ?? 0) > 0
+        ? 'a preview release was already made.'
+        : 'a stable release was already made.'
+    }`
+    if (opts.json) {
+      Output.outputException('invalid_pre_release_case', baseMessage, {
+        sha,
+        preReleaseTag: tags.pre_release?.[0]?.value.version,
+        stableReleaseTag: tags.stable_release?.[0]?.value.version,
+        otherTags: tags.unknown?.map(t => t.value) ?? [],
+      })
+    } else {
+      let message = ''
+      message += baseMessage + '\n'
+      message += '\n'
+      message += indentBlock4(stripIndents`
+        The commit is:           ${sha}
+        ${renderTagsPresent(tags)}
+      `)
+      Output.outputRaw(message)
+    }
+  }
+
+  function dryRun(info: ReleaseBrief): void {
+    Output.outputOk('dry_run', info)
+  }
+
+  return {
+    releaseType,
+    noReleaseToMake,
+    invalidBranchForPreRelease,
+    commitAlreadyPreAndOrStableReleased,
+    dryRun,
+  }
 }
 
 /**

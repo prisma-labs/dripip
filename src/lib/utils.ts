@@ -1,5 +1,4 @@
 import * as Semver from 'semver'
-import { Preview } from '../commands/preview'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }
@@ -159,4 +158,12 @@ export function bumpVer(
     //     `${prevVer.major}.${prevVer.minor}.${prevVer.patch}-${preRelease4}`
     //   )!
   }
+}
+
+/**
+ * Use this to make assertion at end of if-else chain that all members of a
+ * union have been accounted for.
+ */
+export function assertAllCasesHandled(x: never): void {
+  throw new Error(`A case was not handled for value: ${x}`)
 }

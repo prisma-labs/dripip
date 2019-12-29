@@ -68,28 +68,53 @@ export type RunLibreResult = Omit<proc.SuccessfulRunResult, 'command'> & {
   stderr: string
 }
 
-const createLibreRunner = (optionsBase?: proc.RunOptions) => (
+type LibreRunnerOptions = proc.RunOptions & {
+  raw?: boolean
+}
+
+const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
   command: string,
-  options?: proc.RunOptions
-): Promise<RunLibreResult> => {
-  const mergedOptions = { ...optionsBase, ...options }
+  optsLocal?: LibreRunnerOptions
+): Promise<Record<string, any> | RunLibreResult> => {
+  const opts = {
+    ...optsBase,
+    ...optsLocal,
+  }
+
   // TODO Why is the extra `../` needed...
   const pathToProject =
     '../' +
-    path.relative(
-      (mergedOptions as any)['cwd'] || '.',
-      path.join(__dirname, '../..')
-    )
+    path.relative((opts as any)['cwd'] || '.', path.join(__dirname, '../..'))
   // console.log(pathToProject)
   return proc
     .run(
-      `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command}`,
-      mergedOptions
+      `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command} --json`,
+      opts
     )
     .then(result => {
-      delete result.command
-      sanitizeResultForSnap(result as RunLibreResult)
-      return result as RunLibreResult // force TS to ignore the stderr: null possibility
+      if ((opts as any).raw === true) {
+        // TODO remove given new json parse approach?
+        delete result.command
+        // TODO not used/helpful...?
+        sanitizeResultForSnap(result as RunLibreResult)
+        return result as RunLibreResult // force TS to ignore the stderr: null possibility
+      }
+
+      // Avoid silent confusion
+      if (result.stderr) {
+        console.log(
+          `WARNING libre command sent output to stderr:\n\n${result.stderr}`
+        )
+      }
+
+      try {
+        // TODO typed response...
+        return JSON.parse(result.stdout!) as Record<string, any>
+      } catch (e) {
+        throw new Error(
+          `Something went wrong while trying to JSON parse the libre cli stdout:\n\n${e.stack}\n\nThe underlying cli result was:\n\n${result}`
+        )
+      }
     })
 }
 
