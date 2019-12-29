@@ -1,5 +1,4 @@
 import * as Semver from 'semver'
-import { Preview } from '../commands/preview'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }

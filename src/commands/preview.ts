@@ -12,6 +12,7 @@ import {
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as SemVer from 'semver'
+import * as Output from '../lib/output'
 import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
 
 export class Preview extends Command {
@@ -29,6 +30,11 @@ export class Preview extends Command {
     'dry-run': flags.boolean({
       default: false,
       description: 'output what the next version would be if released now',
+    }),
+    // TODO currently all output is JSON, regardless of this flag
+    json: flags.boolean({
+      default: false,
+      description: 'format output as JSON',
     }),
   }
 
@@ -76,33 +82,37 @@ export class Preview extends Command {
         ${renderTagsPresent(tags)}
       `)
 
-      this.error(message, {
-        // TODO what is code for? How shuold we use it?
-        code: 'foo code',
-        exit: 100,
+      Output.outputException('invalid_pre_release_case', message, {
+        sha: currentCommitShortSha,
+        preReleaseTag: tags.pre_release?.[0]?.value.version,
+        stableReleaseTag: tags.stable_release?.[0]?.value.version,
+        otherTags: tags.unknown?.map(t => t.value) ?? [],
       })
+      return
     }
 
     if (await Git.isTrunk(git)) {
       if (flags['show-type']) {
-        console.log(JSON.stringify({ type: 'stable', reason: 'is_trunk' }))
+        Output.outputOk({
+          type: 'stable',
+          reason: 'is_trunk',
+        })
         return
       }
 
       const nextRelease = await calcNextStablePreview(git)
 
       if (nextRelease === null) {
-        console.log(
-          JSON.stringify({
-            message:
-              'All commits are either meta or not conforming to conventional commit. No release will be made.',
-          })
+        Output.outputException(
+          'no_release_to_make',
+          'All commits are either meta or not conforming to conventional commit. No release will be made.',
+          {}
         )
         return
       }
 
       if (flags['dry-run']) {
-        console.log(JSON.stringify(nextRelease))
+        Output.outputOk(nextRelease)
         return
       }
 
@@ -114,7 +124,10 @@ export class Preview extends Command {
 
     if (prCheck.isPR) {
       if (flags['show-type']) {
-        console.log(JSON.stringify({ type: 'pr', reason: prCheck.inferredBy }))
+        Output.outputOk({
+          type: 'pr',
+          reason: prCheck.inferredBy,
+        })
         return
       }
       // TODO
@@ -122,8 +135,10 @@ export class Preview extends Command {
       return
     }
 
-    this.error(
-      'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests'
+    Output.outputException(
+      'invalid_pre_release_case',
+      'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests',
+      {}
     )
   }
 }
