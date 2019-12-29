@@ -7,12 +7,12 @@ import {
   ParsedTag,
   GroupBy,
   bumpVer,
-  calcBumpTypeFromConventionalCommits,
   SemverStableVerParts,
 } from '../lib/utils'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as SemVer from 'semver'
+import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
 
 export class Preview extends Command {
   static flags = {
@@ -91,6 +91,16 @@ export class Preview extends Command {
 
       const nextRelease = await calcNextStablePreview(git)
 
+      if (nextRelease === null) {
+        console.log(
+          JSON.stringify({
+            message:
+              'All commits are either meta or not conforming to conventional commit. No release will be made.',
+          })
+        )
+        return
+      }
+
       if (flags['dry-run']) {
         console.log(JSON.stringify(nextRelease))
         return
@@ -127,7 +137,7 @@ export class Preview extends Command {
  */
 async function calcNextStablePreview(
   git: Git.Simple
-): Promise<{
+): Promise<null | {
   currentVersion: null | string
   currentStable: string
   currentPreviewNumber: null | number
@@ -179,6 +189,8 @@ async function calcNextStablePreview(
   const bumpType = calcBumpTypeFromConventionalCommits(
     commitMessagesSinceLastStable
   )
+
+  if (bumpType === null) return null
 
   // The semver parses in this expression are guaranteed by the tag finding
   // done before.
