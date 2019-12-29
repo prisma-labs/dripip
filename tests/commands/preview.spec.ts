@@ -236,11 +236,50 @@ describe('preflight assertions', () => {
     return result
   }
 
+  // TODO maybe... this is quite the edge-case and would charge all users a
+  // latency fee wherein every stable preview release requires a pr check
+  // anyways just to see if this super weird case is ocurring...
   it.todo(
     'fails semantically if trunk and pr detected becuase that demands conflicting reactions'
   )
 
-  it.todo('fails semantically if not on trunk and branch has no open pr')
+  it('fails semantically if not on trunk and branch has no open pr', async () => {
+    await ws.git.checkoutLocalBranch('feat/foo')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": [Error: The following command failed to complete successfully:
+
+             ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/node_modules/.bin/ts-node --project ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/tsconfig.json ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/src/main preview --dry-run
+
+         It ended with this exit code:
+
+             2
+
+         This underlying error occured (null = none occured):
+
+             null
+
+         It received signal (null = no signal received):
+
+             null
+
+         It output on stderr (null = not spawned in pipe mode):
+
+              [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
+      [31m›[39m   branches with _open_ pull-requests
+
+
+         It output on stdout (null = not spawned in pipe mode):],
+        "exitCode": 2,
+        "signal": null,
+        "stderr": " [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
+       [31m›[39m   branches with _open_ pull-requests
+      ",
+        "stdout": "",
+      }
+    `)
+  })
 
   it('fails semantically if there is a preview release', async () => {
     await ws.git.addTag('v1.2.3-next.1')
