@@ -1,4 +1,4 @@
-import Command from '@oclif/command'
+import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
 import {
   indentBlock4,
@@ -6,13 +6,39 @@ import {
   groupByProp,
   ParsedTag,
   GroupBy,
+  bumpVer,
+  SemverStableVerParts,
 } from '../lib/utils'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
+import * as SemVer from 'semver'
+import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
 
 export class Preview extends Command {
+  static flags = {
+    /**
+     * This flag is mostly used for debugging. It allows the user to see what
+     * kind of preview release _would_ be made under the current conditions, and
+     * why.
+     */
+    'show-type': flags.boolean({
+      default: false,
+      description:
+        'output the kind of preview release that would be made and why',
+    }),
+    'dry-run': flags.boolean({
+      default: false,
+      description: 'output what the next version would be if released now',
+    }),
+  }
+
   async run() {
+    const { flags } = this.parse(Preview)
     const git = createGit()
+    // TODO validate for found releases that fall outside the subset we support.
+    // For example #.#.#-foobar.1 is something we would not know what to do
+    // with. A good default is probably to hard-error when these are
+    // encountered. But offer a flag/config option called e.g. "ignore_unsupport_pre_release_identifiers"
     // TODO handle edge case: not a git repo
     // TODO handle edge case: a git repo with no commits
     // TODO nicer tag rendering:
@@ -21,10 +47,8 @@ export class Preview extends Command {
     //    3. show the the date the tag was made
 
     /**
-     * Before executing a release preview confirm that the commit to be released
-     * has not already been released. It does not make sense to release
-     * a preview of something that has already been released (be it just preview
-     * or preview and stable).
+     * Before executing a preview release confirm that the commit to be released
+     * has not already been released either as preview or stable.
      */
     const [currentCommitShortSha, tags] = await Promise.all([
       Git.gitGetSha(git, { short: true }),
@@ -60,30 +84,176 @@ export class Preview extends Command {
     }
 
     if (await Git.isTrunk(git)) {
-      /**
-       * Non-PR flow:
-       *
-       * 1. Find the last pre-release on the current branch. Take its build number. If none use 1.
-       * 2. Calculate the semver bump type. Do this by analyizing the commits on the branch between HEAD and the last stable git tag. The highest change type found is used. If no previous stable git tag use 0.0.1.
-       * 3. Bump last stable version by bump type, thus producing the next version.
-       * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
-       */
-      // const maybeLatestStableVer =
-      // const maybeLatestPreReleaseSinceRef =
-      process.stdout.write('todo: trunk preview release')
+      if (flags['show-type']) {
+        console.log(JSON.stringify({ type: 'stable', reason: 'is_trunk' }))
+        return
+      }
+
+      const nextRelease = await calcNextStablePreview(git)
+
+      if (nextRelease === null) {
+        console.log(
+          JSON.stringify({
+            message:
+              'All commits are either meta or not conforming to conventional commit. No release will be made.',
+          })
+        )
+        return
+      }
+
+      if (flags['dry-run']) {
+        console.log(JSON.stringify(nextRelease))
+        return
+      }
+
+      process.stdout.write(`todo: release ${nextRelease.nextVersion}`)
+      return
     }
 
     const prCheck = await Git.checkBranchPR(git)
 
     if (prCheck.isPR) {
+      if (flags['show-type']) {
+        console.log(JSON.stringify({ type: 'pr', reason: prCheck.inferredBy }))
+        return
+      }
       // TODO
       process.stdout.write('todo: pr preview release')
+      return
     }
 
-    throw new Error(
+    this.error(
       'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests'
     )
   }
+}
+
+/**
+ * 1. Find the last pre-release on the current branch. Take its build number. If
+ *    none use 1.
+ * 2. Calculate the semver bump type. Do this by analyizing the commits on the
+ *    branch between HEAD and the last stable git tag.  The highest change type
+ *    found is used. If no previous stable git tag use 0.0.1.
+ * 3. Bump last stable version by bump type, thus producing the next version.
+ * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
+ */
+async function calcNextStablePreview(
+  git: Git.Simple
+): Promise<null | {
+  currentVersion: null | string
+  currentStable: null | string
+  currentPreviewNumber: null | number
+  nextStable: string
+  nextPreviewNumber: number
+  nextVersion: string
+  commitsInRelease: string[]
+  bumpType: SemverStableVerParts
+  isFirstVer: boolean
+  isFirstVerPreRelease: boolean
+  isFirstVerStable: boolean
+}> {
+  const maybeLatestStableVer = await Git.findTag(git, {
+    matcher: candidate => {
+      const maybeSemVer = SemVer.parse(candidate)
+      if (maybeSemVer === null) return false
+      return isStable(maybeSemVer)
+    },
+  })
+
+  const maybeLatestPreVerSinceStable = await Git.findTag(git, {
+    since: maybeLatestStableVer ?? undefined,
+    matcher: candidate => {
+      const maybeSemVer = SemVer.parse(candidate)
+      if (maybeSemVer === null) return false
+      return isStablePreview(maybeSemVer)
+    },
+  })
+
+  // We need all the commits since the last stable release to calculate the
+  // pre-release. The pre-release is a bump against the last stable plus a
+  // build number. The bump type used to bump is based on the aggregate of
+  // all commits since the last stable. While the build number always
+  // increments the maj/min/pat may only increment upon the first
+  // pre-release, unless a later pre-release incurs a higher-order bump-type
+  // e.g. begin with patch-kind changes followed later by min-kind changes.
+
+  const commitsSinceLastStable = await Git.log(git, {
+    since: maybeLatestStableVer ?? undefined,
+  })
+
+  const commitMessagesSinceLastStable = commitsSinceLastStable.map(
+    c => c.message
+  )
+
+  // Calculate the next version
+
+  const stablePreReleaseIdentifier = 'next'
+  const bumpType = calcBumpTypeFromConventionalCommits(
+    commitMessagesSinceLastStable
+  )
+
+  if (bumpType === null) return null
+
+  // The semver parses in this expression are guaranteed by the tag finding
+  // done before.
+  const maybeLatestBuildNum =
+    maybeLatestPreVerSinceStable === null
+      ? null
+      : (SemVer.parse(maybeLatestPreVerSinceStable)!.prerelease[1] as number)
+
+  maybeLatestPreVerSinceStable !== null
+    ? SemVer.parse(maybeLatestPreVerSinceStable)!
+    : maybeLatestStableVer !== null
+
+  const nextVerBuildNum = (maybeLatestBuildNum ?? 0) + 1
+
+  const nextStable = bumpVer(
+    bumpType,
+    SemVer.parse(maybeLatestStableVer ?? '0.0.0')!
+  ).version
+
+  const nextVer =
+    nextStable + `-${stablePreReleaseIdentifier}.${nextVerBuildNum}`
+
+  // TODO refactor, expensive re-calc of log when its already a subset of the above
+  // filter on tags? commitsInRelease[0].tags
+  const commitsInRelease = await Git.log(git, {
+    since: maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? undefined,
+  })
+  const commitMessagesInRelease = commitsInRelease.map(m => m.message)
+
+  return {
+    currentStable: maybeLatestStableVer,
+    currentPreviewNumber: maybeLatestBuildNum,
+    nextStable: nextStable,
+    nextPreviewNumber: nextVerBuildNum,
+    currentVersion:
+      maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? null,
+    nextVersion: nextVer,
+    commitsInRelease: commitMessagesInRelease,
+    bumpType,
+    isFirstVer:
+      maybeLatestPreVerSinceStable === null && maybeLatestStableVer === null,
+    isFirstVerStable: maybeLatestStableVer === null,
+    isFirstVerPreRelease: maybeLatestPreVerSinceStable === null,
+  }
+}
+
+/**
+ * Is the given release a stable one?
+ */
+function isStable(release: SemVer.SemVer): boolean {
+  return release.prerelease.length === 0
+}
+
+/**
+ * Is the given release a stable preview one?
+ */
+function isStablePreview(release: SemVer.SemVer): boolean {
+  return (
+    release.prerelease[0] === 'next' &&
+    String(release.prerelease[1]).match(/\d+/) !== null
+  )
 }
 
 /**

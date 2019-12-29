@@ -6,8 +6,18 @@ import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
+import { Refspec } from 'nodegit'
 
 export type Simple = ReturnType<typeof createGit>
+
+function parseGitTags(tagsString: null | string): string[] {
+  if (tagsString === null) return []
+  const tags = tagsString
+    .trim()
+    .split('\n')
+    .map(t => t.trim())
+  return tags
+}
 
 /**
  * Get tags at the given commit or HEAD by default.
@@ -18,11 +28,7 @@ export async function gitGetTags(
 ): Promise<string[]> {
   const ref = opts?.ref ?? 'HEAD'
   const tagsString: string | null = await git.tag({ '--points-at': ref })
-  if (tagsString === null) return []
-  const tags = tagsString
-    .trim()
-    .split('\n')
-    .map(t => t.trim())
+  const tags = parseGitTags(tagsString)
   return tags
 }
 
@@ -55,15 +61,15 @@ export async function gitReset(git: Simple): Promise<void> {
  * Reset a git repository to its initial commit
  */
 export async function gitResetToInitialCommit(git: Simple): Promise<void> {
-  await Promise.all([
-    git.raw(['clean', '-d', '-x', '-f']),
-    git
-      .raw('rev-list --max-parents=0 HEAD'.split(' '))
-      .then(initialCommitSHA => {
-        git.raw(['reset', '--hard', initialCommitSHA.trim()])
-      }),
-    gitDeleteAllTagsInRepo(git),
-  ])
+  await git.raw(['clean', '-d', '-x', '-f'])
+  const trunkBranch = 'master'
+  await git.raw(`checkout ${trunkBranch}`.split(' '))
+  await git
+    .raw('rev-list --max-parents=0 HEAD'.split(' '))
+    .then(initialCommitSHA => {
+      git.raw(['reset', '--hard', initialCommitSHA.trim()])
+    }),
+    gitDeleteAllTagsInRepo(git)
 }
 
 /**
@@ -190,6 +196,7 @@ export async function checkBranchPR(
     )
   }
 
+  // TODO Refactor this to have instance passed as arg.
   const octokit = new Octokit()
   // TODO we could fetch all pull-requests and check against `state` later. One
   // benefit would be better feedback for users, like: "The branch you are on
@@ -228,4 +235,125 @@ export async function checkBranchPR(
 export async function isTrunk(git: Simple): Promise<boolean> {
   const branchSumamry = await git.branch({})
   return branchSumamry.current === 'master'
+}
+
+/**
+ * Get the last tag in the current branch that matches the given pattern.
+ * Returns null if no tag can be found.
+ */
+export async function findTag(
+  git: Simple,
+  ops: { matcher: (x: string) => boolean; since?: string }
+): Promise<null | string> {
+  // References about ordering:
+  // - https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to
+  // - https://git-scm.com/docs/git-for-each-ref#_field_names
+  // References about by-branch:
+  // - https://stackoverflow.com/a/39084124/499537
+  const branchSummary = await git.branch({})
+
+  let tagsByCommits: string[][]
+  if (ops.since) {
+    const logs = await log(git, { since: ops?.since ?? undefined })
+    tagsByCommits = logs.map(log => log.tags)
+  } else {
+    // TODO this method flattens tags on same commit to appear as adjacent tags
+    // in the list. Seems incidentally technically ok for our current algorithm but dubious...
+    const tagsString = await git.tag({
+      '--sort': 'taggerdate',
+      '--merged': branchSummary.current,
+    })
+    tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
+  }
+
+  let lastTag: null | string = null
+
+  for (const tbc of tagsByCommits) {
+    for (const tag of tbc) {
+      if (ops.matcher(tag)) {
+        lastTag = tag
+        break
+      }
+    }
+  }
+
+  return lastTag
+}
+
+type LogEntry = {
+  sha: string
+  tags: string[]
+  body: string
+  subject: string
+  message: string
+}
+
+/**
+ * Version of native simple git func tailored for us, especially accurate types.
+ */
+export async function log(
+  git: Simple,
+  ops?: { since?: string }
+): Promise<LogEntry[]> {
+  // TODO tags or bodies or subjects with double quotes in them or commas will
+  // break parsing... consider using native git.log func?
+  git.log()
+  const logSeparator = '$@<!____LOG____!>@$'
+  const partSeparator = '$@<!____PROP____!>@$'
+  const formatParts = [
+    { prop: 'sha', code: '%H' },
+    { prop: 'refs', code: '%D' },
+    { prop: 'subject', code: '%s' },
+    { prop: 'body', code: '%b' },
+    { prop: 'message', code: '%B' },
+  ]
+  const formatProps = formatParts.map(part => part.prop)
+  const args = [
+    'log',
+    `--format=${formatParts
+      .map(part => part.code)
+      .join(partSeparator)}${logSeparator}`,
+  ]
+  if (ops?.since) args.push(`${ops.since}..head`)
+  const rawLogString = await git.raw(args)
+  const logStrings = rawLogString.trim().split(logSeparator)
+  logStrings.pop() // trailing separator
+  return logStrings
+    .reduce((logs, logString) => {
+      let log: any = {}
+      // propsRemaining and logParts are guaranteed to be the same length
+      // TODO should be a zip...
+      const propsRemaining = [...formatProps]
+      const logParts = logString.split(partSeparator)
+      while (propsRemaining.length > 0) {
+        log[propsRemaining.shift()!] = logParts.shift()!.trim()
+      }
+      logs.push(log)
+      return logs
+    }, [] as (Omit<LogEntry, 'tags'> & { refs: string })[])
+    .map(
+      ({
+        refs,
+        ...rest
+      }: {
+        sha: string
+        refs: string
+        body: string
+        subject: string
+        message: string
+      }) => {
+        return {
+          ...rest,
+          tags: refs
+            .trim()
+            .split(', ')
+            .map(ref => {
+              const result = ref.match(/tag: (.+)/)
+              if (!result) return null
+              return result[1]
+            })
+            .filter((tagRef): tagRef is string => typeof tagRef === 'string'),
+        }
+      }
+    )
 }

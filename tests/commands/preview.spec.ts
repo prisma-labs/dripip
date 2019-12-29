@@ -1,28 +1,294 @@
-import { createWorkspace } from '../__lib/helpers'
+import {
+  createWorkspace,
+  resetEnvironmentBeforeEachTest,
+  RunLibreResult,
+} from '../__lib/helpers'
+import Octokit = require('@octokit/rest')
+import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
 
-it('can be run', async () => {
-  expect(await ws.libre('preview')).toMatchInlineSnapshot(`
-    Object {
-      "error": null,
-      "exitCode": 0,
-      "signal": null,
-      "stderr": "",
-      "stdout": "todo",
+resetEnvironmentBeforeEachTest()
+
+describe('pr preview releases', () => {
+  let instanceId: string
+  let branchName: string
+
+  beforeEach(async () => {
+    instanceId = String(Math.random()).replace('0.', '')
+    branchName = 'feat/foo-' + instanceId
+    // https://github.com/steveukx/git-js/issues/14#issuecomment-45430322
+    await ws.git.checkout(['-b', branchName])
+    await gitCreateEmptyCommit(ws.git, 'some work on new branch')
+    // await ws.git.addRemote(
+    //   'origin',
+    //   'https://github.com/prisma-labs/system-tests-repo.git'
+    // )
+    await ws.git.push('origin', branchName)
+  })
+
+  it('treats release as a pr preview if circleci env vars signify there is a pr', async () => {
+    process.env.CIRCLECI = 'true'
+    process.env.CIRCLE_PULL_REQUEST = 'true'
+    const result = await ws.libre('preview --show-type')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"type\\":\\"pr\\",\\"reason\\":\\"ci_env_var\\"}
+      ",
+      }
+    `)
+  })
+
+  it('treats releases as a pr preview if on branch with open pr', async () => {
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    })
+    try {
+      await octokit.pulls.create({
+        head: branchName,
+        base: 'master',
+        owner: 'prisma-labs',
+        repo: 'system-tests-repo',
+        title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
+      })
+    } catch (e) {
+      console.log(e)
     }
-  `)
+    const result = await ws.libre('preview --show-type')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"type\\":\\"pr\\",\\"reason\\":\\"git_branch_github_api\\"}
+      ",
+      }
+    `)
+  })
 })
 
-describe('preflight assertion no-release-tags', () => {
+describe('stable preview releases', () => {
+  it('treats release as stable preview if on trunk', async () => {
+    const result = await ws.libre('preview --show-type')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"type\\":\\"stable\\",\\"reason\\":\\"is_trunk\\"}
+      ",
+      }
+    `)
+  })
+
+  it('if none of the commits conform to conventional commit then no release will be made', async () => {
+    await gitCreateEmptyCommit(ws.git, 'does not conform 1')
+    await gitCreateEmptyCommit(ws.git, 'does not conform 2')
+    await gitCreateEmptyCommit(ws.git, 'does not conform 3')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"message\\":\\"All commits are either meta or not conforming to conventional commit. No release will be made.\\"}
+      ",
+      }
+    `)
+  })
+
+  it('if all the commits are meta type then no release will be made', async () => {
+    await gitCreateEmptyCommit(ws.git, 'chore: 1')
+    await gitCreateEmptyCommit(ws.git, 'chore: 2')
+    await gitCreateEmptyCommit(ws.git, 'chore: 3')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"message\\":\\"All commits are either meta or not conforming to conventional commit. No release will be made.\\"}
+      ",
+      }
+    `)
+  })
+
+  it('if no stable release exists then pre-releases with just patch-affecting commits begin from stable version 0.0.1', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.0.1\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.0.1-next.1\\",\\"commitsInRelease\\":[\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
+      ",
+      }
+    `)
+  })
+
+  it('if no stable release exists then pre-releases with at least one minor-affecting commits begin from stable version 0.1.0', async () => {
+    await gitCreateEmptyCommit(ws.git, 'feat: 1')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.1.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"minor\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
+      ",
+      }
+    `)
+  })
+
+  it('if patch-affecting and minor-affecting commits in release bump type is minor', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    await gitCreateEmptyCommit(ws.git, 'feat: 1')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"0.1.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 1\\",\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"minor\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
+      ",
+      }
+    `)
+  })
+
+  it('if patch-affecting and minor-affecting and breaking change commits in release bump type is major', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    await gitCreateEmptyCommit(ws.git, 'feat: 1')
+    await gitCreateEmptyCommit(
+      ws.git,
+      'feat: 2\nBREAKING CHANGE:\nblah blah blah'
+    )
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"1.0.0\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":null,\\"nextVersion\\":\\"1.0.0-next.1\\",\\"commitsInRelease\\":[\\"feat: 2\\\\nBREAKING CHANGE:\\\\nblah blah blah\\",\\"feat: 1\\",\\"fix: 1\\",\\"Initial commit\\"],\\"bumpType\\":\\"major\\",\\"isFirstVer\\":true,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":true}
+      ",
+      }
+    `)
+  })
+
+  it('pre-releases only consider commits since last stable', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    await gitCreateEmptyCommit(ws.git, 'feat: 1')
+    await ws.git.addAnnotatedTag('0.1.0', '0.1.0')
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    await gitCreateEmptyCommit(ws.git, 'fix: 2')
+    const result = await ws.libre('preview --dry-run')
+    // note how the feat commit leading to 0.1.0 is ignored below otherwise we'd
+    // see 0.2.0
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":\\"0.1.0\\",\\"currentPreviewNumber\\":null,\\"nextStable\\":\\"0.1.1\\",\\"nextPreviewNumber\\":1,\\"currentVersion\\":\\"0.1.0\\",\\"nextVersion\\":\\"0.1.1-next.1\\",\\"commitsInRelease\\":[\\"fix: 2\\",\\"fix: 1\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":false,\\"isFirstVerStable\\":false,\\"isFirstVerPreRelease\\":true}
+      ",
+      }
+    `)
+  })
+
+  it('pre-releases increment from previous pre-release build number', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: 1')
+    await ws.git.addAnnotatedTag('0.0.1-next.1', '0.0.1-next.1')
+    await gitCreateEmptyCommit(ws.git, 'fix: 2')
+    await gitCreateEmptyCommit(ws.git, 'fix: 3')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "stdout": "{\\"currentStable\\":null,\\"currentPreviewNumber\\":1,\\"nextStable\\":\\"0.0.1\\",\\"nextPreviewNumber\\":2,\\"currentVersion\\":\\"0.0.1-next.1\\",\\"nextVersion\\":\\"0.0.1-next.2\\",\\"commitsInRelease\\":[\\"fix: 3\\",\\"fix: 2\\"],\\"bumpType\\":\\"patch\\",\\"isFirstVer\\":false,\\"isFirstVerStable\\":true,\\"isFirstVerPreRelease\\":false}
+      ",
+      }
+    `)
+  })
+})
+
+describe('preflight assertions', () => {
+  function replaceSHA(result: RunLibreResult): RunLibreResult {
+    result.stderr = result.stderr.replace(
+      /(commit is:\s*)[\w\d]+/g,
+      '$1__sha__'
+    )
+    return result
+  }
+
+  // TODO maybe... this is quite the edge-case and would charge all users a
+  // latency fee wherein every stable preview release requires a pr check
+  // anyways just to see if this super weird case is ocurring...
+  it.todo(
+    'fails semantically if trunk and pr detected becuase that demands conflicting reactions'
+  )
+
+  it('fails semantically if not on trunk and branch has no open pr', async () => {
+    await ws.git.checkoutLocalBranch('feat/foo')
+    const result = await ws.libre('preview --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": [Error: The following command failed to complete successfully:
+
+             ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/node_modules/.bin/ts-node --project ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/tsconfig.json ../../../../../Users/jasonkuhrt/projects/prisma-labs/libre/src/main preview --dry-run
+
+         It ended with this exit code:
+
+             2
+
+         This underlying error occured (null = none occured):
+
+             null
+
+         It received signal (null = no signal received):
+
+             null
+
+         It output on stderr (null = not spawned in pipe mode):
+
+              [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
+      [31m›[39m   branches with _open_ pull-requests
+
+
+         It output on stdout (null = not spawned in pipe mode):],
+        "exitCode": 2,
+        "signal": null,
+        "stderr": " [31m›[39m   Error: Preview releases are only supported on trunk (master) branch or 
+       [31m›[39m   branches with _open_ pull-requests
+      ",
+        "stdout": "",
+      }
+    `)
+  })
+
   it('fails semantically if there is a preview release', async () => {
     await ws.git.addTag('v1.2.3-next.1')
     const result = await ws.libre('preview')
-    expect(result.stderr).toMatchInlineSnapshot(`
+    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
       " [31m›[39m   Error: You cannot make a preview release for this commit because a preview 
        [31m›[39m   release was already made.
        [31m›[39m
-       [31m›[39m        The commit is:           c14cc64
+       [31m›[39m        The commit is:           __sha__
        [31m›[39m        The stable release is:   N/A
        [31m›[39m        The preview release is:  1.2.3-next.1
        [31m›[39m        Other tags present:      N/A
@@ -33,11 +299,11 @@ describe('preflight assertion no-release-tags', () => {
   it('fails semantically if there is a stable release', async () => {
     await ws.git.addTag('v1.2.3')
     const result = await ws.libre('preview')
-    expect(result.stderr).toMatchInlineSnapshot(`
+    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
       " [31m›[39m   Error: You cannot make a preview release for this commit because a stable 
        [31m›[39m   release was already made.
        [31m›[39m
-       [31m›[39m        The commit is:           c14cc64
+       [31m›[39m        The commit is:           __sha__
        [31m›[39m        The stable release is:   1.2.3
        [31m›[39m        The preview release is:  N/A
        [31m›[39m        Other tags present:      N/A
@@ -49,11 +315,11 @@ describe('preflight assertion no-release-tags', () => {
     await ws.git.addTag('v1.2.3')
     await ws.git.addTag('v1.2.3-next.1')
     const result = await ws.libre('preview')
-    expect(result.stderr).toMatchInlineSnapshot(`
+    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
       " [31m›[39m   Error: You cannot make a preview release for this commit because stable 
        [31m›[39m   and preview releases were already made
        [31m›[39m
-       [31m›[39m        The commit is:           c14cc64
+       [31m›[39m        The commit is:           __sha__
        [31m›[39m        The stable release is:   1.2.3
        [31m›[39m        The preview release is:  1.2.3-next.1
        [31m›[39m        Other tags present:      N/A
@@ -67,11 +333,11 @@ describe('preflight assertion no-release-tags', () => {
     await ws.git.addTag('foo')
     await ws.git.addTag('bar')
     const result = await ws.libre('preview')
-    expect(result.stderr).toMatchInlineSnapshot(`
+    expect(replaceSHA(result).stderr).toMatchInlineSnapshot(`
       " [31m›[39m   Error: You cannot make a preview release for this commit because stable 
        [31m›[39m   and preview releases were already made
        [31m›[39m
-       [31m›[39m        The commit is:           c14cc64
+       [31m›[39m        The commit is:           __sha__
        [31m›[39m        The stable release is:   1.2.3
        [31m›[39m        The preview release is:  1.2.3-next.1
        [31m›[39m        Other tags present:      bar, foo
@@ -81,13 +347,15 @@ describe('preflight assertion no-release-tags', () => {
 
   it('does not include non-release tags', async () => {
     await ws.git.addTag('foobar')
-    expect(await ws.libre('preview')).toMatchInlineSnapshot(`
+    const result = await ws.libre('preview --show-type')
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "error": null,
         "exitCode": 0,
         "signal": null,
         "stderr": "",
-        "stdout": "todo",
+        "stdout": "{\\"type\\":\\"stable\\",\\"reason\\":\\"is_trunk\\"}
+      ",
       }
     `)
   })

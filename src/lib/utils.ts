@@ -1,4 +1,5 @@
 import * as Semver from 'semver'
+import { Preview } from '../commands/preview'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }
@@ -85,4 +86,77 @@ export function groupByProp<
 
     return groupings
   }, seed)
+}
+
+export type SemverStableVerParts = 'major' | 'minor' | 'patch'
+
+/**
+ * Calculate the stable bump to a given semver version. This function is similar
+ * to `semver` package inc function with the following differences:
+ *
+ *     1. pre-releases are 1 based:
+ *
+ *          this  : '0.0.1'  inc('prerelease') --> '0.0.1-1'
+ *          semver: '0.0.1'  inc('prerelease') --> '0.0.1-0'
+ *
+ *     2. bumping pre{min,maj,pat} also bumps the build num:
+ *
+ *          this  : '0.0.1-1' inc('preminor') --> '0.1.0-2'
+ *          semver: '0.0.1'   inc('preminor') --> '0.1.0-0'
+ */
+export function bumpVer(
+  bumpType: 'major' | 'minor' | 'patch',
+  // | 'premajor'
+  // | 'preminor'
+  // | 'prepatch'
+  // | 'pre',
+  // preReleaseTypeIdentifier: string,
+  prevVer: Semver.SemVer
+): Semver.SemVer {
+  // const buildNumPrefix = preReleaseTypeIdentifier
+  //   ? `${preReleaseTypeIdentifier}.`
+  //   : ''
+  switch (bumpType) {
+    case 'major':
+      return Semver.parse(
+        `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}`
+      )!
+    case 'minor':
+      return Semver.parse(
+        `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}`
+      )!
+    case 'patch':
+      return Semver.parse(
+        `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
+      )!
+    // // TODO refactor
+    // case 'premajor':
+    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
+    //   const buildNum1 = (prevVer.prerelease[1] as undefined | number) ?? 1
+    //   const preRelease1 = buildNumPrefix + String(buildNum1 + 1)
+    //   return Semver.parse(
+    //     `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}-${preRelease1}`
+    //   )!
+    // case 'preminor':
+    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
+    //   const buildNum2 = (prevVer.prerelease[1] as undefined | number) ?? 1
+    //   const preRelease2 = buildNumPrefix + String(buildNum2 + 1)
+    //   return Semver.parse(
+    //     `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}-${preRelease2}`
+    //   )!
+    // case 'prepatch':
+    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
+    //   const buildNum3 = (prevVer.prerelease[1] as undefined | number) ?? 1
+    //   const preRelease3 = buildNumPrefix + String(buildNum3 + 1)
+    //   return Semver.parse(
+    //     `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}-${preRelease3}`
+    //   )!
+    // case 'pre':
+    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
+    //   const buildNum4 = (prevVer.prerelease[1] as undefined | number) ?? 1
+    //   const preRelease4 = buildNumPrefix + String(buildNum4 + 1)
+    //   return Semver.parse(
+    //     `${prevVer.major}.${prevVer.minor}.${prevVer.patch}-${preRelease4}`
+    //   )!
+  }
 }
