@@ -1,4 +1,7 @@
 import * as Semver from 'semver'
+import createGit from 'simple-git/promise'
+import { gitGetTags } from './git'
+import { parse } from 'path'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }
@@ -166,4 +169,63 @@ export function bumpVer(
  */
 export function assertAllCasesHandled(x: never): void {
   throw new Error(`A case was not handled for value: ${x}`)
+}
+
+type CommitReleases = {
+  stable: null | { type: 'stable'; version: string }
+  preview: null | { type: 'preview'; version: string }
+}
+
+const emptyCommitReleases = {
+  stable: null,
+  preview: null,
+}
+
+/**
+ * Get the releases at the given commit.
+ */
+export async function getReleasesAtCommit(
+  sha: string
+): Promise<CommitReleases> {
+  const git = createGit()
+  const tags = await gitGetTags(git, { ref: sha })
+  if (isEmpty(tags)) return emptyCommitReleases
+  const parsedTags = groupByProp(tags.map(parseTag), 'type')
+  const stableTags = parsedTags.stable_release ?? []
+  const previewtags = parsedTags.pre_release ?? []
+
+  const invariantViolations = []
+  if (stableTags.length > 1) {
+    invariantViolations.push(
+      `Multiple stable releases found but there should only be 0 or 1: ${stableTags}`
+    )
+  }
+  if (previewtags.length > 1) {
+    invariantViolations.push(
+      `Multiple preview releases found but there should only be 0 or 1: ${stableTags}`
+    )
+  }
+  if (invariantViolations.length > 0) {
+    throw new Error(
+      `While getting the pre-existing releases at commit ${sha} the following invariant violations were found:\n\n${invariantViolations
+        .map(x => `    - ${x}`)
+        .join('\n')}`
+    )
+  }
+
+  return {
+    stable: stableTags[0]
+      ? { type: 'stable', version: stableTags[0].value.version }
+      : null,
+    preview: previewtags[0]
+      ? { type: 'preview', version: previewtags[0].value.version }
+      : null,
+  }
+}
+
+/**
+ * Determin if the given array or object is empty.
+ */
+export function isEmpty(x: {} | unknown[]): boolean {
+  return Array.isArray(x) ? x.length === 0 : Object.keys(x).length > 0
 }

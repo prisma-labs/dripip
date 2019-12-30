@@ -26,6 +26,10 @@ export function outputRaw(message: string): void {
   console.log(message)
 }
 
+type OutputOptions = {
+  json: boolean
+}
+
 /**
  * This module encapsulates the various structures that libre may output.
  * Precise data details stay local throughout the codebase but core concerns
@@ -55,13 +59,11 @@ export function outputOk(type: string, data: Record<string, any>): void {
 export function outputException(
   identifier: string,
   summary: string,
-  context: Record<string, any>
+  opts: OutputOptions & { context: Record<string, any> }
 ): void {
-  outputJson(createException(identifier, { summary, context }))
-}
-
-type OutputOptions = {
-  json: boolean
+  output(createException(identifier, { summary, context: opts.context }), {
+    json: opts.json,
+  })
 }
 
 export function output(message: Message, opts: OutputOptions): void {

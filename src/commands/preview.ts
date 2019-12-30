@@ -37,7 +37,6 @@ export class Preview extends Command {
       default: false,
       description: 'output what the next version would be if released now',
     }),
-    // TODO currently all output is JSON, regardless of this flag
     json: flags.boolean({
       default: false,
       description: 'format output as JSON',
@@ -313,10 +312,13 @@ function createOutputters(opts: OutputterOptions) {
     }`
     if (opts.json) {
       Output.outputException('invalid_pre_release_case', baseMessage, {
-        sha,
-        preReleaseTag: tags.pre_release?.[0]?.value.version,
-        stableReleaseTag: tags.stable_release?.[0]?.value.version,
-        otherTags: tags.unknown?.map(t => t.value) ?? [],
+        json: true,
+        context: {
+          sha,
+          preReleaseTag: tags.pre_release?.[0]?.value.version,
+          stableReleaseTag: tags.stable_release?.[0]?.value.version,
+          otherTags: tags.unknown?.map(t => t.value) ?? [],
+        },
       })
     } else {
       let message = ''

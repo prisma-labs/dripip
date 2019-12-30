@@ -73,7 +73,8 @@ export async function gitResetToInitialCommit(git: Simple): Promise<void> {
 }
 
 /**
- * Get the SHA at the given commit or HEAD by default.
+ * Get the SHA at the given commit or HEAD by default. By default returns the
+ * full SHA.
  */
 export async function gitGetSha(
   git: Simple,
