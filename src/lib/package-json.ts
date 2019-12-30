@@ -19,8 +19,6 @@ type PackageJson = {
   version: string
 }
 
-function validatePackageJson() {}
-
 /**
  * Update the package.json located at cwd. The given updater function will
  * receive the parsed package contents and whatever is returned will be written

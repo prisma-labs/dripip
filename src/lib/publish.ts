@@ -40,7 +40,7 @@ export async function publish(release: Release, givenOpts?: Options) {
   // Update package.json
 
   const packageJsonPath = fs.path('package.json')
-  const packageJson = fs.readAsync(packageJsonPath, 'json')
+  const packageJson = await fs.readAsync(packageJsonPath, 'json')
 
   if (!packageJson) {
     throw new Error(
