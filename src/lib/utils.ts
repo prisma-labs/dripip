@@ -1,3 +1,4 @@
+import * as fs from 'fs-jetpack'
 import * as Semver from 'semver'
 
 export type ParsedTag =

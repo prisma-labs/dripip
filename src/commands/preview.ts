@@ -13,6 +13,7 @@ import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as SemVer from 'semver'
 import * as Output from '../lib/output'
+import * as Publish from '../lib/publish'
 import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
 
 type ReleaseTypeInfo = {
@@ -47,6 +48,8 @@ export class Preview extends Command {
     const { flags } = this.parse(Preview)
     const send = createOutputters({ json: flags.json })
     const git = createGit()
+    // TODO validate for missing or faulty package.json
+    // TODO validate for dirty git status
     // TODO validate for found releases that fall outside the subset we support.
     // For example #.#.#-foobar.1 is something we would not know what to do
     // with. A good default is probably to hard-error when these are
@@ -93,7 +96,13 @@ export class Preview extends Command {
         return send.dryRun(nextRelease)
       }
 
-      return process.stdout.write(`todo: release ${nextRelease.nextVersion}`)
+      await Publish.publish({
+        distTag: 'next',
+        version: nextRelease.nextVersion,
+        isPreview: true,
+      })
+      await git.raw(['tag', '-f', 'next'])
+      await git.pushTags()
     }
 
     const prCheck = await Git.checkBranchPR(git)
