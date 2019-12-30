@@ -102,7 +102,8 @@ export class Preview extends Command {
         isPreview: true,
       })
       await git.raw(['tag', '-f', 'next'])
-      await git.pushTags()
+      // force push to make the remote move the next tag
+      await git.raw(['push', '-f', '--tags'])
       return
     }
 
