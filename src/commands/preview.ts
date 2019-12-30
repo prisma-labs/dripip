@@ -103,6 +103,7 @@ export class Preview extends Command {
       })
       await git.raw(['tag', '-f', 'next'])
       await git.pushTags()
+      return
     }
 
     const prCheck = await Git.checkBranchPR(git)
