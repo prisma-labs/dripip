@@ -6,7 +6,6 @@ import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
-import { Refspec } from 'nodegit'
 
 export type Simple = ReturnType<typeof createGit>
 
@@ -160,6 +159,74 @@ export async function checkBranchPR(
     }
   }
 
+  const githubRepo = await parseGithubRepoInfoFromGitConfig()
+
+  // TODO Refactor this to have instance passed as arg.
+  const octoOps = {} as Octokit.Options
+  if (process.env.GITHUB_TOKEN) octoOps.auth = process.env.GITHUB_TOKEN
+  const octokit = new Octokit(octoOps)
+  // TODO we could fetch all pull-requests and check against `state` later. One
+  // benefit would be better feedback for users, like: "The branch you are on
+  // had a pull a request but it has been closed [...]" which is more precise
+  // than e.g. "No open pull-requests found [...]". We could go further yet,
+  // checking if the PR was closed via merge or not, "Did you forget to switch
+  // to trunk branch?", etc.
+  //
+  // To attain this level of feedback users would need to accept potentially
+  // higher levels of latentcy to pagination through all pull-requests.
+  // TODO pagination https://octokit.github.io/rest.js/#pagination
+  const pullsRes = await octokit.pulls.list({
+    owner: githubRepo.owner,
+    repo: githubRepo.name,
+    state: 'open',
+  })
+
+  const branchSummary = await git.branch({})
+  if (pullsRes.data.length > 0) {
+    for (const pull of pullsRes.data) {
+      if (pull.head.ref === branchSummary.current) {
+        return { isPR: true, inferredBy: 'git_branch_github_api' }
+      }
+    }
+  }
+
+  return { isPR: false, inferredBy: 'branch_no_open_pr' }
+}
+
+export type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged'
+
+/**
+ * Check how the local branch is not in sync or is with the remote.
+ * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
+ */
+export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
+  await git.remote(['update'])
+
+  const [local, remote, base] = (
+    await Promise.all([
+      git.raw(['rev-parse', '@']),
+      git.raw(['rev-parse', '@{u}']),
+      git.raw(['merge-base', '@', '@{u}']),
+    ])
+  ).map(sha => sha.trim())
+
+  return local === remote
+    ? 'synced'
+    : local === base
+    ? 'needs_push'
+    : remote === base
+    ? 'needs_pull'
+    : 'diverged'
+}
+
+/**
+ * Extract the github repo name and owner from the git config. If anything goes
+ * wrong during extraction a specific error about it will be thrown.
+ */
+export async function parseGithubRepoInfoFromGitConfig(): Promise<{
+  name: string
+  owner: string
+}> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 
@@ -197,34 +264,10 @@ export async function checkBranchPR(
     )
   }
 
-  // TODO Refactor this to have instance passed as arg.
-  const octokit = new Octokit()
-  // TODO we could fetch all pull-requests and check against `state` later. One
-  // benefit would be better feedback for users, like: "The branch you are on
-  // had a pull a request but it has been closed [...]" which is more precise
-  // than e.g. "No open pull-requests found [...]". We could go further yet,
-  // checking if the PR was closed via merge or not, "Did you forget to switch
-  // to trunk branch?", etc.
-  //
-  // To attain this level of feedback users would need to accept potentially
-  // higher levels of latentcy to pagination through all pull-requests.
-  // TODO pagination https://octokit.github.io/rest.js/#pagination
-  const pullsRes = await octokit.pulls.list({
+  return {
+    name: githubRepoURL.name,
     owner: githubRepoURL.owner,
-    repo: githubRepoURL.name,
-    state: 'open',
-  })
-
-  const branchSummary = await git.branch({})
-  if (pullsRes.data.length > 0) {
-    for (const pull of pullsRes.data) {
-      if (pull.head.ref === branchSummary.current) {
-        return { isPR: true, inferredBy: 'git_branch_github_api' }
-      }
-    }
   }
-
-  return { isPR: false, inferredBy: 'branch_no_open_pr' }
 }
 
 /**

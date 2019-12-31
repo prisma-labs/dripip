@@ -1,8 +1,7 @@
 import Command, { flags } from '@oclif/command'
-import { getReleasesAtCommit } from '../lib/utils'
 import * as Output from '../lib/output'
-import createGit from 'simple-git/promise'
-import { gitGetSha } from '../lib/git'
+import * as Context from '../lib/context'
+// import createGit from 'simple-git/promise'
 
 export class Stable extends Command {
   static flags = {
@@ -12,17 +11,18 @@ export class Stable extends Command {
     }),
   }
   async run() {
-    console.log('todo')
     const { flags } = this.parse(Stable)
     const send = createOutputters({ json: flags.json })
-    const git = createGit()
-    const releaseSHA = await gitGetSha(git, { ref: 'head' })
-    const existingReleases = await getReleasesAtCommit(releaseSHA)
-    if (existingReleases.stable) {
-      return send.commitAlreadyHasStableRelease(
-        releaseSHA,
-        existingReleases.stable.version
-      )
+    const context = await Context.scan()
+    // const git = createGit()
+    if (context.currentBranch.isDetatched) {
+      // ...
+    }
+    if (context.currentBranch.syncStatus !== 'synced') {
+      // ...
+    }
+    if (context.currentCommit.releases.stable) {
+      return send.commitAlreadyHasStableRelease(context)
     }
 
     // Calculate new version:
@@ -45,15 +45,15 @@ type OutputterOptions = {
 }
 
 function createOutputters(opts: OutputterOptions) {
-  function commitAlreadyHasStableRelease(sha: string, version: string) {
+  function commitAlreadyHasStableRelease(ctx: Context.Context) {
     Output.outputException(
       'commit_already_has_stable_release',
       'You are attempting a stable release on a commit that already has a stable release.',
       {
         json: opts.json,
         context: {
-          version,
-          sha,
+          version: ctx.currentCommit.releases.stable!.version,
+          sha: ctx.currentCommit.sha,
         },
       }
     )
