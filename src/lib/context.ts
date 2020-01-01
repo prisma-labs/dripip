@@ -1,9 +1,26 @@
 import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import * as Git from './git'
-import { getReleasesAtCommit } from './utils'
+import {
+  getReleasesAtCommit,
+  isStable,
+  isStablePreview,
+  findLatestStable,
+  findLatestPreview,
+} from './utils'
+import * as SemVer from 'semver'
 
 export type Context = {
+  commitsSinceLastStable: Git.LogEntry[]
+  commitsSinceLastPreview: Git.LogEntry[]
+  // nextReleasesNowWouldBe: {
+  //   stable: null | SemVer.SemVer
+  //   preview: null | SemVer.SemVer
+  // }
+  latestReleases: {
+    stable: null | StableRelease
+    preview: null | PreviewRelease
+  }
   githubRepo: {
     owner: string
     name: string
@@ -28,6 +45,11 @@ export type Context = {
   }
 }
 
+type Commit = {
+  sha: string
+  message: string
+}
+
 type PullRequest = {
   title: string
   number: number
@@ -35,12 +57,14 @@ type PullRequest = {
 
 type StableRelease = {
   type: 'stable'
-  version: string
+  version: SemVer.SemVer
+  sha: string
 }
 
 type PreviewRelease = {
   type: 'preview'
-  version: string
+  version: SemVer.SemVer
+  sha: string
 }
 
 export async function scan(): Promise<Context> {
@@ -88,8 +112,40 @@ export async function scan(): Promise<Context> {
   // get commit info
   const currentCommitSHA = await Git.gitGetSha(git, { ref: 'head' })
   const commitReleases = await getReleasesAtCommit(currentCommitSHA)
+  // get the latest releases
+  const maybeLatestStableVer = await findLatestStable(git)
+  const maybeLatestPreVerSinceStable = await findLatestPreview(
+    git,
+    maybeLatestStableVer
+  )
+  // get commits since the latest releases
+  const [commitsSinceLastStable, commitsSinceLastPreview] = await Promise.all([
+    Git.log(git, { since: maybeLatestStableVer }),
+    Git.log(git, { since: maybeLatestPreVerSinceStable }),
+  ])
+
   // return the final result
   return {
+    commitsSinceLastPreview,
+    commitsSinceLastStable,
+    latestReleases: {
+      stable:
+        maybeLatestStableVer === null
+          ? null
+          : {
+              type: 'stable',
+              sha: 'todo',
+              version: SemVer.parse(maybeLatestStableVer)!,
+            },
+      preview:
+        maybeLatestPreVerSinceStable === null
+          ? null
+          : {
+              type: 'preview',
+              sha: 'todo',
+              version: SemVer.parse(maybeLatestPreVerSinceStable)!,
+            },
+    },
     githubRepo: {
       owner: githubRepoAddress.owner,
       name: githubRepoAddress.name,

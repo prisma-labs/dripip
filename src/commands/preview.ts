@@ -8,6 +8,10 @@ import {
   GroupBy,
   bumpVer,
   SemverStableVerParts,
+  isStablePreview,
+  isStable,
+  findLatestStable,
+  findLatestPreview,
 } from '../lib/utils'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
@@ -150,22 +154,11 @@ type ReleaseBrief = {
 async function calcNextStablePreview(
   git: Git.Simple
 ): Promise<null | ReleaseBrief> {
-  const maybeLatestStableVer = await Git.findTag(git, {
-    matcher: candidate => {
-      const maybeSemVer = SemVer.parse(candidate)
-      if (maybeSemVer === null) return false
-      return isStable(maybeSemVer)
-    },
-  })
-
-  const maybeLatestPreVerSinceStable = await Git.findTag(git, {
-    since: maybeLatestStableVer ?? undefined,
-    matcher: candidate => {
-      const maybeSemVer = SemVer.parse(candidate)
-      if (maybeSemVer === null) return false
-      return isStablePreview(maybeSemVer)
-    },
-  })
+  const maybeLatestStableVer = await findLatestStable(git)
+  const maybeLatestPreVerSinceStable = await findLatestPreview(
+    git,
+    maybeLatestStableVer
+  )
 
   // We need all the commits since the last stable release to calculate the
   // pre-release. The pre-release is a bump against the last stable plus a
@@ -235,23 +228,6 @@ async function calcNextStablePreview(
     isFirstVerStable: maybeLatestStableVer === null,
     isFirstVerPreRelease: maybeLatestPreVerSinceStable === null,
   }
-}
-
-/**
- * Is the given release a stable one?
- */
-function isStable(release: SemVer.SemVer): boolean {
-  return release.prerelease.length === 0
-}
-
-/**
- * Is the given release a stable preview one?
- */
-function isStablePreview(release: SemVer.SemVer): boolean {
-  return (
-    release.prerelease[0] === 'next' &&
-    String(release.prerelease[1]).match(/\d+/) !== null
-  )
 }
 
 type OutputterOptions = {

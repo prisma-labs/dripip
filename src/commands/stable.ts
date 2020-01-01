@@ -1,10 +1,17 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
+import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
+import { bumpVer } from '../lib/utils'
+import * as SemVer from 'semver'
 // import createGit from 'simple-git/promise'
 
 export class Stable extends Command {
   static flags = {
+    'dry-run': flags.boolean({
+      default: false,
+      description: 'output what the next version would be if released now',
+    }),
     json: flags.boolean({
       default: false,
       description: 'format output as JSON',
@@ -12,6 +19,7 @@ export class Stable extends Command {
   }
   async run() {
     const { flags } = this.parse(Stable)
+    const show = createShowers({ json: flags.json })
     const check = createValidators({ json: flags.json })
     const ctx = await Context.scan()
 
@@ -19,10 +27,22 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    // Calculate new version:
-    // Find the last stable version (git tag on the current branch). If none use 0.0.1.
-    // Calculate the semver bump type. Do this by analyizing the commits on the branch between HEAD and the last stable git tag. The highest change type found is used.
-    // Bump last stable version by bump type, thus producing the new version.
+    const bumpType = calcBumpTypeFromConventionalCommits(
+      ctx.commitsSinceLastStable.map(c => c.message)
+    )
+
+    if (bumpType === null) {
+      return show.noReleaseNeeded(ctx)
+    }
+
+    const newVer = bumpVer(
+      bumpType,
+      ctx.latestReleases.stable?.version ?? SemVer.parse('0.0.0')!
+    )
+
+    if (flags['dry-run']) {
+      return show.dryRun(ctx, newVer.version)
+    }
 
     // Run publishing process:
     // Change package.json version field to be new version.
@@ -36,6 +56,33 @@ export class Stable extends Command {
 
 type OutputterOptions = {
   json: boolean
+}
+
+function createShowers(opts: OutputterOptions) {
+  function noReleaseNeeded(ctx: Context.Context): void {
+    Output.outputException(
+      'only_chore_like_changes',
+      'The release you attempting only contains chore commits which means no release is needed.',
+      {
+        json: opts.json,
+        context: {
+          commits: ctx.commitsSinceLastStable.map(c => c.message),
+        },
+      }
+    )
+  }
+
+  function dryRun(ctx: Context.Context, newVer: string): void {
+    Output.outputOk('dry_run', {
+      newVer,
+      commits: ctx.commitsSinceLastStable,
+    })
+  }
+
+  return {
+    noReleaseNeeded,
+    dryRun,
+  }
 }
 
 function createValidators(opts: OutputterOptions) {

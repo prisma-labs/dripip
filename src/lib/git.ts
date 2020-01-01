@@ -337,7 +337,7 @@ export async function findTag(
   return lastTag
 }
 
-type LogEntry = {
+export type LogEntry = {
   sha: string
   tags: string[]
   body: string
@@ -350,7 +350,7 @@ type LogEntry = {
  */
 export async function log(
   git: Simple,
-  ops?: { since?: string }
+  ops?: { since?: null | string }
 ): Promise<LogEntry[]> {
   // TODO tags or bodies or subjects with double quotes in them or commas will
   // break parsing... consider using native git.log func?
