@@ -3,13 +3,16 @@ import Octokit from '@octokit/rest'
 import * as Git from './git'
 import {
   getReleasesAtCommit,
-  isStable,
-  isStablePreview,
   findLatestStable,
   findLatestPreview,
 } from './utils'
 import * as SemVer from 'semver'
 
+export type scanOoptions = {
+  overrides?: {
+    trunk?: null | string
+  }
+}
 export type Context = {
   commitsSinceLastStable: Git.LogEntry[]
   commitsSinceLastPreview: Git.LogEntry[]
@@ -67,21 +70,28 @@ type PreviewRelease = {
   sha: string
 }
 
-export async function scan(): Promise<Context> {
+export async function scan(opts?: scanOoptions): Promise<Context> {
   // Build up instances
   const octoOps = {} as Octokit.Options
   if (process.env.GITHUB_TOKEN) octoOps.auth = process.env.GITHUB_TOKEN
   const octokit = new Octokit(octoOps)
   const git = createGit()
-  // Get the trunk branch
+  // Generally required information
   const githubRepoAddress = await Git.parseGithubRepoInfoFromGitConfig()
-  const githubRepo = await octokit.repos.get({
-    owner: githubRepoAddress.owner,
-    repo: githubRepoAddress.name,
-  })
-  const trunkBranch = githubRepo.data.default_branch
-  const branchesSummary = await git.branch({})
+  // Get the trunk branch either from a given override or by default from the
+  // GitHub repo settings.
+  let trunkBranch: string
+  if (opts?.overrides?.trunk) {
+    trunkBranch = opts.overrides.trunk
+  } else {
+    const githubRepo = await octokit.repos.get({
+      owner: githubRepoAddress.owner,
+      repo: githubRepoAddress.name,
+    })
+    trunkBranch = githubRepo.data.default_branch
+  }
   // Get the PRs if any
+  const branchesSummary = await git.branch({})
   const prs = (
     await octokit.pulls.list({
       owner: githubRepoAddress.owner,

@@ -8,6 +8,11 @@ import * as SemVer from 'semver'
 
 export class Stable extends Command {
   static flags = {
+    'trunk-is': flags.string({
+      default: '',
+      description:
+        'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
+    }),
     'dry-run': flags.boolean({
       default: false,
       description: 'output what the next version would be if released now',
@@ -21,7 +26,11 @@ export class Stable extends Command {
     const { flags } = this.parse(Stable)
     const show = createShowers({ json: flags.json })
     const check = createValidators({ json: flags.json })
-    const ctx = await Context.scan()
+    const ctx = await Context.scan({
+      overrides: {
+        trunk: flags['trunk-is'] || null,
+      },
+    })
 
     if (!check.isTrunk(ctx)) return
     if (!check.branchSynced(ctx)) return

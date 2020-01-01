@@ -2,6 +2,7 @@ import * as path from 'path'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
 import { format } from 'util'
+import Octokit from '@octokit/rest'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
@@ -18,14 +19,16 @@ export function resetEnvironmentBeforeEachTest() {
  * Helper for creating a specialized workspace
  */
 export function createWorkspace(command: 'preview' | 'stable') {
-  const ws = addLibreToWorkspace(
-    WS.createWorkspace({
-      name: command,
-      repo: 'git@github.com:prisma-labs/system-tests-repo.git',
-      cache: {
-        version: '7',
-      },
-    })
+  const ws = addOctokitToworkspace(
+    addLibreToWorkspace(
+      WS.createWorkspace({
+        name: command,
+        repo: 'git@github.com:prisma-labs/system-tests-repo.git',
+        cache: {
+          version: '7',
+        },
+      })
+    )
   )
 
   beforeEach(async () => {
@@ -39,6 +42,18 @@ export function createWorkspace(command: 'preview' | 'stable') {
     await ws.git.commit('chore: add package.json')
   })
 
+  return ws
+}
+
+export function addOctokitToworkspace<T>(ws: T): T & { octokit: Octokit } {
+  beforeAll(() => {
+    // @ts-ignore
+    ws.octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    })
+  })
+
+  // @ts-ignore
   return ws
 }
 

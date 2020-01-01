@@ -1,9 +1,7 @@
 import {
   createWorkspace,
   resetEnvironmentBeforeEachTest,
-  RunLibreResult,
 } from '../__lib/helpers'
-import Octokit = require('@octokit/rest')
 import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
@@ -44,11 +42,8 @@ describe('pr preview releases', () => {
   })
 
   it('treats releases as a pr preview if on branch with open pr', async () => {
-    const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
-    })
     try {
-      await octokit.pulls.create({
+      await ws.octokit.pulls.create({
         head: branchName,
         base: 'master',
         owner: 'prisma-labs',
@@ -130,6 +125,8 @@ describe('stable preview releases', () => {
           "bumpType": "patch",
           "commitsInRelease": Array [
             "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
             "Initial commit",
           ],
           "currentPreviewNumber": null,
@@ -157,6 +154,8 @@ describe('stable preview releases', () => {
           "bumpType": "minor",
           "commitsInRelease": Array [
             "feat: 1",
+            "chore: add package.json",
+            "chore: who knows",
             "Initial commit",
           ],
           "currentPreviewNumber": null,
@@ -186,6 +185,8 @@ describe('stable preview releases', () => {
           "commitsInRelease": Array [
             "feat: 1",
             "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
             "Initial commit",
           ],
           "currentPreviewNumber": null,
@@ -222,6 +223,8 @@ describe('stable preview releases', () => {
       blah blah blah",
             "feat: 1",
             "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
             "Initial commit",
           ],
           "currentPreviewNumber": null,

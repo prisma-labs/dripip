@@ -372,7 +372,7 @@ export async function log(
       .join(partSeparator)}${logSeparator}`,
   ]
   if (ops?.since) args.push(`${ops.since}..head`)
-  const rawLogString = await git.raw(args)
+  const rawLogString = (await git.raw(args)) ?? ''
   const logStrings = rawLogString.trim().split(logSeparator)
   logStrings.pop() // trailing separator
   return logStrings
