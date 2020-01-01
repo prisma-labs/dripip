@@ -193,7 +193,12 @@ export async function checkBranchPR(
   return { isPR: false, inferredBy: 'branch_no_open_pr' }
 }
 
-export type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged'
+export type SyncStatus =
+  | 'needs_pull'
+  | 'needs_push'
+  | 'synced'
+  | 'diverged'
+  | 'remote_needs_branch'
 
 /**
  * Check how the local branch is not in sync or is with the remote.
@@ -201,21 +206,29 @@ export type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged'
  */
 export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
   await git.remote(['update'])
+  const remoteHeads = await git.raw(['ls-remote', '--heads'])
+  const branchSumamry = await git.branch({})
+  const branchOnRemoteRE = new RegExp(
+    `.*refs/heads/${branchSumamry.current}$`,
+    'm'
+  )
 
-  const [local, remote, base] = (
-    await Promise.all([
-      git.raw(['rev-parse', '@']),
-      git.raw(['rev-parse', '@{u}']),
-      git.raw(['merge-base', '@', '@{u}']),
-    ])
-  ).map(sha => sha.trim())
+  if (remoteHeads.match(branchOnRemoteRE) === null) {
+    return 'remote_needs_branch'
+  }
+
+  const [local, remote, base] = await Promise.all([
+    git.raw(['rev-parse', '@']).then(sha => sha.trim()),
+    git.raw(['rev-parse', '@{u}']).then(sha => sha.trim()),
+    git.raw(['merge-base', '@', '@{u}']).then(sha => sha.trim()),
+  ])
 
   return local === remote
     ? 'synced'
     : local === base
-    ? 'needs_push'
-    : remote === base
     ? 'needs_pull'
+    : remote === base
+    ? 'needs_push'
     : 'diverged'
 }
 

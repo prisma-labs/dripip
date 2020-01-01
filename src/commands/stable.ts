@@ -12,18 +12,12 @@ export class Stable extends Command {
   }
   async run() {
     const { flags } = this.parse(Stable)
-    const send = createOutputters({ json: flags.json })
-    const context = await Context.scan()
-    // const git = createGit()
-    if (context.currentBranch.isDetatched) {
-      // ...
-    }
-    if (context.currentBranch.syncStatus !== 'synced') {
-      // ...
-    }
-    if (context.currentCommit.releases.stable) {
-      return send.commitAlreadyHasStableRelease(context)
-    }
+    const check = createValidators({ json: flags.json })
+    const ctx = await Context.scan()
+
+    if (!check.isTrunk(ctx)) return
+    if (!check.branchSynced(ctx)) return
+    if (!check.notAlreadyStableReleased(ctx)) return
 
     // Calculate new version:
     // Find the last stable version (git tag on the current branch). If none use 0.0.1.
@@ -44,22 +38,63 @@ type OutputterOptions = {
   json: boolean
 }
 
-function createOutputters(opts: OutputterOptions) {
-  function commitAlreadyHasStableRelease(ctx: Context.Context) {
-    Output.outputException(
-      'commit_already_has_stable_release',
-      'You are attempting a stable release on a commit that already has a stable release.',
-      {
-        json: opts.json,
-        context: {
-          version: ctx.currentCommit.releases.stable!.version,
-          sha: ctx.currentCommit.sha,
-        },
-      }
-    )
+function createValidators(opts: OutputterOptions) {
+  function branchSynced(ctx: Context.Context): boolean {
+    if (ctx.currentBranch.syncStatus !== 'synced') {
+      Output.outputException(
+        'branch_not_synced_with_remote',
+        'You are attempting a stable release but your trunk (aka. master/base branch) is not synced with the remote.',
+        {
+          json: opts.json,
+          context: {
+            syncStatus: ctx.currentBranch.syncStatus,
+            sha: ctx.currentCommit.sha,
+          },
+        }
+      )
+      return false
+    }
+    return true
+  }
+  function isTrunk(ctx: Context.Context): boolean {
+    if (!ctx.currentBranch.isTrunk) {
+      Output.outputException(
+        'must_be_on_trunk',
+        'You are attempting a stable release but you are not on trunk (aka. master/base branch)',
+        {
+          json: opts.json,
+          context: {
+            branch: ctx.currentBranch.name,
+            sha: ctx.currentCommit.sha,
+          },
+        }
+      )
+      return false
+    }
+    return true
+  }
+
+  function notAlreadyStableReleased(ctx: Context.Context): boolean {
+    if (ctx.currentCommit.releases.stable) {
+      Output.outputException(
+        'commit_already_has_stable_release',
+        'You are attempting a stable release on a commit that already has a stable release.',
+        {
+          json: opts.json,
+          context: {
+            version: ctx.currentCommit.releases.stable!.version,
+            sha: ctx.currentCommit.sha,
+          },
+        }
+      )
+      return false
+    }
+    return true
   }
 
   return {
-    commitAlreadyHasStableRelease,
+    branchSynced,
+    isTrunk,
+    notAlreadyStableReleased,
   }
 }

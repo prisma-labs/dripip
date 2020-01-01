@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
+import { format } from 'util'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
@@ -16,7 +17,7 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createWorkspace(command: 'preview') {
+export function createWorkspace(command: 'preview' | 'stable') {
   const ws = addLibreToWorkspace(
     WS.createWorkspace({
       name: command,
@@ -34,6 +35,7 @@ export function createWorkspace(command: 'preview') {
         license: 'MIT',
       }),
     ])
+    await ws.git.add('package.json')
     await ws.git.commit('chore: add package.json')
   })
 
@@ -112,7 +114,9 @@ const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
         return JSON.parse(result.stdout!) as Record<string, any>
       } catch (e) {
         throw new Error(
-          `Something went wrong while trying to JSON parse the libre cli stdout:\n\n${e.stack}\n\nThe underlying cli result was:\n\n${result}`
+          `Something went wrong while trying to JSON parse the libre cli stdout:\n\n${
+            e.stack
+          }\n\nThe underlying cli result was:\n\n${format(result)}`
         )
       }
     })
