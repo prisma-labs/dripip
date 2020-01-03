@@ -72,8 +72,9 @@ export class Stable extends Command {
     console.log('updated dist-tag "next"')
 
     // force update so the tag moves to a new commit
-    await git.raw(['tag', '-f', 'latest', 'next'])
-    // force push to make the remote move the next tag
+    await git.raw(['tag', '-f', 'latest'])
+    await git.raw(['tag', '-f', 'next'])
+    // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
     await git.raw(['push', 'origin', ':refs/tags/latest', ':refs/tags/next'])
     await git.raw(['push', '--tags'])
     console.log('updated git-tags "latest" "next"')
