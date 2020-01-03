@@ -63,9 +63,12 @@ export class Stable extends Command {
     })
 
     // Bring next pointer up to date too
-    proc.run(`npm dist-tag ${ctx.package.name}@${newStableVer.version} next`, {
-      require: true,
-    })
+    proc.run(
+      `npm dist-tag add ${ctx.package.name}@${newStableVer.version} next`,
+      {
+        require: true,
+      }
+    )
 
     // force update so the tag moves to a new commit
     await git.raw(['tag', '-f', 'latest'])
