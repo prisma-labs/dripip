@@ -6,7 +6,6 @@ import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
-import { Refspec } from 'nodegit'
 
 export type Simple = ReturnType<typeof createGit>
 
@@ -73,7 +72,8 @@ export async function gitResetToInitialCommit(git: Simple): Promise<void> {
 }
 
 /**
- * Get the SHA at the given commit or HEAD by default.
+ * Get the SHA at the given commit or HEAD by default. By default returns the
+ * full SHA.
  */
 export async function gitGetSha(
   git: Simple,
@@ -159,6 +159,87 @@ export async function checkBranchPR(
     }
   }
 
+  const githubRepo = await parseGithubRepoInfoFromGitConfig()
+
+  // TODO Refactor this to have instance passed as arg.
+  const octoOps = {} as Octokit.Options
+  if (process.env.GITHUB_TOKEN) octoOps.auth = process.env.GITHUB_TOKEN
+  const octokit = new Octokit(octoOps)
+  // TODO we could fetch all pull-requests and check against `state` later. One
+  // benefit would be better feedback for users, like: "The branch you are on
+  // had a pull a request but it has been closed [...]" which is more precise
+  // than e.g. "No open pull-requests found [...]". We could go further yet,
+  // checking if the PR was closed via merge or not, "Did you forget to switch
+  // to trunk branch?", etc.
+  //
+  // To attain this level of feedback users would need to accept potentially
+  // higher levels of latentcy to pagination through all pull-requests.
+  // TODO pagination https://octokit.github.io/rest.js/#pagination
+  const pullsRes = await octokit.pulls.list({
+    owner: githubRepo.owner,
+    repo: githubRepo.name,
+    state: 'open',
+  })
+
+  const branchSummary = await git.branch({})
+  if (pullsRes.data.length > 0) {
+    for (const pull of pullsRes.data) {
+      if (pull.head.ref === branchSummary.current) {
+        return { isPR: true, inferredBy: 'git_branch_github_api' }
+      }
+    }
+  }
+
+  return { isPR: false, inferredBy: 'branch_no_open_pr' }
+}
+
+export type SyncStatus =
+  | 'needs_pull'
+  | 'needs_push'
+  | 'synced'
+  | 'diverged'
+  | 'remote_needs_branch'
+
+/**
+ * Check how the local branch is not in sync or is with the remote.
+ * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
+ */
+export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
+  await git.remote(['update'])
+  const remoteHeads = await git.raw(['ls-remote', '--heads'])
+  const branchSumamry = await git.branch({})
+  const branchOnRemoteRE = new RegExp(
+    `.*refs/heads/${branchSumamry.current}$`,
+    'm'
+  )
+
+  if (remoteHeads.match(branchOnRemoteRE) === null) {
+    return 'remote_needs_branch'
+  }
+
+  const [local, remote, base] = await Promise.all([
+    git.raw(['rev-parse', '@']).then(sha => sha.trim()),
+    git.raw(['rev-parse', '@{u}']).then(sha => sha.trim()),
+    git.raw(['merge-base', '@', '@{u}']).then(sha => sha.trim()),
+  ])
+
+  return local === remote
+    ? 'synced'
+    : local === base
+    ? 'needs_pull'
+    : remote === base
+    ? 'needs_push'
+    : 'diverged'
+}
+
+/**
+ * Extract the github repo name and owner from the git config. If anything goes
+ * wrong during extraction a specific error about it will be thrown.
+ */
+export async function parseGithubRepoInfoFromGitConfig(): Promise<{
+  name: string
+  owner: string
+}> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 
@@ -196,34 +277,10 @@ export async function checkBranchPR(
     )
   }
 
-  // TODO Refactor this to have instance passed as arg.
-  const octokit = new Octokit()
-  // TODO we could fetch all pull-requests and check against `state` later. One
-  // benefit would be better feedback for users, like: "The branch you are on
-  // had a pull a request but it has been closed [...]" which is more precise
-  // than e.g. "No open pull-requests found [...]". We could go further yet,
-  // checking if the PR was closed via merge or not, "Did you forget to switch
-  // to trunk branch?", etc.
-  //
-  // To attain this level of feedback users would need to accept potentially
-  // higher levels of latentcy to pagination through all pull-requests.
-  // TODO pagination https://octokit.github.io/rest.js/#pagination
-  const pullsRes = await octokit.pulls.list({
+  return {
+    name: githubRepoURL.name,
     owner: githubRepoURL.owner,
-    repo: githubRepoURL.name,
-    state: 'open',
-  })
-
-  const branchSummary = await git.branch({})
-  if (pullsRes.data.length > 0) {
-    for (const pull of pullsRes.data) {
-      if (pull.head.ref === branchSummary.current) {
-        return { isPR: true, inferredBy: 'git_branch_github_api' }
-      }
-    }
   }
-
-  return { isPR: false, inferredBy: 'branch_no_open_pr' }
 }
 
 /**
@@ -280,7 +337,7 @@ export async function findTag(
   return lastTag
 }
 
-type LogEntry = {
+export type LogEntry = {
   sha: string
   tags: string[]
   body: string
@@ -293,7 +350,7 @@ type LogEntry = {
  */
 export async function log(
   git: Simple,
-  ops?: { since?: string }
+  ops?: { since?: null | string }
 ): Promise<LogEntry[]> {
   // TODO tags or bodies or subjects with double quotes in them or commas will
   // break parsing... consider using native git.log func?
@@ -315,7 +372,7 @@ export async function log(
       .join(partSeparator)}${logSeparator}`,
   ]
   if (ops?.since) args.push(`${ops.since}..head`)
-  const rawLogString = await git.raw(args)
+  const rawLogString = (await git.raw(args)) ?? ''
   const logStrings = rawLogString.trim().split(logSeparator)
   logStrings.pop() // trailing separator
   return logStrings

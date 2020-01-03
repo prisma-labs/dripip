@@ -8,6 +8,10 @@ import {
   GroupBy,
   bumpVer,
   SemverStableVerParts,
+  isStablePreview,
+  isStable,
+  findLatestStable,
+  findLatestPreview,
 } from '../lib/utils'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
@@ -37,7 +41,6 @@ export class Preview extends Command {
       default: false,
       description: 'output what the next version would be if released now',
     }),
-    // TODO currently all output is JSON, regardless of this flag
     json: flags.boolean({
       default: false,
       description: 'format output as JSON',
@@ -101,9 +104,11 @@ export class Preview extends Command {
         version: nextRelease.nextVersion,
         isPreview: true,
       })
+
+      // force update so the tag moves to a new commit
       await git.raw(['tag', '-f', 'next'])
       // force push to make the remote move the next tag
-      await git.raw(['push', '-f', '--tags'])
+      await git.raw(['push', '-f', '--follow-tags'])
       return
     }
 
@@ -151,22 +156,11 @@ type ReleaseBrief = {
 async function calcNextStablePreview(
   git: Git.Simple
 ): Promise<null | ReleaseBrief> {
-  const maybeLatestStableVer = await Git.findTag(git, {
-    matcher: candidate => {
-      const maybeSemVer = SemVer.parse(candidate)
-      if (maybeSemVer === null) return false
-      return isStable(maybeSemVer)
-    },
-  })
-
-  const maybeLatestPreVerSinceStable = await Git.findTag(git, {
-    since: maybeLatestStableVer ?? undefined,
-    matcher: candidate => {
-      const maybeSemVer = SemVer.parse(candidate)
-      if (maybeSemVer === null) return false
-      return isStablePreview(maybeSemVer)
-    },
-  })
+  const maybeLatestStableVer = await findLatestStable(git)
+  const maybeLatestPreVerSinceStable = await findLatestPreview(
+    git,
+    maybeLatestStableVer
+  )
 
   // We need all the commits since the last stable release to calculate the
   // pre-release. The pre-release is a bump against the last stable plus a
@@ -238,23 +232,6 @@ async function calcNextStablePreview(
   }
 }
 
-/**
- * Is the given release a stable one?
- */
-function isStable(release: SemVer.SemVer): boolean {
-  return release.prerelease.length === 0
-}
-
-/**
- * Is the given release a stable preview one?
- */
-function isStablePreview(release: SemVer.SemVer): boolean {
-  return (
-    release.prerelease[0] === 'next' &&
-    String(release.prerelease[1]).match(/\d+/) !== null
-  )
-}
-
 type OutputterOptions = {
   json: boolean
 }
@@ -313,10 +290,13 @@ function createOutputters(opts: OutputterOptions) {
     }`
     if (opts.json) {
       Output.outputException('invalid_pre_release_case', baseMessage, {
-        sha,
-        preReleaseTag: tags.pre_release?.[0]?.value.version,
-        stableReleaseTag: tags.stable_release?.[0]?.value.version,
-        otherTags: tags.unknown?.map(t => t.value) ?? [],
+        json: true,
+        context: {
+          sha,
+          preReleaseTag: tags.pre_release?.[0]?.value.version,
+          stableReleaseTag: tags.stable_release?.[0]?.value.version,
+          otherTags: tags.unknown?.map(t => t.value) ?? [],
+        },
       })
     } else {
       let message = ''

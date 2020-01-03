@@ -1,12 +1,15 @@
-import * as Semver from 'semver'
+import * as SemVer from 'semver'
+import createGit from 'simple-git/promise'
+import * as Git from './git'
+import { parse } from 'path'
 
 export type ParsedTag =
   | { type: 'unknown'; value: string }
-  | { type: 'stable_release'; value: Semver.SemVer }
-  | { type: 'pre_release'; value: Semver.SemVer }
+  | { type: 'stable_release'; value: SemVer.SemVer }
+  | { type: 'pre_release'; value: SemVer.SemVer }
 
 export function parseTag(rawTag: string): ParsedTag {
-  const semverParseResult = Semver.parse(rawTag)
+  const semverParseResult = SemVer.parse(rawTag)
   if (semverParseResult !== null) {
     if (semverParseResult.prerelease.length > 0) {
       return { type: 'pre_release', value: semverParseResult } as const
@@ -110,22 +113,22 @@ export function bumpVer(
   // | 'prepatch'
   // | 'pre',
   // preReleaseTypeIdentifier: string,
-  prevVer: Semver.SemVer
-): Semver.SemVer {
+  prevVer: SemVer.SemVer
+): SemVer.SemVer {
   // const buildNumPrefix = preReleaseTypeIdentifier
   //   ? `${preReleaseTypeIdentifier}.`
   //   : ''
   switch (bumpType) {
     case 'major':
-      return Semver.parse(
+      return SemVer.parse(
         `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}`
       )!
     case 'minor':
-      return Semver.parse(
+      return SemVer.parse(
         `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}`
       )!
     case 'patch':
-      return Semver.parse(
+      return SemVer.parse(
         `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
       )!
     // // TODO refactor
@@ -166,4 +169,128 @@ export function bumpVer(
  */
 export function assertAllCasesHandled(x: never): void {
   throw new Error(`A case was not handled for value: ${x}`)
+}
+
+export type StableRelease = {
+  type: 'stable'
+  version: SemVer.SemVer
+  sha: string
+}
+
+export type PreviewRelease = {
+  type: 'preview'
+  version: SemVer.SemVer
+  sha: string
+  buildNum: number
+}
+
+export type CommitReleases = {
+  stable: null | StableRelease
+  preview: null | PreviewRelease
+}
+
+const emptyCommitReleases = {
+  stable: null,
+  preview: null,
+}
+
+/**
+ * Get the releases at the given commit.
+ */
+export async function getReleasesAtCommit(
+  sha: string
+): Promise<CommitReleases> {
+  const git = createGit()
+  const tags = await Git.gitGetTags(git, { ref: sha })
+  if (isEmpty(tags)) return emptyCommitReleases
+  const parsedTags = groupByProp(tags.map(parseTag), 'type')
+  const stableTags = parsedTags.stable_release ?? []
+  const previewtags = parsedTags.pre_release ?? []
+
+  const invariantViolations = []
+  if (stableTags.length > 1) {
+    invariantViolations.push(
+      `Multiple stable releases found but there should only be 0 or 1: ${stableTags}`
+    )
+  }
+  if (previewtags.length > 1) {
+    invariantViolations.push(
+      `Multiple preview releases found but there should only be 0 or 1: ${stableTags}`
+    )
+  }
+  if (invariantViolations.length > 0) {
+    throw new Error(
+      `While getting the pre-existing releases at commit ${sha} the following invariant violations were found:\n\n${invariantViolations
+        .map(x => `    - ${x}`)
+        .join('\n')}`
+    )
+  }
+
+  return {
+    stable: stableTags[0]
+      ? {
+          type: 'stable',
+          version: stableTags[0].value,
+          sha,
+        }
+      : null,
+    preview: previewtags[0]
+      ? {
+          type: 'preview',
+          version: previewtags[0].value,
+          sha,
+          buildNum: previewtags[0].value.prerelease[1] as number,
+        }
+      : null,
+  }
+}
+
+/**
+ * Determin if the given array or object is empty.
+ */
+export function isEmpty(x: {} | unknown[]): boolean {
+  return Array.isArray(x) ? x.length === 0 : Object.keys(x).length > 0
+}
+
+/**
+ * Is the given release a stable one?
+ */
+export function isStable(release: SemVer.SemVer): boolean {
+  return release.prerelease.length === 0
+}
+
+/**
+ * Is the given release a stable preview one?
+ */
+export function isStablePreview(release: SemVer.SemVer): boolean {
+  return (
+    release.prerelease[0] === 'next' &&
+    String(release.prerelease[1]).match(/\d+/) !== null
+  )
+}
+
+export async function findLatestStable(
+  git: Git.Simple
+): Promise<null | string> {
+  return Git.findTag(git, {
+    matcher: candidate => {
+      const maybeSemVer = SemVer.parse(candidate)
+      if (maybeSemVer === null) return false
+      return isStable(maybeSemVer)
+    },
+  })
+}
+
+export async function findLatestPreview(
+  git: Git.Simple,
+  maybeLatestStableVer: null | string
+): Promise<null | string> {
+  return Git.findTag(git, {
+    since: maybeLatestStableVer ?? undefined,
+    matcher: candidate => {
+      const maybeSemVer = SemVer.parse(candidate)
+      if (maybeSemVer === null) return false
+      return isStablePreview(maybeSemVer)
+    },
+  })
 }
