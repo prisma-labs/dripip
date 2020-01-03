@@ -56,16 +56,14 @@ export class Stable extends Command {
       return show.dryRun(ctx, newStableVer.version)
     }
 
-    publish({
+    await publish({
       isPreview: false,
       version: newStableVer.version,
       distTag: 'latest',
     })
 
     // Bring next pointer up to date too
-    // TODO while loop polling to make robust
-    await delay(1000)
-    proc.run(
+    await proc.run(
       `npm dist-tags add ${ctx.package.name}@${newStableVer.version} next`,
       {
         require: true,
