@@ -5,8 +5,12 @@ import {
   getReleasesAtCommit,
   findLatestStable,
   findLatestPreview,
+  CommitReleases,
+  StableRelease,
+  PreviewRelease,
 } from './utils'
 import * as SemVer from 'semver'
+import * as PackageJson from '../lib/package-json'
 
 export type scanOoptions = {
   overrides?: {
@@ -14,6 +18,9 @@ export type scanOoptions = {
   }
 }
 export type Context = {
+  package: {
+    name: string
+  }
   commitsSinceLastStable: Git.LogEntry[]
   commitsSinceLastPreview: Git.LogEntry[]
   // nextReleasesNowWouldBe: {
@@ -41,33 +48,13 @@ export type Context = {
   }
   currentCommit: {
     sha: string
-    releases: {
-      stable: null | StableRelease
-      preview: null | PreviewRelease
-    }
+    releases: CommitReleases
   }
-}
-
-type Commit = {
-  sha: string
-  message: string
 }
 
 type PullRequest = {
   title: string
   number: number
-}
-
-type StableRelease = {
-  type: 'stable'
-  version: SemVer.SemVer
-  sha: string
-}
-
-type PreviewRelease = {
-  type: 'preview'
-  version: SemVer.SemVer
-  sha: string
 }
 
 export async function scan(opts?: scanOoptions): Promise<Context> {
@@ -133,9 +120,19 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
     Git.log(git, { since: maybeLatestStableVer }),
     Git.log(git, { since: maybeLatestPreVerSinceStable }),
   ])
+  // get package info
+  const packageJson = await PackageJson.read()
+
+  if (packageJson === undefined) {
+    // todo exception system
+    throw new Error('could not find a package.json')
+  }
 
   // return the final result
   return {
+    package: {
+      name: packageJson.name,
+    },
     commitsSinceLastPreview,
     commitsSinceLastStable,
     latestReleases: {
@@ -154,6 +151,8 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
               type: 'preview',
               sha: 'todo',
               version: SemVer.parse(maybeLatestPreVerSinceStable)!,
+              buildNum: SemVer.parse(maybeLatestPreVerSinceStable)!
+                .prerelease[1] as number,
             },
     },
     githubRepo: {

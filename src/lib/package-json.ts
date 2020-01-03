@@ -20,15 +20,19 @@ type PackageJson = {
 }
 
 /**
+ * Read the package.json file.
+ */
+export async function read(): Promise<undefined | PackageJson> {
+  return fs.readAsync('package.json', 'json')
+}
+
+/**
  * Update the package.json located at cwd. The given updater function will
  * receive the parsed package contents and whatever is returned will be written
  * to disk.
  */
 export async function update(updater: PackageJsonUpdater): Promise<void> {
-  const packageJson: undefined | JsonObject = await fs.readAsync(
-    'package.json',
-    'json'
-  )
+  const packageJson = await read()
   if (packageJson) {
     const packageJsonUpdated = await updater(packageJson)
     await fs.writeAsync('package.json', packageJsonUpdated)

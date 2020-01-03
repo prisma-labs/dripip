@@ -4,7 +4,9 @@ import * as Context from '../lib/context'
 import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
 import { bumpVer } from '../lib/utils'
 import * as SemVer from 'semver'
-// import createGit from 'simple-git/promise'
+import { publish } from '../lib/publish'
+import createGit from 'simple-git/promise'
+import * as proc from '../lib/proc'
 
 export class Stable extends Command {
   static flags = {
@@ -24,6 +26,7 @@ export class Stable extends Command {
   }
   async run() {
     const { flags } = this.parse(Stable)
+    const git = createGit()
     const show = createShowers({ json: flags.json })
     const check = createValidators({ json: flags.json })
     const ctx = await Context.scan({
@@ -44,22 +47,31 @@ export class Stable extends Command {
       return show.noReleaseNeeded(ctx)
     }
 
-    const newVer = bumpVer(
+    const newStableVer = bumpVer(
       bumpType,
       ctx.latestReleases.stable?.version ?? SemVer.parse('0.0.0')!
     )
 
     if (flags['dry-run']) {
-      return show.dryRun(ctx, newVer.version)
+      return show.dryRun(ctx, newStableVer.version)
     }
 
-    // Run publishing process:
-    // Change package.json version field to be new version.
-    // Run npm publish --tag latest.
-    // Undo package.json change.
-    // Run git tag {newVersion}.
-    // Run git tag next (normally should already be present)
-    // Run git push --tags.
+    publish({
+      isPreview: false,
+      version: newStableVer.version,
+      distTag: 'latest',
+    })
+
+    // Bring next pointer up to date too
+    proc.run(`npm dist-tag ${ctx.package.name}@${newStableVer.version} next`, {
+      require: true,
+    })
+
+    // force update so the tag moves to a new commit
+    await git.raw(['tag', '-f', 'latest'])
+    await git.raw(['tag', '-f', 'next'])
+    // force push to make the remote move the next tag
+    await git.raw(['push', '-f', '--follow-tags'])
   }
 }
 

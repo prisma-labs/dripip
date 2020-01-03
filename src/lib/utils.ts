@@ -171,9 +171,22 @@ export function assertAllCasesHandled(x: never): void {
   throw new Error(`A case was not handled for value: ${x}`)
 }
 
-type CommitReleases = {
-  stable: null | { type: 'stable'; version: SemVer.SemVer; sha: string }
-  preview: null | { type: 'preview'; version: SemVer.SemVer; sha: string }
+export type StableRelease = {
+  type: 'stable'
+  version: SemVer.SemVer
+  sha: string
+}
+
+export type PreviewRelease = {
+  type: 'preview'
+  version: SemVer.SemVer
+  sha: string
+  buildNum: number
+}
+
+export type CommitReleases = {
+  stable: null | StableRelease
+  preview: null | PreviewRelease
 }
 
 const emptyCommitReleases = {
@@ -215,10 +228,19 @@ export async function getReleasesAtCommit(
 
   return {
     stable: stableTags[0]
-      ? { type: 'stable', version: stableTags[0].value, sha }
+      ? {
+          type: 'stable',
+          version: stableTags[0].value,
+          sha,
+        }
       : null,
     preview: previewtags[0]
-      ? { type: 'preview', version: previewtags[0].value, sha }
+      ? {
+          type: 'preview',
+          version: previewtags[0].value,
+          sha,
+          buildNum: previewtags[0].value.prerelease[1] as number,
+        }
       : null,
   }
 }
