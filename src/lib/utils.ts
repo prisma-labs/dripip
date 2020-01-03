@@ -120,13 +120,9 @@ export function bumpVer(
   //   : ''
   switch (bumpType) {
     case 'major':
-      return SemVer.parse(
-        `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}`
-      )!
+      return SemVer.parse(`${prevVer.major + 1}.0.0`)!
     case 'minor':
-      return SemVer.parse(
-        `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}`
-      )!
+      return SemVer.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
     case 'patch':
       return SemVer.parse(
         `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
