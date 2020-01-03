@@ -294,3 +294,9 @@ export async function findLatestPreview(
     },
   })
 }
+
+export function delay(milliseconds: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, 1000)
+  })
+}

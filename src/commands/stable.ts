@@ -2,7 +2,7 @@ import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
 import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
-import { bumpVer } from '../lib/utils'
+import { bumpVer, delay } from '../lib/utils'
 import * as SemVer from 'semver'
 import { publish } from '../lib/publish'
 import createGit from 'simple-git/promise'
@@ -63,6 +63,8 @@ export class Stable extends Command {
     })
 
     // Bring next pointer up to date too
+    // TODO while loop polling to make robust
+    await delay(1000)
     proc.run(
       `npm dist-tags add ${ctx.package.name}@${newStableVer.version} next`,
       {
