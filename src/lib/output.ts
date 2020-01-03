@@ -31,7 +31,7 @@ type OutputOptions = {
 }
 
 /**
- * This module encapsulates the various structures that libre may output.
+ * This module encapsulates the various structures that dripip may output.
  * Precise data details stay local throughout the codebase but core concerns
  * like data envelop and serialization are encoded here.
  */

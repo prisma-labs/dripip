@@ -20,7 +20,7 @@ export function resetEnvironmentBeforeEachTest() {
  */
 export function createWorkspace(command: 'preview' | 'stable') {
   const ws = addOctokitToworkspace(
-    addLibreToWorkspace(
+    addDripipToWorkspace(
       WS.createWorkspace({
         name: command,
         repo: 'git@github.com:prisma-labs/system-tests-repo.git',
@@ -58,41 +58,41 @@ export function addOctokitToworkspace<T>(ws: T): T & { octokit: Octokit } {
 }
 
 /**
- * Add the libre cli to the workspace, ready to use.
+ * Add the dripip cli to the workspace, ready to use.
  */
-export function addLibreToWorkspace<T extends {}>(
+export function addDripipToWorkspace<T extends {}>(
   ws: T
-): T & { libre: ReturnType<typeof createLibreRunner> } {
+): T & { dripip: ReturnType<typeof createDripipRunner> } {
   beforeAll(async () => {
     // @ts-ignore
-    ws.libre = createLibreRunner({ cwd: ws.dir.path })
+    ws.dripip = createDripipRunner({ cwd: ws.dir.path })
   })
 
-  return ws as T & { libre: ReturnType<typeof createLibreRunner> }
+  return ws as T & { dripip: ReturnType<typeof createDripipRunner> }
 }
 
 /**
- * Certain parts of libre output are highly dynamic, making it difficult to
+ * Certain parts of dripip output are highly dynamic, making it difficult to
  * snapshot. This function strips out those dynamic parts.
  */
-function sanitizeResultForSnap(result: RunLibreResult): void {
+function sanitizeResultForSnap(result: RunDripipResult): void {
   const shortSHAPattern = /\(.{7}\)/g
   result.stderr = result.stderr!.replace(shortSHAPattern, '(__SHORT_SHA__)')
   result.stdout = result.stdout!.replace(shortSHAPattern, '(__SHORT_SHA__)')
 }
 
-export type RunLibreResult = Omit<proc.SuccessfulRunResult, 'command'> & {
+export type RunDripipResult = Omit<proc.SuccessfulRunResult, 'command'> & {
   stderr: string
 }
 
-type LibreRunnerOptions = proc.RunOptions & {
+type DripipRunnerOptions = proc.RunOptions & {
   raw?: boolean
 }
 
-const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
+const createDripipRunner = (optsBase?: DripipRunnerOptions) => (
   command: string,
-  optsLocal?: LibreRunnerOptions
-): Promise<Record<string, any> | RunLibreResult> => {
+  optsLocal?: DripipRunnerOptions
+): Promise<Record<string, any> | RunDripipResult> => {
   const opts = {
     ...optsBase,
     ...optsLocal,
@@ -113,14 +113,14 @@ const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
         // TODO remove given new json parse approach?
         delete result.command
         // TODO not used/helpful...?
-        sanitizeResultForSnap(result as RunLibreResult)
-        return result as RunLibreResult // force TS to ignore the stderr: null possibility
+        sanitizeResultForSnap(result as RunDripipResult)
+        return result as RunDripipResult // force TS to ignore the stderr: null possibility
       }
 
       // Avoid silent confusion
       if (result.stderr) {
         console.log(
-          `WARNING libre command sent output to stderr:\n\n${result.stderr}`
+          `WARNING dripip command sent output to stderr:\n\n${result.stderr}`
         )
       }
 
@@ -129,7 +129,7 @@ const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
         return JSON.parse(result.stdout!) as Record<string, any>
       } catch (e) {
         throw new Error(
-          `Something went wrong while trying to JSON parse the libre cli stdout:\n\n${
+          `Something went wrong while trying to JSON parse the dripip cli stdout:\n\n${
             e.stack
           }\n\nThe underlying cli result was:\n\n${format(result)}`
         )
@@ -137,4 +137,4 @@ const createLibreRunner = (optsBase?: LibreRunnerOptions) => (
     })
 }
 
-export { createLibreRunner }
+export { createDripipRunner }

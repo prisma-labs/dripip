@@ -1,12 +1,12 @@
 {
-  "name": "librelibre",
+  "name": "dripip",
   "version": "0.0.0-see-git-tags",
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/main",
   "bin": {
-    "libre": "dist/main.js"
+    "dripip": "dist/main.js"
   },
-  "repository": "git@github.com:prisma-labs/libre.git",
+  "repository": "git@github.com:prisma-labs/dripip.git",
   "author": "Jason Kuhrt <jasonkuhrt@me.com>",
   "license": "MIT",
   "private": false,
@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "format": "prettier --write '*/**/*.ts'",
-    "libre": "ts-node src/main",
+    "dripip": "ts-node src/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
     "build": "yarn -s build:oclif && tsc",
@@ -69,7 +69,7 @@
   },
   "oclif": {
     "commands": "./dist/commands",
-    "bin": "libre",
+    "bin": "dripip",
     "plugins": [
       "@oclif/plugin-help"
     ]

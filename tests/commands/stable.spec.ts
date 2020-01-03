@@ -11,7 +11,7 @@ describe('preflight requirements include that', () => {
 
   it('the branch is trunk', async () => {
     await ws.git.checkoutLocalBranch('foobar')
-    const result: any = await ws.libre('stable')
+    const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -33,7 +33,7 @@ describe('preflight requirements include that', () => {
   // race-condition PR merges.
   it('the branch is synced with remote (needs push)', async () => {
     await gitCreateEmptyCommit(ws.git, 'some work')
-    const result: any = await ws.libre('stable')
+    const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -52,7 +52,7 @@ describe('preflight requirements include that', () => {
 
   it('the branch is synced with remote (needs pull)', async () => {
     await ws.git.raw(['reset', '--hard', 'head~1']) // something on remote
-    const result: any = await ws.libre('stable')
+    const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -72,7 +72,7 @@ describe('preflight requirements include that', () => {
   it('the branch is synced with remote (diverged)', async () => {
     await ws.git.raw(['reset', '--hard', 'head~1']) // remove something on remote
     await gitCreateEmptyCommit(ws.git, 'some work')
-    const result: any = await ws.libre('stable')
+    const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -91,7 +91,7 @@ describe('preflight requirements include that', () => {
 
   it('check that the commit does not already have a stable release present', async () => {
     await ws.git.addTag('1.0.0')
-    const result: any = await ws.libre('stable')
+    const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -141,7 +141,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'chore: 1')
     await gitCreateEmptyCommit(ws.git, 'chore: 2')
     await ws.git.push()
-    const result: any = await ws.libre('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -164,7 +164,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'fix: 1')
     await gitCreateEmptyCommit(ws.git, 'fix: 2')
     await ws.git.push()
-    const result: any = await ws.libre('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })
@@ -201,7 +201,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'chore: 1')
     await gitCreateEmptyCommit(ws.git, 'feat: 2')
     await ws.git.push()
-    const result: any = await ws.libre('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })

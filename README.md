@@ -1,4 +1,4 @@
-# libre
+# dripip
 
 Opinionated CLI for continuous delivery of npm packages.
 
@@ -8,24 +8,22 @@ Opinionated CLI for continuous delivery of npm packages.
 - [Installation](#installation)
 - [Introduction](#introduction)
 - [Reference](#reference)
-  - [`libre help [COMMAND]`](#libre-help-command)
-  - [`libre preview`](#libre-preview)
+  - [`dripip help [COMMAND]`](#dripip-help-command)
+  - [`dripip preview`](#dripip-preview)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Installation
 
-`libre` was already taken on npm so we publish it under `librelibre`. But once installed you access it simply as `libre`.
-
 ```
-npm install --save-dev librelibre
+npm install --save-dev dripip
 ```
 
 ## Introduction
 
 TODO
 
-For now you can refer to the original issue that specified the overall vision for `libre`: [prisma-labs/issues#2](https://github.com/prisma-labs/issues/issues/2).
+For now you can refer to the original issue that specified the overall vision for `dripip`: [prisma-labs/issues#2](https://github.com/prisma-labs/issues/issues/2).
 
 ![diagram](https://user-images.githubusercontent.com/284476/65810154-837d6580-e174-11e9-87e3-15ca31b66379.png)
 
@@ -33,16 +31,16 @@ For now you can refer to the original issue that specified the overall vision fo
 
 <!-- commands -->
 
-- [`libre help [COMMAND]`](#libre-help-command)
-- [`libre preview`](#libre-preview)
+- [`dripip help [COMMAND]`](#dripip-help-command)
+- [`dripip preview`](#dripip-preview)
 
-## `libre help [COMMAND]`
+## `dripip help [COMMAND]`
 
-display help for libre
+display help for dripip
 
 ```
 USAGE
-  $ libre help [COMMAND]
+  $ dripip help [COMMAND]
 
 ARGUMENTS
   COMMAND  command to show help for
@@ -53,11 +51,11 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v2.2.1/src/commands/help.ts)_
 
-## `libre preview`
+## `dripip preview`
 
 ```
 USAGE
-  $ libre preview
+  $ dripip preview
 ```
 
 <!-- commandsstop -->

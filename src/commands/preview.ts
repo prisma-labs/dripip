@@ -360,11 +360,11 @@ function renderTagsPresent(tags: GroupBy<ParsedTag, 'type'>): string {
     message += '\n'
     message += 'This may have happened because:\n'
     message += '- A human manually fiddled with the git tags\n'
-    message += '- Another tool than libre acted on the git tags\n'
-    message += '- There is a bug in libre\n'
+    message += '- Another tool than dripip acted on the git tags\n'
+    message += '- There is a bug in dripip\n'
     message += '\n'
     message +=
-      'If you think there is a bug in libre please open an issue: https://github.com/prisma-labs/libre/issues/new.\n'
+      'If you think there is a bug in dripip please open an issue: https://github.com/prisma-labs/dripip/issues/new.\n'
     message +=
       'Otherwise consider manually cleaning up this commit to fix the above violated invariant(s).\n'
   }
