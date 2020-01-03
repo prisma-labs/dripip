@@ -5,7 +5,7 @@ import { SemverStableVerParts } from './utils'
  * message for the commit) calculate what the package version containing these
  * changes should be. Returns `null` if all changes were meta or unconforming.
  */
-export function calcBumpTypeFromConventionalCommits(
+export function calcBumpType(
   commitMessages: string[]
 ): null | SemverStableVerParts {
   let semverPart: null | SemverStableVerParts = null

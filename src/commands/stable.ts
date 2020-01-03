@@ -1,7 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
-import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
+import { calcBumpType } from '../lib/conventional-commit'
 import { bumpVer, delay } from '../lib/utils'
 import * as SemVer from 'semver'
 import { publish } from '../lib/publish'
@@ -39,7 +39,7 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    const bumpType = calcBumpTypeFromConventionalCommits(
+    const bumpType = calcBumpType(
       ctx.commitsSinceLastStable.map(c => c.message)
     )
 

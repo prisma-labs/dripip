@@ -23,6 +23,7 @@
     "build": "yarn -s build:oclif && tsc",
     "dev": "tsdx watch",
     "test:dev": "tsdx test --testTimeout 10000",
+    "test:unit:dev": "tsdx test --testPathPattern '.*/unit/.*'",
     "test": "CI=true tsdx test --color --testTimeout 10000",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",

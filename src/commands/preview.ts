@@ -18,7 +18,7 @@ import * as Git from '../lib/git'
 import * as SemVer from 'semver'
 import * as Output from '../lib/output'
 import * as Publish from '../lib/publish'
-import { calcBumpTypeFromConventionalCommits } from '../lib/conventional-commit'
+import { calcBumpType } from '../lib/conventional-commit'
 
 type ReleaseTypeInfo = {
   type: string
@@ -182,9 +182,7 @@ async function calcNextStablePreview(
   // Calculate the next version
 
   const stablePreReleaseIdentifier = 'next'
-  const bumpType = calcBumpTypeFromConventionalCommits(
-    commitMessagesSinceLastStable
-  )
+  const bumpType = calcBumpType(commitMessagesSinceLastStable)
 
   if (bumpType === null) return null
 
