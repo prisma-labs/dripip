@@ -20,7 +20,7 @@
     "libre": "ts-node src/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
-    "build": "yarn -s build:oclif && tsc build",
+    "build": "yarn -s build:oclif && tsc",
     "dev": "tsdx watch",
     "test:dev": "tsdx test --testTimeout 10000",
     "test": "CI=true tsdx test --color --testTimeout 10000",
