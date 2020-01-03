@@ -69,12 +69,14 @@ export class Stable extends Command {
         require: true,
       }
     )
+    console.log('updated dist-tag "next"')
 
     // force update so the tag moves to a new commit
-    await git.raw(['tag', '-f', 'latest'])
-    await git.raw(['tag', '-f', 'next'])
+    await git.raw(['tag', '-f', 'latest', 'next'])
     // force push to make the remote move the next tag
-    await git.raw(['push', '-f', '--follow-tags'])
+    await git.raw(['push', 'origin', ':refs/tags/latest', ':refs/tags/next'])
+    await git.raw(['push', '--tags'])
+    console.log('updated git-tags "latest" "next"')
   }
 }
 

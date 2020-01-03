@@ -107,8 +107,9 @@ export class Preview extends Command {
 
       // force update so the tag moves to a new commit
       await git.raw(['tag', '-f', 'next'])
-      // force push to make the remote move the next tag
-      await git.raw(['push', '-f', '--follow-tags'])
+      await git.raw(['push', 'origin', ':refs/tags/next'])
+      await git.raw(['push', '--tags'])
+      console.log('updated git-tag "next"')
       return
     }
 
