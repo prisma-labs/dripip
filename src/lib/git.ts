@@ -325,11 +325,11 @@ export async function findTag(
 
   let lastTag: null | string = null
 
-  for (const tbc of tagsByCommits) {
+  outerloop: for (const tbc of tagsByCommits) {
     for (const tag of tbc) {
       if (ops.matcher(tag)) {
         lastTag = tag
-        break
+        break outerloop
       }
     }
   }
@@ -374,6 +374,10 @@ export async function log(
   if (ops?.since) args.push(`${ops.since}..head`)
   const rawLogString = (await git.raw(args)) ?? ''
   const logStrings = rawLogString.trim().split(logSeparator)
+  // git range is inclusive, but we want exclusive, semantic of "since"
+  if (ops?.since) {
+    logStrings.pop()
+  }
   logStrings.pop() // trailing separator
   return logStrings
     .reduce((logs, logString) => {

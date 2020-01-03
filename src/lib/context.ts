@@ -141,7 +141,7 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
           ? null
           : {
               type: 'stable',
-              sha: 'todo',
+              sha: await Git.gitGetSha(git, { ref: maybeLatestStableVer }),
               version: SemVer.parse(maybeLatestStableVer)!,
             },
       preview:
@@ -149,7 +149,9 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
           ? null
           : {
               type: 'preview',
-              sha: 'todo',
+              sha: await Git.gitGetSha(git, {
+                ref: maybeLatestPreVerSinceStable,
+              }),
               version: SemVer.parse(maybeLatestPreVerSinceStable)!,
               buildNum: SemVer.parse(maybeLatestPreVerSinceStable)!
                 .prerelease[1] as number,
