@@ -6,10 +6,6 @@ import {
   groupByProp,
   ParsedTag,
   GroupBy,
-  bumpVer,
-  SemverStableVerParts,
-  isStablePreview,
-  isStable,
   findLatestStable,
   findLatestPreview,
 } from '../lib/utils'
@@ -18,7 +14,7 @@ import * as Git from '../lib/git'
 import * as SemVer from 'semver'
 import * as Output from '../lib/output'
 import * as Publish from '../lib/publish'
-import { calcBumpType } from '../lib/conventional-commit'
+import { SemverStableVerParts, calcBumpType, bump } from '../lib/semver'
 
 type ReleaseTypeInfo = {
   type: string
@@ -199,7 +195,7 @@ async function calcNextStablePreview(
 
   const nextVerBuildNum = (maybeLatestBuildNum ?? 0) + 1
 
-  const nextStable = bumpVer(
+  const nextStable = bump(
     bumpType,
     SemVer.parse(maybeLatestStableVer ?? '0.0.0')!
   ).version

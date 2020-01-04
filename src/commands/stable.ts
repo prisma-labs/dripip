@@ -1,8 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
-import { calcBumpType } from '../lib/conventional-commit'
-import { bumpVer, delay } from '../lib/utils'
+import { bump, calcBumpType } from '../lib/semver'
 import * as SemVer from 'semver'
 import { publish } from '../lib/publish'
 import createGit from 'simple-git/promise'
@@ -47,7 +46,7 @@ export class Stable extends Command {
       return show.noReleaseNeeded(ctx)
     }
 
-    const newStableVer = bumpVer(
+    const newStableVer = bump(
       bumpType,
       ctx.latestReleases.stable?.version ?? SemVer.parse('0.0.0')!
     )
