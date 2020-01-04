@@ -53,7 +53,7 @@ export class Preview extends Command {
     //    2. show the tag author name
     //    3. show the the date the tag was made
 
-    const series = await Rel.scanCommitSeries(git)
+    const series = await Rel.getCurrentSeries(git)
 
     if (series.current.releases.stable || series.current.releases.preview) {
       return send.commitAlreadyPreAndOrStableReleased(series.current)

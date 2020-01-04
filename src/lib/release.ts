@@ -1,25 +1,23 @@
 import * as SemVer from './semver'
 import * as Git from './git'
+import { findIndexFromEnd } from './utils'
 
-type CommitSeriesScan = {
-  previousStable: null | Git.CommitEntry
-  commitsSince: Git.CommitEntry[]
-}
+export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
 
 /**
  * Get the previous stable and commits since then. If there is no previous
  * stable then commits are counted from start of history.
  */
-export async function scanCommitSeries(git: Git.Simple): Promise<Series> {
+export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
+  return getLog(git).then(buildSeries)
+}
+
+async function getLog(git: Git.Simple): Promise<SeriesLog> {
   const previousStableCommit = await findLatestStable(git)
   const commits = await Git.log(git, { since: previousStableCommit })
-
-  return enrichCommitSeries({
-    // If there was a previous stable it will be included in the returned log.
-    // Extract it.
-    previousStable: previousStableCommit === null ? null : commits.shift()!,
-    commitsSince: commits,
-  })
+  return previousStableCommit
+    ? [commits.shift() as Git.LogEntry, commits]
+    : [null, commits]
 }
 
 export type Commit = {
@@ -81,15 +79,19 @@ export type Series = {
   isEmpty: boolean
 }
 
-function enrichCommitSeries(findings: CommitSeriesScan): Series {
-  const pi = findings.commitsSince.findIndex(c =>
-    c.tags.find(tag => tag.match(/.+-next\.\d+/))
+/**
+ * Build structured series data from a raw series log.
+ */
+export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
+  const pi = findIndexFromEnd(
+    commitsSince,
+    c => c.tags.find(tag => tag.match(/.+-next\.\d+/)) !== undefined
   )
 
   let previousPreview: null | PreviewRelease = null
-  let commitsSincePreview: Git.CommitEntry[] = []
+  let commitsSincePreview: Git.LogEntry[] = []
   if (pi !== -1) {
-    const c = findings.commitsSince[pi]!
+    const c = commitsSince[pi]!
     const r = SemVer.parse(c.tags.find(isPreviewTag)!)!
     previousPreview = {
       sha: c.sha,
@@ -98,23 +100,21 @@ function enrichCommitSeries(findings: CommitSeriesScan): Series {
       version: r,
       buildNum: r.prerelease[1] as number,
     }
-    commitsSincePreview = findings.commitsSince.slice(pi + 1)
+    commitsSincePreview = commitsSince.slice(pi + 1)
   }
 
-  const previousStable: null | StableRelease =
-    findings.previousStable === null
+  const previousStable2: null | StableRelease =
+    previousStable === null
       ? null
       : {
           type: 'stable',
-          sha: findings.previousStable.sha,
-          version: SemVer.parse(
-            findings.previousStable.tags.find(isStableTag)!
-          )!,
+          sha: previousStable.sha,
+          version: SemVer.parse(previousStable.tags.find(isStableTag)!)!,
         }
 
   return {
-    previousStable,
-    commitsSinceStable: findings.commitsSince,
+    previousStable: previousStable2,
+    commitsSinceStable: commitsSince,
     previousPreview,
     commitsSincePreview,
   } as any

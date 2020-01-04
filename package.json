@@ -22,7 +22,7 @@
     "build:oclif": "oclif-dev manifest",
     "build": "yarn -s build:oclif && tsc",
     "dev": "tsdx watch",
-    "test:dev:unit": "tsdx test --testPathPattern '.*/unit/.*'",
+    "dev:test:unit": "tsdx test --testPathPattern '.*/unit/.*'",
     "test:unit": "CI=true tsdx test --color --testPathPattern '.*/unit/.*'",
     "test:system": "CI=true tsdx test --color --testTimeout 10000 --testPathPattern '.*/system/.*'",
     "test": "CI=true tsdx test --color --testTimeout 10000",

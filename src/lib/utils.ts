@@ -18,7 +18,7 @@ export const indentBlock4 = indentBlock.bind(null, 4)
 /**
  * Create a function that will only ever return the given value when called.
  */
-const constant = <T>(x: T): (() => T) => {
+export const constant = <T>(x: T): (() => T) => {
   return function() {
     return x
   }
@@ -98,4 +98,14 @@ export function delay(milliseconds: number): Promise<void> {
   return new Promise(resolve => {
     setTimeout(resolve, 1000)
   })
+}
+
+/**
+ * Like Array.findIndex but working backwards from end of array.
+ */
+export function findIndexFromEnd<T>(xs: T[], f: (x: T) => boolean): number {
+  for (let index = xs.length - 1; index > -1; index--) {
+    if (f(xs[index])) return index
+  }
+  return -1
 }

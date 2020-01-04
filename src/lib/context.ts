@@ -90,7 +90,7 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
   // get the branch sync status
   const syncStatus = await Git.checkSyncStatus(git)
   // get the latest releases and commits since
-  const series = await Rel.scanCommitSeries(git)
+  const series = await Rel.getCurrentSeries(git)
   // get package info
   const packageJson = await PackageJson.read()
   if (packageJson === undefined) {
