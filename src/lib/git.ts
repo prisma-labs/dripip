@@ -337,16 +337,30 @@ export async function findTag(
   return lastTag
 }
 
-export type LogEntry = {
+export type CommitEntry = {
   sha: string
   tags: string[]
-  body: string
-  subject: string
   message: string
 }
 
 const logSeparator = '$@<!____LOG____!>@$'
 const partSeparator = '$@<!____PROP____!>@$'
+
+type CommitDatum = { name: string; code: 'H' | 'D' | 's' | 'b' | 'B' }
+
+export const commitDatums: CommitDatum[] = [
+  { name: 'sha', code: 'H' },
+  { name: 'refs', code: 'D' },
+  { name: 'subject', code: 's' },
+  { name: 'body', code: 'b' },
+  { name: 'message', code: 'B' },
+]
+
+export function gitLogFormat(commitDatums: CommitDatum[]): string {
+  return (
+    commitDatums.map(part => '%' + part.code).join(partSeparator) + logSeparator
+  )
+}
 
 /**
  * Version of native simple git func tailored for us, especially accurate types.
@@ -354,40 +368,27 @@ const partSeparator = '$@<!____PROP____!>@$'
 export async function log(
   git: Simple,
   ops?: { since?: null | string }
-): Promise<LogEntry[]> {
-  // TODO tags or bodies or subjects with double quotes in them or commas will
-  // break parsing... consider using native git.log func?
-  const logDatums = [
-    { prop: 'sha', code: '%H' },
-    { prop: 'refs', code: '%D' },
-    { prop: 'subject', code: '%s' },
-    { prop: 'body', code: '%b' },
-    { prop: 'message', code: '%B' },
-  ]
-  const formatProps = logDatums.map(datum => datum.prop)
-  const args = [
-    'log',
-    `--format=${logDatums
-      .map(part => part.code)
-      .join(partSeparator)}${logSeparator}`,
-  ]
-  if (ops?.since) args.push(`${ops.since}..head`)
-  const rawLogString = (await git.raw(args)) ?? ''
+): Promise<CommitEntry[]> {
+  const gitArgs = ['log', `--format=${gitLogFormat(commitDatums)}`]
+  // ~1 makes the range inclusive, since-commit will be in the result set
+  if (ops?.since) gitArgs.push(`${ops.since}~1..head`)
+  const rawLogString = (await git.raw(gitArgs)) ?? ''
   const logStrings = rawLogString.trim().split(logSeparator)
   logStrings.pop() // trailing separator
+  const datumNames = commitDatums.map(datum => datum.name)
   return logStrings
     .reduce((logs, logString) => {
       let log: any = {}
       // propsRemaining and logParts are guaranteed to be the same length
       // TODO should be a zip...
-      const propsRemaining = [...formatProps]
+      const propsRemaining = [...datumNames]
       const logParts = logString.split(partSeparator)
       while (propsRemaining.length > 0) {
         log[propsRemaining.shift()!] = logParts.shift()!.trim()
       }
       logs.push(log)
       return logs
-    }, [] as (Omit<LogEntry, 'tags'> & { refs: string })[])
+    }, [] as (Omit<CommitEntry, 'tags'> & { refs: string })[])
     .map(
       ({
         refs,
@@ -395,8 +396,8 @@ export async function log(
       }: {
         sha: string
         refs: string
-        body: string
-        subject: string
+        // body: string
+        // subject: string
         message: string
       }) => {
         return {
@@ -414,5 +415,3 @@ export async function log(
       }
     )
 }
-
-// export async function getNextStableReleaseWork(): string[] {}

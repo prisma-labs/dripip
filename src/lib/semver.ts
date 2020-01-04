@@ -1,4 +1,20 @@
-import * as Semver from 'semver'
+import * as SemVer from 'semver'
+
+export type StableVer = {
+  major: string
+  minor: string
+  patch: string
+  version: string
+}
+
+export type PreviewVer = {
+  major: string
+  minor: string
+  patch: string
+  identifier: string
+  buildNum: number
+  version: string
+}
 
 /**
  * Given a list of conventional commit messages (subject and body, the entire
@@ -81,18 +97,18 @@ export function bump(
   // | 'prepatch'
   // | 'pre',
   // preReleaseTypeIdentifier: string,
-  prevVer: Semver.SemVer
-): Semver.SemVer {
+  prevVer: SemVer.SemVer
+): SemVer.SemVer {
   // const buildNumPrefix = preReleaseTypeIdentifier
   //   ? `${preReleaseTypeIdentifier}.`
   //   : ''
   switch (bumpType) {
     case 'major':
-      return Semver.parse(`${prevVer.major + 1}.0.0`)!
+      return SemVer.parse(`${prevVer.major + 1}.0.0`)!
     case 'minor':
-      return Semver.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
+      return SemVer.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
     case 'patch':
-      return Semver.parse(
+      return SemVer.parse(
         `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
       )!
     // // TODO refactor
@@ -131,4 +147,8 @@ export function bump(
  * Create a semver instance programatically.
  */
 export const create = (maj: number, min: number, pat: number) =>
-  Semver.parse(`${maj}.${min}.${pat}`)!
+  SemVer.parse(`${maj}.${min}.${pat}`)!
+
+export const parse = SemVer.parse
+
+export { SemVer } from 'semver'

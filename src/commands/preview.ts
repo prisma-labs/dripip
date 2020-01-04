@@ -1,14 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
-import {
-  indentBlock4,
-  parseTag,
-  groupByProp,
-  ParsedTag,
-  GroupBy,
-  findLatestStable,
-  findLatestPreview,
-} from '../lib/utils'
+import { indentBlock4 } from '../lib/utils'
+import * as Rel from '../lib/release'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as SemVer from 'semver'
@@ -60,24 +53,10 @@ export class Preview extends Command {
     //    2. show the tag author name
     //    3. show the the date the tag was made
 
-    /**
-     * Before executing a preview release confirm that the commit to be released
-     * has not already been released either as preview or stable.
-     */
-    const [currentCommitShortSha, tags] = await Promise.all([
-      Git.gitGetSha(git, { short: true }),
-      Git.gitGetTags(git).then(tags => {
-        return groupByProp(tags.map(parseTag), 'type')
-      }),
-    ])
+    const series = await Rel.scanCommitSeries(git)
 
-    const hasReleaseTags = tags.stable_release || tags.pre_release
-
-    if (hasReleaseTags) {
-      return send.commitAlreadyPreAndOrStableReleased(
-        currentCommitShortSha,
-        tags
-      )
+    if (series.current.releases.stable || series.current.releases.preview) {
+      return send.commitAlreadyPreAndOrStableReleased(series.current)
     }
 
     if (await Git.isTrunk(git)) {
@@ -85,7 +64,7 @@ export class Preview extends Command {
         return send.releaseType({ type: 'stable', reason: 'is_trunk' })
       }
 
-      const nextRelease = await calcNextStablePreview(git)
+      const nextRelease = await calcNextStablePreview(series)
 
       if (nextRelease === null) {
         return send.noReleaseToMake()
@@ -150,15 +129,7 @@ type ReleaseBrief = {
  * 3. Bump last stable version by bump type, thus producing the next version.
  * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
  */
-async function calcNextStablePreview(
-  git: Git.Simple
-): Promise<null | ReleaseBrief> {
-  const maybeLatestStableVer = await findLatestStable(git)
-  const maybeLatestPreVerSinceStable = await findLatestPreview(
-    git,
-    maybeLatestStableVer
-  )
-
+function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
   // We need all the commits since the last stable release to calculate the
   // pre-release. The pre-release is a bump against the last stable plus a
   // build number. The bump type used to bump is based on the aggregate of
@@ -167,63 +138,41 @@ async function calcNextStablePreview(
   // pre-release, unless a later pre-release incurs a higher-order bump-type
   // e.g. begin with patch-kind changes followed later by min-kind changes.
 
-  const commitsSinceLastStable = await Git.log(git, {
-    since: maybeLatestStableVer ?? undefined,
-  })
-
-  const commitMessagesSinceLastStable = commitsSinceLastStable.map(
-    c => c.message
-  )
-
   // Calculate the next version
 
   const stablePreReleaseIdentifier = 'next'
-  const bumpType = calcBumpType(commitMessagesSinceLastStable)
+  const bumpType = calcBumpType(series.commitsSinceStable.map(c => c.message))
 
   if (bumpType === null) return null
 
-  // The semver parses in this expression are guaranteed by the tag finding
-  // done before.
-  const maybeLatestBuildNum =
-    maybeLatestPreVerSinceStable === null
-      ? null
-      : (SemVer.parse(maybeLatestPreVerSinceStable)!.prerelease[1] as number)
-
-  maybeLatestPreVerSinceStable !== null
-    ? SemVer.parse(maybeLatestPreVerSinceStable)!
-    : maybeLatestStableVer !== null
-
-  const nextVerBuildNum = (maybeLatestBuildNum ?? 0) + 1
+  const nextVerBuildNum =
+    (series.previousPreview?.releases.preview.buildNum ?? Rel.zeroBuildNum) + 1
 
   const nextStable = bump(
     bumpType,
-    SemVer.parse(maybeLatestStableVer ?? '0.0.0')!
+    SemVer.parse(series.previousStable?.releases.stable.version ?? Rel.zeroVer)!
   ).version
 
   const nextVer =
     nextStable + `-${stablePreReleaseIdentifier}.${nextVerBuildNum}`
 
-  // TODO refactor, expensive re-calc of log when its already a subset of the above
-  // filter on tags? commitsInRelease[0].tags
-  const commitsInRelease = await Git.log(git, {
-    since: maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? undefined,
-  })
-  const commitMessagesInRelease = commitsInRelease.map(m => m.message)
-
   return {
-    currentStable: maybeLatestStableVer,
-    currentPreviewNumber: maybeLatestBuildNum,
+    currentStable: series.previousStable?.releases.stable.version ?? null,
+    currentPreviewNumber:
+      series.previousPreview?.releases.preview.buildNum ?? null,
     nextStable: nextStable,
     nextPreviewNumber: nextVerBuildNum,
     currentVersion:
-      maybeLatestPreVerSinceStable ?? maybeLatestStableVer ?? null,
+      series.previousPreview?.releases.preview.version ??
+      series.previousStable?.releases.stable.version ??
+      null,
     nextVersion: nextVer,
-    commitsInRelease: commitMessagesInRelease,
+    commitsInRelease: series.commitsSincePreview.map(c => c.message),
     bumpType,
     isFirstVer:
-      maybeLatestPreVerSinceStable === null && maybeLatestStableVer === null,
-    isFirstVerStable: maybeLatestStableVer === null,
-    isFirstVerPreRelease: maybeLatestPreVerSinceStable === null,
+      series.previousStable === null && series.previousPreview === null,
+    isFirstVerStable: series.previousStable === null,
+    isFirstVerPreRelease: series.previousPreview === null,
   }
 }
 
@@ -271,15 +220,11 @@ function createOutputters(opts: OutputterOptions) {
     )
   }
 
-  function commitAlreadyPreAndOrStableReleased(
-    sha: string,
-    tags: GroupBy<ParsedTag, 'type'>
-  ): void {
+  function commitAlreadyPreAndOrStableReleased(c: Rel.Commit): void {
     const baseMessage = `You cannot make a preview release for this commit because ${
-      (tags.pre_release?.length ?? 0) > 0 &&
-      (tags.stable_release?.length ?? 0) > 0
+      c.releases.preview && c.releases.stable
         ? 'stable and preview releases were already made'
-        : (tags.pre_release?.length ?? 0) > 0
+        : c.releases.preview
         ? 'a preview release was already made.'
         : 'a stable release was already made.'
     }`
@@ -287,10 +232,10 @@ function createOutputters(opts: OutputterOptions) {
       Output.outputException('invalid_pre_release_case', baseMessage, {
         json: true,
         context: {
-          sha,
-          preReleaseTag: tags.pre_release?.[0]?.value.version,
-          stableReleaseTag: tags.stable_release?.[0]?.value.version,
-          otherTags: tags.unknown?.map(t => t.value) ?? [],
+          sha: c.sha,
+          preReleaseTag: c.releases.preview?.version,
+          stableReleaseTag: c.releases.stable?.version,
+          otherTags: [], // TODO
         },
       })
     } else {
@@ -298,8 +243,8 @@ function createOutputters(opts: OutputterOptions) {
       message += baseMessage + '\n'
       message += '\n'
       message += indentBlock4(stripIndents`
-        The commit is:           ${sha}
-        ${renderTagsPresent(tags)}
+        The commit is:           ${c.sha}
+        ${renderTagsPresent(c)}
       `)
       Output.outputRaw(message)
     }
@@ -322,46 +267,39 @@ function createOutputters(opts: OutputterOptions) {
  * Given groups of parsed tags, create a nice summary of the commit for the user
  * to read in their terminal.
  */
-function renderTagsPresent(tags: GroupBy<ParsedTag, 'type'>): string {
+function renderTagsPresent(c: Rel.Commit): string {
   const NA = 'N/A'
-  const [expectedMaybePreRelease, ...unexpectedOtherPreReleases] =
-    tags.pre_release ?? []
-  const [expectedMaybeStableRelease, ...unexpectedOtherStableReleases] =
-    tags.stable_release ?? []
-
   let message = ''
-
-  message += `The stable release is:   ${expectedMaybeStableRelease?.value.format() ??
-    NA}\n`
-  message += `The preview release is:  ${expectedMaybePreRelease?.value.format() ??
-    NA}\n`
+  message += `The stable release is:   ${c.releases.stable?.version ?? NA}\n`
+  message += `The preview release is:  ${c.releases.preview?.version ?? NA}\n`
   message += `Other tags present:      ${
-    !tags.unknown ? NA : tags.unknown.map(t => t.value).join(', ')
+    c.nonReleaseTags.length === 0 ? NA : c.nonReleaseTags.join(', ')
   }\n`
-  if (
-    unexpectedOtherPreReleases.length > 0 ||
-    unexpectedOtherStableReleases.length > 0
-  ) {
-    message += '\nWARNING\n\n'
-    if (unexpectedOtherStableReleases) {
-      message +=
-        '- Multiple stable releases appear to have been on this commit when there should only ever been 0 or 1\n'
-    }
-    if (unexpectedOtherPreReleases) {
-      message +=
-        '- Multiple preview releases appear to have been on this commit when there should only ever been 0 or 1\n'
-    }
-    message += '\n'
-    message += 'This may have happened because:\n'
-    message += '- A human manually fiddled with the git tags\n'
-    message += '- Another tool than dripip acted on the git tags\n'
-    message += '- There is a bug in dripip\n'
-    message += '\n'
-    message +=
-      'If you think there is a bug in dripip please open an issue: https://github.com/prisma-labs/dripip/issues/new.\n'
-    message +=
-      'Otherwise consider manually cleaning up this commit to fix the above violated invariant(s).\n'
-  }
+  // TODO make part of diagnostics
+  // if (
+  //   unexpectedOtherPreReleases.length > 0 ||
+  //   unexpectedOtherStableReleases.length > 0
+  // ) {
+  //   message += '\nWARNING\n\n'
+  //   if (unexpectedOtherStableReleases) {
+  //     message +=
+  //       '- Multiple stable releases appear to have been on this commit when there should only ever been 0 or 1\n'
+  //   }
+  //   if (unexpectedOtherPreReleases) {
+  //     message +=
+  //       '- Multiple preview releases appear to have been on this commit when there should only ever been 0 or 1\n'
+  //   }
+  //   message += '\n'
+  //   message += 'This may have happened because:\n'
+  //   message += '- A human manually fiddled with the git tags\n'
+  //   message += '- Another tool than dripip acted on the git tags\n'
+  //   message += '- There is a bug in dripip\n'
+  //   message += '\n'
+  //   message +=
+  //     'If you think there is a bug in dripip please open an issue: https://github.com/prisma-labs/dripip/issues/new.\n'
+  //   message +=
+  //     'Otherwise consider manually cleaning up this commit to fix the above violated invariant(s).\n'
+  // }
 
   return message
 }
