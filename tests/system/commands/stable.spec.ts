@@ -1,14 +1,17 @@
 // TODO test that context honours the base branch setting of the repo
-import { createWorkspace } from '../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../src/lib/git'
+import { createWorkspace } from '../../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../../src/lib/git'
 
 const ws = createWorkspace('stable')
 
-describe('preflight requirements include that', () => {
-  beforeEach(async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // package json change
+async function setupPackageJson() {
+  await ws.fs.writeAsync('package.json', {
+    name: 'foo',
+    version: '0.0.0-ignoreme',
   })
+}
 
+describe('preflight requirements include that', () => {
   it('the branch is trunk', async () => {
     await ws.git.checkoutLocalBranch('foobar')
     const result: any = await ws.dripip('stable')
@@ -51,7 +54,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (needs pull)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // something on remote
+    await ws.git.raw(['reset', '--hard', 'head~2']) // package.json + something on remote
+    await setupPackageJson()
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
@@ -70,7 +74,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (diverged)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // remove something on remote
+    await ws.git.raw(['reset', '--hard', 'head~2']) // remove package.json + something on remote
+    await setupPackageJson()
     await gitCreateEmptyCommit(ws.git, 'some work')
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
@@ -90,6 +95,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('check that the commit does not already have a stable release present', async () => {
+    await ws.git.raw(['reset', '--hard', 'head~1']) // package.json
+    await setupPackageJson()
     await ws.git.addTag('1.0.0')
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'

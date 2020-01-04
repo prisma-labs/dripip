@@ -345,6 +345,9 @@ export type LogEntry = {
   message: string
 }
 
+const logSeparator = '$@<!____LOG____!>@$'
+const partSeparator = '$@<!____PROP____!>@$'
+
 /**
  * Version of native simple git func tailored for us, especially accurate types.
  */
@@ -354,30 +357,23 @@ export async function log(
 ): Promise<LogEntry[]> {
   // TODO tags or bodies or subjects with double quotes in them or commas will
   // break parsing... consider using native git.log func?
-  git.log()
-  const logSeparator = '$@<!____LOG____!>@$'
-  const partSeparator = '$@<!____PROP____!>@$'
-  const formatParts = [
+  const logDatums = [
     { prop: 'sha', code: '%H' },
     { prop: 'refs', code: '%D' },
     { prop: 'subject', code: '%s' },
     { prop: 'body', code: '%b' },
     { prop: 'message', code: '%B' },
   ]
-  const formatProps = formatParts.map(part => part.prop)
+  const formatProps = logDatums.map(datum => datum.prop)
   const args = [
     'log',
-    `--format=${formatParts
+    `--format=${logDatums
       .map(part => part.code)
       .join(partSeparator)}${logSeparator}`,
   ]
   if (ops?.since) args.push(`${ops.since}..head`)
   const rawLogString = (await git.raw(args)) ?? ''
   const logStrings = rawLogString.trim().split(logSeparator)
-  // git range is inclusive, but we want exclusive, semantic of "since"
-  if (ops?.since) {
-    logStrings.pop()
-  }
   logStrings.pop() // trailing separator
   return logStrings
     .reduce((logs, logString) => {
@@ -418,3 +414,5 @@ export async function log(
       }
     )
 }
+
+// export async function getNextStableReleaseWork(): string[] {}

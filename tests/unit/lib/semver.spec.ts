@@ -1,4 +1,4 @@
-import * as Semver from '../../src/lib/semver'
+import * as Semver from '../../../src/lib/semver'
 
 describe('calcBumpType', () => {
   it('"fix" bumps patch', () => {

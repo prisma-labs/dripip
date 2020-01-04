@@ -1,8 +1,8 @@
 import {
   createWorkspace,
   resetEnvironmentBeforeEachTest,
-} from '../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../src/lib/git'
+} from '../../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../../src/lib/git'
 
 const ws = createWorkspace('preview')
 
@@ -78,40 +78,6 @@ describe('stable preview releases', () => {
         },
         "kind": "ok",
         "type": "release_type",
-      }
-    `)
-  })
-
-  it('if none of the commits conform to conventional commit then no release will be made', async () => {
-    await gitCreateEmptyCommit(ws.git, 'does not conform 1')
-    await gitCreateEmptyCommit(ws.git, 'does not conform 2')
-    await gitCreateEmptyCommit(ws.git, 'does not conform 3')
-    const result = await ws.dripip('preview --dry-run')
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {},
-          "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
-        },
-        "kind": "exception",
-        "type": "no_release_to_make",
-      }
-    `)
-  })
-
-  it('if all the commits are meta type then no release will be made', async () => {
-    await gitCreateEmptyCommit(ws.git, 'chore: 1')
-    await gitCreateEmptyCommit(ws.git, 'chore: 2')
-    await gitCreateEmptyCommit(ws.git, 'chore: 3')
-    const result = await ws.dripip('preview --dry-run')
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {},
-          "summary": "All commits are either meta or not conforming to conventional commit. No release will be made.",
-        },
-        "kind": "exception",
-        "type": "no_release_to_make",
       }
     `)
   })
