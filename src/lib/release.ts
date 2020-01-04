@@ -2,8 +2,6 @@ import * as SemVer from './semver'
 import * as Git from './git'
 import { findIndexFromEnd } from './utils'
 
-export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
-
 /**
  * Get the previous stable and commits since then. If there is no previous
  * stable then commits are counted from start of history.
@@ -12,6 +10,12 @@ export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
   return getLog(git).then(buildSeries)
 }
 
+/**
+ * Get the latest stable and all subsequent commits. If no stable then all
+ * commits (edge-case, new project) since-inclusive initial commit. The returned
+ * tuple contains the  stable commit partitioned from the subsequent commits.
+ * The stable commit may be null.
+ */
 async function getLog(git: Git.Simple): Promise<SeriesLog> {
   const previousStableCommit = await findLatestStable(git)
   const commits = await Git.log(git, { since: previousStableCommit })
@@ -78,6 +82,8 @@ export type Series = {
   current: Commit
   isEmpty: boolean
 }
+
+export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
 
 /**
  * Build structured series data from a raw series log.
