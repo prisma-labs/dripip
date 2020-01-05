@@ -157,6 +157,7 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
   const nextVer =
     nextStable + `-${stablePreReleaseIdentifier}.${nextVerBuildNum}`
 
+  // TODO simplify by exposing series struct as is, little value in the remix here
   return {
     currentStable: series.previousStable?.releases.stable.version ?? null,
     currentPreviewNumber:
@@ -168,7 +169,9 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
       series.previousStable?.releases.stable.version ??
       null,
     nextVersion: nextVer,
-    commitsInRelease: series.commitsSincePreview.map(c => c.message),
+    commitsInRelease: series.previousPreview
+      ? series.commitsSincePreview.map(c => c.message)
+      : series.commitsSinceStable.map(c => c.message),
     bumpType,
     isFirstVer:
       series.previousStable === null && series.previousPreview === null,

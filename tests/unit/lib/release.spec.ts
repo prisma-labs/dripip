@@ -7,26 +7,21 @@ import * as Git from '../../../src/lib/git'
 import * as Rel from '../../../src/lib/release'
 
 describe('buildSeries', () => {
-  // empty
   it('<empty>', () => {
     expect(() => gitlog()).toThrowErrorMatchingSnapshot()
   })
-  // none
   it('none', () => {
     expect(gitlog(n)).toMatchSnapshot()
   })
-  // none<>preview
   it('none preview', () => {
     expect(gitlog(n, p)).toMatchSnapshot()
   })
   it('preview none none preview', () => {
     expect(gitlog(p, n, n, p)).toMatchSnapshot()
   })
-  // none<>stable
   it('stable none', () => {
     expect(gitlog(s, n)).toMatchSnapshot()
   })
-  // none<>preview<>stable
   it('stable none none preview none', () => {
     expect(gitlog(s, n, n, p, n)).toMatchSnapshot()
   })
@@ -69,7 +64,7 @@ function n(): RawLogEntryValues {
 }
 
 function gitlog(...actions: (() => RawLogEntryValues)[]): Rel.Series {
-  const log = Git.parseLog(Git.serializeLog(actions.map(f => f())))
+  const log = Git.parseLog(Git.serializeLog(actions.map(f => f()).reverse()))
   const pstable = actions[0] === s ? (log.shift() as Git.LogEntry) : null
   return Rel.buildSeries([pstable, log])
 }

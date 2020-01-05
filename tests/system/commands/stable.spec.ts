@@ -105,21 +105,7 @@ describe('preflight requirements include that', () => {
         "data": Object {
           "context": Object {
             "sha": "__sha__",
-            "version": Object {
-              "build": Array [],
-              "includePrerelease": false,
-              "loose": false,
-              "major": 1,
-              "minor": 0,
-              "options": Object {
-                "includePrerelease": false,
-                "loose": false,
-              },
-              "patch": 0,
-              "prerelease": Array [],
-              "raw": "1.0.0",
-              "version": "1.0.0",
-            },
+            "version": "1.0.0",
           },
           "summary": "You are attempting a stable release on a commit that already has a stable release.",
         },

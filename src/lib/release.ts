@@ -20,7 +20,7 @@ async function getLog(git: Git.Simple): Promise<SeriesLog> {
   const previousStableCommit = await findLatestStable(git)
   const commits = await Git.log(git, { since: previousStableCommit })
   return previousStableCommit
-    ? [commits.shift() as Git.LogEntry, commits]
+    ? [commits.pop() as Git.LogEntry, commits]
     : [null, commits]
 }
 
@@ -108,24 +108,14 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
   })
 
   const prevPreviewI = findIndexFromEnd(
-    commitsSince,
-    c => c.tags.find(tag => tag.match(/.+-next\.\d+/)) !== undefined
+    commitsSinceStable,
+    c => c.releases.preview !== null
   )
 
   let previousPreview: null | PreviewCommit = null
   let commitsSincePreview: UnreleasedCommit[] = []
   if (prevPreviewI !== -1) {
-    const c = commitsSince[prevPreviewI]!
-    // TODO findFirstSuccess(processor, xs)
-    previousPreview = {
-      sha: c.sha,
-      message: c.message,
-      nonReleaseTags: c.tags.filter(isUnknownTag),
-      releases: {
-        stable: null, //SemVer.parse(c.tags.find(isStableTag) ?? ''),
-        preview: SemVer.parsePreview(c.tags.find(isPreviewTag)!)!,
-      },
-    }
+    previousPreview = commitsSinceStable[prevPreviewI]! as PreviewCommit
     commitsSincePreview = commitsSinceStable.slice(
       prevPreviewI + 1
     ) as UnreleasedCommit[]

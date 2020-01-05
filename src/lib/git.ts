@@ -393,11 +393,15 @@ export function serializeLog<T>(values: [string, string, string][]): string {
 }
 
 /**
- * Parse a raw git log into a list of structured commit entries.
+ * Parse a raw git log into a list of structured commit entries. The given
+ * rawLog should be newest commits first, as per how git log returns items (ref:
+ * https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to#comment95151860_36636526).
+ * In turn, the items are here flipped so that oldest commits are first.
  */
 export function parseLog(rawLog: string): LogEntry[] {
   const logStrings = rawLog.trim().split(logEntrySeparator)
   logStrings.pop() // trailing separator
+  logStrings.reverse() // oldest first
   const datumNames = commitDatums.map(datum => datum.name)
   return logStrings
     .reduce((logs, logString) => {
