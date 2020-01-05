@@ -1,8 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
-import { calcBumpType } from '../lib/conventional-commit'
-import { bumpVer, delay } from '../lib/utils'
+import { bump, calcBumpType } from '../lib/semver'
 import * as SemVer from 'semver'
 import { publish } from '../lib/publish'
 import createGit from 'simple-git/promise'
@@ -40,16 +39,18 @@ export class Stable extends Command {
     if (!check.notAlreadyStableReleased(ctx)) return
 
     const bumpType = calcBumpType(
-      ctx.commitsSinceLastStable.map(c => c.message)
+      ctx.series.commitsSinceStable.map(c => c.message)
     )
 
     if (bumpType === null) {
       return show.noReleaseNeeded(ctx)
     }
 
-    const newStableVer = bumpVer(
+    const newStableVer = bump(
       bumpType,
-      ctx.latestReleases.stable?.version ?? SemVer.parse('0.0.0')!
+      ctx.series.previousStable === null
+        ? SemVer.parse('0.0.0')!
+        : SemVer.parse(ctx.series.previousStable.releases.stable.version)!
     )
 
     if (flags['dry-run']) {
@@ -93,7 +94,7 @@ function createShowers(opts: OutputterOptions) {
       {
         json: opts.json,
         context: {
-          commits: ctx.commitsSinceLastStable.map(c => c.message),
+          commits: ctx.series.commitsSinceStable.map(c => c.message),
         },
       }
     )
@@ -102,7 +103,7 @@ function createShowers(opts: OutputterOptions) {
   function dryRun(ctx: Context.Context, newVer: string): void {
     Output.outputOk('dry_run', {
       newVer,
-      commits: ctx.commitsSinceLastStable,
+      commits: ctx.series.commitsSinceStable,
     })
   }
 
@@ -122,7 +123,7 @@ function createValidators(opts: OutputterOptions) {
           json: opts.json,
           context: {
             syncStatus: ctx.currentBranch.syncStatus,
-            sha: ctx.currentCommit.sha,
+            sha: ctx.series.current.sha,
           },
         }
       )
@@ -139,7 +140,7 @@ function createValidators(opts: OutputterOptions) {
           json: opts.json,
           context: {
             branch: ctx.currentBranch.name,
-            sha: ctx.currentCommit.sha,
+            sha: ctx.series.current.sha,
           },
         }
       )
@@ -149,15 +150,15 @@ function createValidators(opts: OutputterOptions) {
   }
 
   function notAlreadyStableReleased(ctx: Context.Context): boolean {
-    if (ctx.currentCommit.releases.stable) {
+    if (ctx.series.current.releases.stable) {
       Output.outputException(
         'commit_already_has_stable_release',
         'You are attempting a stable release on a commit that already has a stable release.',
         {
           json: opts.json,
           context: {
-            version: ctx.currentCommit.releases.stable!.version,
-            sha: ctx.currentCommit.sha,
+            version: ctx.series.current.releases.stable!.version,
+            sha: ctx.series.current.sha,
           },
         }
       )

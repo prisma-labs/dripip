@@ -1,14 +1,17 @@
 // TODO test that context honours the base branch setting of the repo
-import { createWorkspace } from '../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../src/lib/git'
+import { createWorkspace } from '../../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../../src/lib/git'
 
 const ws = createWorkspace('stable')
 
-describe('preflight requirements include that', () => {
-  beforeEach(async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // package json change
+async function setupPackageJson() {
+  await ws.fs.writeAsync('package.json', {
+    name: 'foo',
+    version: '0.0.0-ignoreme',
   })
+}
 
+describe('preflight requirements include that', () => {
   it('the branch is trunk', async () => {
     await ws.git.checkoutLocalBranch('foobar')
     const result: any = await ws.dripip('stable')
@@ -51,7 +54,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (needs pull)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // something on remote
+    await ws.git.raw(['reset', '--hard', 'head~2']) // package.json + something on remote
+    await setupPackageJson()
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
@@ -70,7 +74,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (diverged)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // remove something on remote
+    await ws.git.raw(['reset', '--hard', 'head~2']) // remove package.json + something on remote
+    await setupPackageJson()
     await gitCreateEmptyCommit(ws.git, 'some work')
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
@@ -90,6 +95,8 @@ describe('preflight requirements include that', () => {
   })
 
   it('check that the commit does not already have a stable release present', async () => {
+    await ws.git.raw(['reset', '--hard', 'head~1']) // package.json
+    await setupPackageJson()
     await ws.git.addTag('1.0.0')
     const result: any = await ws.dripip('stable')
     result.data.context.sha = '__sha__'
@@ -98,21 +105,7 @@ describe('preflight requirements include that', () => {
         "data": Object {
           "context": Object {
             "sha": "__sha__",
-            "version": Object {
-              "build": Array [],
-              "includePrerelease": false,
-              "loose": false,
-              "major": 1,
-              "minor": 0,
-              "options": Object {
-                "includePrerelease": false,
-                "loose": false,
-              },
-              "patch": 0,
-              "prerelease": Array [],
-              "raw": "1.0.0",
-              "version": "1.0.0",
-            },
+            "version": "1.0.0",
           },
           "summary": "You are attempting a stable release on a commit that already has a stable release.",
         },
@@ -147,8 +140,8 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "context": Object {
             "commits": Array [
-              "chore: 2",
               "chore: 1",
+              "chore: 2",
             ],
           },
           "summary": "The release you attempting only contains chore commits which means no release is needed.",
@@ -173,18 +166,22 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "commits": Array [
             Object {
-              "body": "",
-              "message": "fix: 2",
+              "message": "fix: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
               "sha": "__sha__",
-              "subject": "fix: 2",
-              "tags": Array [],
             },
             Object {
-              "body": "",
-              "message": "fix: 1",
+              "message": "fix: 2",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
               "sha": "__sha__",
-              "subject": "fix: 1",
-              "tags": Array [],
             },
           ],
           "newVer": "0.1.1",
@@ -210,53 +207,67 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "commits": Array [
             Object {
-              "body": "",
-              "message": "feat: 2",
-              "sha": "__sha__",
-              "subject": "feat: 2",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
-              "message": "chore: 1",
-              "sha": "__sha__",
-              "subject": "chore: 1",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
-              "message": "fix: 1",
-              "sha": "__sha__",
-              "subject": "fix: 1",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
-              "message": "feat: 1",
-              "sha": "__sha__",
-              "subject": "feat: 1",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
-              "message": "chore: add package.json",
-              "sha": "__sha__",
-              "subject": "chore: add package.json",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
-              "message": "chore: who knows",
-              "sha": "__sha__",
-              "subject": "chore: who knows",
-              "tags": Array [],
-            },
-            Object {
-              "body": "",
               "message": "Initial commit",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
               "sha": "__sha__",
-              "subject": "Initial commit",
-              "tags": Array [],
+            },
+            Object {
+              "message": "chore: who knows",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "chore: add package.json",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "feat: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "fix: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "chore: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "feat: 2",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
             },
           ],
           "newVer": "0.1.0",

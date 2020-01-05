@@ -340,52 +340,76 @@ export async function findTag(
 export type LogEntry = {
   sha: string
   tags: string[]
-  body: string
-  subject: string
   message: string
 }
 
 /**
- * Version of native simple git func tailored for us, especially accurate types.
+ * Fetch commit log from given ref or else its entirety. The since commit is
+ * inclusive. If given, it will be in your result set. Oldest commit comes first.
  */
 export async function log(
   git: Simple,
   ops?: { since?: null | string }
 ): Promise<LogEntry[]> {
-  // TODO tags or bodies or subjects with double quotes in them or commas will
-  // break parsing... consider using native git.log func?
-  git.log()
-  const logSeparator = '$@<!____LOG____!>@$'
-  const partSeparator = '$@<!____PROP____!>@$'
-  const formatParts = [
-    { prop: 'sha', code: '%H' },
-    { prop: 'refs', code: '%D' },
-    { prop: 'subject', code: '%s' },
-    { prop: 'body', code: '%b' },
-    { prop: 'message', code: '%B' },
-  ]
-  const formatProps = formatParts.map(part => part.prop)
-  const args = [
-    'log',
-    `--format=${formatParts
-      .map(part => part.code)
-      .join(partSeparator)}${logSeparator}`,
-  ]
-  if (ops?.since) args.push(`${ops.since}..head`)
-  const rawLogString = (await git.raw(args)) ?? ''
-  const logStrings = rawLogString.trim().split(logSeparator)
-  // git range is inclusive, but we want exclusive, semantic of "since"
-  if (ops?.since) {
-    logStrings.pop()
-  }
+  const gitArgs = ['log', `--format=${gitLogFormat(commitDatums)}`]
+  // ~1 makes the range inclusive, since-commit will be in the result set
+  if (ops?.since) gitArgs.push(`${ops.since}~1..head`)
+  const rawLog = (await git.raw(gitArgs)) ?? ''
+  return parseLog(rawLog)
+}
+
+const logEntrySeparator = '$@<!____LOG____!>@$'
+const logEntryValueSepartaor = '$@<!____PROP____!>@$'
+
+type CommitDatum = { name: string; code: 'H' | 'D' | 's' | 'b' | 'B' }
+
+export const commitDatums: CommitDatum[] = [
+  { name: 'sha', code: 'H' },
+  { name: 'refs', code: 'D' },
+  { name: 'message', code: 'B' },
+  // { name: 'subject', code: 's' },
+  // { name: 'body', code: 'b' },
+]
+
+export function gitLogFormat(commitDatums: CommitDatum[]): string {
+  return (
+    commitDatums.map(part => '%' + part.code).join(logEntryValueSepartaor) +
+    logEntrySeparator
+  )
+}
+
+/**
+ * Lightweight utility to build up a raw log from semi-structured commit input.
+ * Useful for creating mock data. Not very safe. Requires tuple members to be in
+ * the exact order as the datums in this module. Hence this is for testing, not
+ * external consumption.
+ */
+export function serializeLog<T>(values: [string, string, string][]): string {
+  if (values.length === 0) return ''
+  return (
+    values.map(v => v.join(logEntryValueSepartaor)).join(logEntrySeparator) +
+    logEntrySeparator
+  )
+}
+
+/**
+ * Parse a raw git log into a list of structured commit entries. The given
+ * rawLog should be newest commits first, as per how git log returns items (ref:
+ * https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to#comment95151860_36636526).
+ * In turn, the items are here flipped so that oldest commits are first.
+ */
+export function parseLog(rawLog: string): LogEntry[] {
+  const logStrings = rawLog.trim().split(logEntrySeparator)
   logStrings.pop() // trailing separator
+  logStrings.reverse() // oldest first
+  const datumNames = commitDatums.map(datum => datum.name)
   return logStrings
     .reduce((logs, logString) => {
       let log: any = {}
       // propsRemaining and logParts are guaranteed to be the same length
       // TODO should be a zip...
-      const propsRemaining = [...formatProps]
-      const logParts = logString.split(partSeparator)
+      const propsRemaining = [...datumNames]
+      const logParts = logString.split(logEntryValueSepartaor)
       while (propsRemaining.length > 0) {
         log[propsRemaining.shift()!] = logParts.shift()!.trim()
       }
@@ -393,16 +417,7 @@ export async function log(
       return logs
     }, [] as (Omit<LogEntry, 'tags'> & { refs: string })[])
     .map(
-      ({
-        refs,
-        ...rest
-      }: {
-        sha: string
-        refs: string
-        body: string
-        subject: string
-        message: string
-      }) => {
+      ({ refs, ...rest }: { sha: string; refs: string; message: string }) => {
         return {
           ...rest,
           tags: refs
