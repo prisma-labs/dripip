@@ -8,8 +8,8 @@ import * as Rel from '../../../src/lib/release'
 
 describe('buildSeries', () => {
   // empty
-  it('<emptj>', () => {
-    expect(gitlog()).toMatchSnapshot()
+  it('<empty>', () => {
+    expect(() => gitlog()).toThrowErrorMatchingSnapshot()
   })
   // none
   it('none', () => {

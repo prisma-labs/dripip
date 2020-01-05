@@ -3,19 +3,21 @@ import * as SemVer from 'semver'
 export type Ver = StableVer | PreviewVer
 
 export type StableVer = {
+  version: string
   major: string
   minor: string
   patch: string
-  version: string
 }
 
 export type PreviewVer = {
+  version: string
   major: string
   minor: string
   patch: string
-  identifier: string
-  buildNum: number
-  version: string
+  preRelease: {
+    identifier: string
+    buildNum: number
+  }
 }
 
 /**
@@ -154,7 +156,7 @@ export const create = (maj: number, min: number, pat: number) =>
 export function parsePreview(ver: string): null | PreviewVer {
   const result = parse(ver)
   if (result === null) return null
-  if ((result as any).identifier) {
+  if ((result as any).preRelease) {
     return result as PreviewVer
   }
   throw new Error(
@@ -176,20 +178,22 @@ export function parse(ver: string): null | StableVer | PreviewVer {
     const identifier = result[4]
     const buildNum = parseInt(result[5], 10)
     return {
+      version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
       major,
       minor,
       patch,
-      identifier,
-      buildNum,
-      version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
+      preRelease: {
+        identifier,
+        buildNum,
+      },
     }
   }
 
   return {
+    version: `${major}.${minor}.${patch}`,
     major,
     minor,
     patch,
-    version: `${major}.${minor}.${patch}`,
   }
 }
 

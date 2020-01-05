@@ -88,6 +88,12 @@ export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
  * Build structured series data from a raw series log.
  */
 export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
+  if (previousStable === null && commitsSince.length === 0) {
+    throw new Error(
+      `Cannot build release series with given data. There is no previous stable release and no commits since. This would indicate an unexpected error or working with a git repo that has zero commits. The latter should be guarded by upstream checks. Therefore this is bad. There must be a bug.`
+    )
+  }
+
   const commitsSinceStable = commitsSince.map(c => {
     const { message, sha } = c
     return {
