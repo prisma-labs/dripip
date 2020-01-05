@@ -168,15 +168,17 @@ export function parsePreview(ver: string): null | PreviewVer {
  * Parse a version string into structured data.
  */
 export function parse(ver: string): null | StableVer | PreviewVer {
-  const result = ver.match(/(\d).(\d).(\d)(?:-(\w+).(\d)+)?/)
+  const result = ver.match(
+    /^(\d+).(\d+).(\d+)$|^(\d+).(\d+).(\d+)-(\w+).(\d+)$/
+  )
   if (result === null) return null
-  const major = result[1]
-  const minor = result[2]
-  const patch = result[3]
 
   if (result[4]) {
-    const identifier = result[4]
-    const buildNum = parseInt(result[5], 10)
+    const major = result[4]
+    const minor = result[5]
+    const patch = result[6]
+    const identifier = result[7]
+    const buildNum = parseInt(result[8], 10)
     return {
       version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
       major,
@@ -189,6 +191,9 @@ export function parse(ver: string): null | StableVer | PreviewVer {
     }
   }
 
+  const major = result[1]
+  const minor = result[2]
+  const patch = result[3]
   return {
     version: `${major}.${minor}.${patch}`,
     major,
