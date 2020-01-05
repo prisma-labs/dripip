@@ -109,3 +109,11 @@ export function findIndexFromEnd<T>(xs: T[], f: (x: T) => boolean): number {
   }
   return -1
 }
+
+/**
+ * Get the last element of an array.
+ */
+export function last<T>(xs: T[]): null | T {
+  if (xs.length === 0) return null
+  return xs[xs.length - 1]
+}

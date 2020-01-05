@@ -1,5 +1,7 @@
 import * as SemVer from 'semver'
 
+export type Ver = StableVer | PreviewVer
+
 export type StableVer = {
   major: string
   minor: string
@@ -149,6 +151,48 @@ export function bump(
 export const create = (maj: number, min: number, pat: number) =>
   SemVer.parse(`${maj}.${min}.${pat}`)!
 
-export const parse = SemVer.parse
+export function parsePreview(ver: string): null | PreviewVer {
+  const result = parse(ver)
+  if (result === null) return null
+  if ((result as any).identifier) {
+    return result as PreviewVer
+  }
+  throw new Error(
+    `Given version string ${ver} could not be parsed as a preview.`
+  )
+}
+
+/**
+ * Parse a version string into structured data.
+ */
+export function parse(ver: string): null | StableVer | PreviewVer {
+  const result = ver.match(/(\d).(\d).(\d)(?:-(\w+).(\d)+)?/)
+  if (result === null) return null
+  const major = result[1]
+  const minor = result[2]
+  const patch = result[3]
+
+  if (result[4]) {
+    const identifier = result[4]
+    const buildNum = parseInt(result[5], 10)
+    return {
+      major,
+      minor,
+      patch,
+      identifier,
+      buildNum,
+      version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
+    }
+  }
+
+  return {
+    major,
+    minor,
+    patch,
+    version: `${major}.${minor}.${patch}`,
+  }
+}
+
+export const parseToClass = SemVer.parse
 
 export { SemVer } from 'semver'

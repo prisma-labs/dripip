@@ -1,6 +1,6 @@
 import * as SemVer from './semver'
 import * as Git from './git'
-import { findIndexFromEnd } from './utils'
+import { findIndexFromEnd, last } from './utils'
 
 /**
  * Get the previous stable and commits since then. If there is no previous
@@ -27,7 +27,7 @@ async function getLog(git: Git.Simple): Promise<SeriesLog> {
 export type Commit = {
   message: string
   sha: string
-  nonReleaseTags: []
+  nonReleaseTags: string[]
   releases: {
     stable: null | SemVer.StableVer
     preview: null | SemVer.PreviewVer
@@ -37,7 +37,7 @@ export type Commit = {
 export type StableCommit = {
   message: string
   sha: string
-  nonReleaseTags: []
+  nonReleaseTags: string[]
   releases: {
     stable: SemVer.StableVer
     preview: null
@@ -47,7 +47,7 @@ export type StableCommit = {
 export type PreviewCommit = {
   message: string
   sha: string
-  nonReleaseTags: []
+  nonReleaseTags: string[]
   releases: {
     stable: null
     preview: SemVer.PreviewVer
@@ -57,7 +57,7 @@ export type PreviewCommit = {
 export type MaybePreviewCommit = {
   message: string
   sha: string
-  nonReleaseTags: []
+  nonReleaseTags: string[]
   releases: {
     stable: null
     preview: null | SemVer.PreviewVer
@@ -67,7 +67,7 @@ export type MaybePreviewCommit = {
 export type UnreleasedCommit = {
   message: string
   sha: string
-  nonReleaseTags: []
+  nonReleaseTags: string[]
   releases: {
     stable: null
     preview: null
@@ -80,7 +80,6 @@ export type Series = {
   previousPreview: null | PreviewCommit
   commitsSincePreview: UnreleasedCommit[]
   current: Commit
-  isEmpty: boolean
 }
 
 export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
@@ -89,52 +88,84 @@ export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
  * Build structured series data from a raw series log.
  */
 export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
-  const pi = findIndexFromEnd(
+  const commitsSinceStable = commitsSince.map(c => {
+    const { message, sha } = c
+    return {
+      message,
+      sha,
+      nonReleaseTags: c.tags.filter(isUnknownTag),
+      releases: {
+        stable: SemVer.parse(c.tags.find(isStableTag) ?? ''),
+        preview: SemVer.parsePreview(c.tags.find(isPreviewTag) ?? ''),
+      },
+    } as MaybePreviewCommit
+  })
+
+  const prevPreviewI = findIndexFromEnd(
     commitsSince,
     c => c.tags.find(tag => tag.match(/.+-next\.\d+/)) !== undefined
   )
 
-  let previousPreview: null | PreviewRelease = null
-  let commitsSincePreview: Git.LogEntry[] = []
-  if (pi !== -1) {
-    const c = commitsSince[pi]!
-    const r = SemVer.parse(c.tags.find(isPreviewTag)!)!
+  let previousPreview: null | PreviewCommit = null
+  let commitsSincePreview: UnreleasedCommit[] = []
+  if (prevPreviewI !== -1) {
+    const c = commitsSince[prevPreviewI]!
+    // TODO findFirstSuccess(processor, xs)
     previousPreview = {
       sha: c.sha,
-      type: 'preview',
-      // TODO findFirstSuccess(processor, xs)
-      version: r,
-      buildNum: r.prerelease[1] as number,
+      message: c.message,
+      nonReleaseTags: c.tags.filter(isUnknownTag),
+      releases: {
+        stable: null, //SemVer.parse(c.tags.find(isStableTag) ?? ''),
+        preview: SemVer.parsePreview(c.tags.find(isPreviewTag)!)!,
+      },
     }
-    commitsSincePreview = commitsSince.slice(pi + 1)
+    commitsSincePreview = commitsSinceStable.slice(
+      prevPreviewI + 1
+    ) as UnreleasedCommit[]
   }
 
-  const previousStable2: null | StableRelease =
+  const previousStable2 =
     previousStable === null
       ? null
-      : {
-          type: 'stable',
+      : ({
           sha: previousStable.sha,
-          version: SemVer.parse(previousStable.tags.find(isStableTag)!)!,
-        }
+          message: previousStable.message,
+          nonReleaseTags: previousStable.tags.filter(isUnknownTag),
+          releases: {
+            stable: SemVer.parse(previousStable.tags.find(isStableTag)!)!,
+            preview: SemVer.parsePreview(
+              previousStable.tags.find(isPreviewTag) ?? ''
+            ),
+          },
+        } as StableCommit)
 
   return {
     previousStable: previousStable2,
-    commitsSinceStable: commitsSince,
+    commitsSinceStable,
     previousPreview,
     commitsSincePreview,
-  } as any
+    // If there are no commits since stable and no stable that means we're on a
+    // repo with no commit. This edge-case is ignored. It is assumed that it
+    // will be validated for before calling this function.
+    current: last(commitsSinceStable) ?? previousStable2!,
+  }
+}
+
+function isUnknownTag(tag: string): boolean {
+  const ver = SemVer.parse(tag)
+  return ver === null
 }
 
 function isStableTag(tag: string): boolean {
-  const ver = SemVer.parse(tag)
+  const ver = SemVer.parseToClass(tag)
   if (ver === null) return false
   if (ver.prerelease.length === 0) return true
   return false
 }
 
 function isPreviewTag(tag: string): boolean {
-  const ver = SemVer.parse(tag)
+  const ver = SemVer.parseToClass(tag)
   if (ver === null) return false
   if (ver.prerelease[0] === 'next' && typeof ver.prerelease[1] === 'number')
     return true
@@ -158,24 +189,6 @@ export function isStablePreview(release: SemVer.SemVer): boolean {
   )
 }
 
-export type StableRelease = {
-  type: 'stable'
-  version: SemVer.SemVer
-  sha: string
-}
-
-export type PreviewRelease = {
-  type: 'preview'
-  version: SemVer.SemVer
-  sha: string
-  buildNum: number
-}
-
-export type CommitReleases = {
-  stable: null | StableRelease
-  preview: null | PreviewRelease
-}
-
 export const zeroVer = '0.0.0'
 
 export const zeroBuildNum = 0
@@ -187,7 +200,7 @@ export const zeroBuildNum = 0
 async function findLatestStable(git: Git.Simple): Promise<null | string> {
   return Git.findTag(git, {
     matcher: candidate => {
-      const maybeSemVer = SemVer.parse(candidate)
+      const maybeSemVer = SemVer.parseToClass(candidate)
       if (maybeSemVer === null) return false
       return isStable(maybeSemVer)
     },
