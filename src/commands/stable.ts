@@ -37,7 +37,7 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    const bumpType = Semver.calcBumpType(
+    const bumpType = Semver.calcIncType(
       ctx.series.commitsSinceStable.map(c => c.message)
     )
 

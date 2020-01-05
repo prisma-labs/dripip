@@ -25,7 +25,7 @@ export type PreviewVer = {
  * message for the commit) calculate what the package version containing these
  * changes should be. Returns `null` if all changes were meta or unconforming.
  */
-export function calcBumpType(commitMessages: string[]): null | MajMinPat {
+export function calcIncType(commitMessages: string[]): null | MajMinPat {
   let semverPart: null | MajMinPat = null
   for (const m of commitMessages) {
     // Commits that do not conform to conventional commit standard are discarded
@@ -79,31 +79,9 @@ function isValidConventionalCommit(message: string): boolean {
 export type MajMinPat = 'major' | 'minor' | 'patch'
 
 /**
- * Calculate the stable bump to a given semver version. This function is similar
- * to `semver` package inc function with the following differences:
- *
- *     1. pre-releases are 1 based:
- *
- *          this  : '0.0.1'  inc('prerelease') --> '0.0.1-1'
- *          semver: '0.0.1'  inc('prerelease') --> '0.0.1-0'
- *
- *     2. bumping pre{min,maj,pat} also bumps the build num:
- *
- *          this  : '0.0.1-1' inc('preminor') --> '0.1.0-2'
- *          semver: '0.0.1'   inc('preminor') --> '0.1.0-0'
+ * Calculate the stable increment to a given version.
  */
-export function incStable(
-  bumpType: 'major' | 'minor' | 'patch',
-  // | 'premajor'
-  // | 'preminor'
-  // | 'prepatch'
-  // | 'pre',
-  // preReleaseTypeIdentifier: string,
-  v: Ver
-): Ver {
-  // const buildNumPrefix = preReleaseTypeIdentifier
-  //   ? `${preReleaseTypeIdentifier}.`
-  //   : ''
+export function incStable(bumpType: MajMinPat, v: Ver): Ver {
   const { vprefix, major, minor, patch } = v
   switch (bumpType) {
     case 'major':
@@ -112,38 +90,13 @@ export function incStable(
       return createStable(major, minor + 1, 0, { vprefix })
     case 'patch':
       return createStable(major, minor, patch + 1, { vprefix })
-    // // TODO refactor
-    // case 'premajor':
-    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
-    //   const buildNum1 = (prevVer.prerelease[1] as undefined | number) ?? 1
-    //   const preRelease1 = buildNumPrefix + String(buildNum1 + 1)
-    //   return Semver.parse(
-    //     `${prevVer.major + 1}.${prevVer.minor}.${prevVer.patch}-${preRelease1}`
-    //   )!
-    // case 'preminor':
-    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
-    //   const buildNum2 = (prevVer.prerelease[1] as undefined | number) ?? 1
-    //   const preRelease2 = buildNumPrefix + String(buildNum2 + 1)
-    //   return Semver.parse(
-    //     `${prevVer.major}.${prevVer.minor + 1}.${prevVer.patch}-${preRelease2}`
-    //   )!
-    // case 'prepatch':
-    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
-    //   const buildNum3 = (prevVer.prerelease[1] as undefined | number) ?? 1
-    //   const preRelease3 = buildNumPrefix + String(buildNum3 + 1)
-    //   return Semver.parse(
-    //     `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}-${preRelease3}`
-    //   )!
-    // case 'pre':
-    //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
-    //   const buildNum4 = (prevVer.prerelease[1] as undefined | number) ?? 1
-    //   const preRelease4 = buildNumPrefix + String(buildNum4 + 1)
-    //   return Semver.parse(
-    //     `${prevVer.major}.${prevVer.minor}.${prevVer.patch}-${preRelease4}`
-    //   )!
   }
 }
 
+/**
+ * Add pre-release info to a stable release. In other words convert a stable
+ * release into a pre-release one.
+ */
 export function stableToPreview(
   v: StableVer,
   identifier: string,
@@ -194,20 +147,23 @@ export function createStable(
   }
 }
 
-// export function render(ver:Omit<Ver,'version'>):string{
-//   return isPreview(ver as any)
-//   ? `${ver.major}.${ver.minor}.${ver.patch}`
-//   : `${ver.major}.${ver.minor}.${ver.patch}-${ver.preRelease}`
-// }
-
+/**
+ * Is the given version a preview one?
+ */
 export function isPreview(v: Ver): v is PreviewVer {
   return (v as any).preRelease !== undefined
 }
 
+/**
+ * Is the given version a stable one?
+ */
 export function isStable(v: Ver): v is StableVer {
   return !isPreview(v)
 }
 
+/**
+ * Parse a version that you believe should be a preview variant. If not, an error is thrown.
+ */
 export function parsePreview(ver: string): null | PreviewVer {
   const result = parse(ver)
   if (result === null) return null

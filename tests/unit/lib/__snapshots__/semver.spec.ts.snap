@@ -1,5 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`incStable can bump major 1`] = `
+Object {
+  "major": 2,
+  "minor": 0,
+  "patch": 0,
+  "version": "2.0.0",
+  "vprefix": false,
+}
+`;
+
+exports[`incStable can bump minor 1`] = `
+Object {
+  "major": 1,
+  "minor": 2,
+  "patch": 0,
+  "version": "1.2.0",
+  "vprefix": false,
+}
+`;
+
+exports[`incStable can bump patch 1`] = `
+Object {
+  "major": 2,
+  "minor": 0,
+  "patch": 0,
+  "version": "2.0.0",
+  "vprefix": false,
+}
+`;
+
+exports[`incStable propagates vprefix 1`] = `
+Object {
+  "major": 2,
+  "minor": 0,
+  "patch": 0,
+  "version": "2.0.0",
+  "vprefix": true,
+}
+`;
+
 exports[`parse 0.0.1 1`] = `
 Object {
   "major": 0,
@@ -95,5 +135,19 @@ Object {
   },
   "version": "0.0.0-a.1",
   "vprefix": true,
+}
+`;
+
+exports[`stableToPreview turns stable-release version into a pre-release one 1`] = `
+Object {
+  "major": 1,
+  "minor": 2,
+  "patch": 3,
+  "preRelease": Object {
+    "buildNum": 100,
+    "identifier": "foobar",
+  },
+  "version": "1.2.3-foobar.100",
+  "vprefix": false,
 }
 `;

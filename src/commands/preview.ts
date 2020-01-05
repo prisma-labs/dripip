@@ -139,7 +139,7 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
 
   // Calculate the next version
 
-  const incType = Semver.calcBumpType(
+  const incType = Semver.calcIncType(
     series.commitsSinceStable.map(c => c.message)
   )
 
