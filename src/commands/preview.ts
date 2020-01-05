@@ -146,7 +146,8 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
   if (bumpType === null) return null
 
   const nextVerBuildNum =
-    (series.previousPreview?.releases.preview.buildNum ?? Rel.zeroBuildNum) + 1
+    (series.previousPreview?.releases.preview.preRelease.buildNum ??
+      Rel.zeroBuildNum) + 1
 
   const nextStable = bump(
     bumpType,
@@ -159,7 +160,7 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
   return {
     currentStable: series.previousStable?.releases.stable.version ?? null,
     currentPreviewNumber:
-      series.previousPreview?.releases.preview.buildNum ?? null,
+      series.previousPreview?.releases.preview.preRelease.buildNum ?? null,
     nextStable: nextStable,
     nextPreviewNumber: nextVerBuildNum,
     currentVersion:
