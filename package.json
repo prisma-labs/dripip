@@ -44,7 +44,6 @@
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.0",
-    "semver": "^7.1.1",
     "simple-git": "^1.126.0"
   },
   "devDependencies": {
@@ -52,7 +51,6 @@
     "@types/common-tags": "^1.8.0",
     "@types/jest": "^24.0.21",
     "@types/node": "^13.1.2",
-    "@types/semver": "^6.2.0",
     "@types/tmp": "^0.1.0",
     "doctoc": "^1.4.0",
     "fs-jetpack": "^2.2.3",

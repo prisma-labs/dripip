@@ -1,8 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
-import { bump, calcBumpType } from '../lib/semver'
-import * as SemVer from 'semver'
+import * as Semver from '../lib/semver'
 import { publish } from '../lib/publish'
 import createGit from 'simple-git/promise'
 import * as proc from '../lib/proc'
@@ -38,7 +37,7 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    const bumpType = calcBumpType(
+    const bumpType = Semver.calcBumpType(
       ctx.series.commitsSinceStable.map(c => c.message)
     )
 
@@ -46,11 +45,11 @@ export class Stable extends Command {
       return show.noReleaseNeeded(ctx)
     }
 
-    const newStableVer = bump(
+    const newStableVer = Semver.incStable(
       bumpType,
       ctx.series.previousStable === null
-        ? SemVer.parse('0.0.0')!
-        : SemVer.parse(ctx.series.previousStable.releases.stable.version)!
+        ? Semver.zeroVer
+        : ctx.series.previousStable.releases.stable
     )
 
     if (flags['dry-run']) {

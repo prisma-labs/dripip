@@ -1,21 +1,19 @@
-import * as SemVer from 'semver'
-
 export type Ver = StableVer | PreviewVer
 
 export type StableVer = {
   version: string
   vprefix: boolean
-  major: string
-  minor: string
-  patch: string
+  major: number
+  minor: number
+  patch: number
 }
 
 export type PreviewVer = {
   version: string
   vprefix: boolean
-  major: string
-  minor: string
-  patch: string
+  major: number
+  minor: number
+  patch: number
   preRelease: {
     identifier: string
     buildNum: number
@@ -27,10 +25,8 @@ export type PreviewVer = {
  * message for the commit) calculate what the package version containing these
  * changes should be. Returns `null` if all changes were meta or unconforming.
  */
-export function calcBumpType(
-  commitMessages: string[]
-): null | SemverStableVerParts {
-  let semverPart: null | SemverStableVerParts = null
+export function calcBumpType(commitMessages: string[]): null | MajMinPat {
+  let semverPart: null | MajMinPat = null
   for (const m of commitMessages) {
     // Commits that do not conform to conventional commit standard are discarded
     if (!isValidConventionalCommit(m)) {
@@ -80,7 +76,7 @@ function isValidConventionalCommit(message: string): boolean {
   return message.match(/\w+: .+/) !== null
 }
 
-export type SemverStableVerParts = 'major' | 'minor' | 'patch'
+export type MajMinPat = 'major' | 'minor' | 'patch'
 
 /**
  * Calculate the stable bump to a given semver version. This function is similar
@@ -96,27 +92,26 @@ export type SemverStableVerParts = 'major' | 'minor' | 'patch'
  *          this  : '0.0.1-1' inc('preminor') --> '0.1.0-2'
  *          semver: '0.0.1'   inc('preminor') --> '0.1.0-0'
  */
-export function bump(
+export function incStable(
   bumpType: 'major' | 'minor' | 'patch',
   // | 'premajor'
   // | 'preminor'
   // | 'prepatch'
   // | 'pre',
   // preReleaseTypeIdentifier: string,
-  prevVer: SemVer.SemVer
-): SemVer.SemVer {
+  v: Ver
+): Ver {
   // const buildNumPrefix = preReleaseTypeIdentifier
   //   ? `${preReleaseTypeIdentifier}.`
   //   : ''
+  const { vprefix, major, minor, patch } = v
   switch (bumpType) {
     case 'major':
-      return SemVer.parse(`${prevVer.major + 1}.0.0`)!
+      return createStable(major + 1, 0, 0, { vprefix })
     case 'minor':
-      return SemVer.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
+      return createStable(major, minor + 1, 0, { vprefix })
     case 'patch':
-      return SemVer.parse(
-        `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
-      )!
+      return createStable(major, minor, patch + 1, { vprefix })
     // // TODO refactor
     // case 'premajor':
     //   // TODO unsafe, assumes the incoming ver has format #.#.# or #.#.#-foo.#
@@ -149,11 +144,69 @@ export function bump(
   }
 }
 
+export function stableToPreview(
+  v: StableVer,
+  identifier: string,
+  buildNum: number
+): PreviewVer {
+  return createPreRelease(v.major, v.minor, v.patch, identifier, buildNum)
+}
+
 /**
- * Create a semver instance programatically.
+ * Create a semantic pre-release version programatically.
  */
-export const create = (maj: number, min: number, pat: number) =>
-  SemVer.parse(`${maj}.${min}.${pat}`)!
+export function createPreRelease(
+  major: number,
+  minor: number,
+  patch: number,
+  identifier: string,
+  buildNum: number,
+  opts?: { vprefix: boolean }
+): PreviewVer {
+  return {
+    version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
+    vprefix: opts?.vprefix ?? false,
+    major,
+    minor,
+    patch,
+    preRelease: {
+      buildNum,
+      identifier,
+    },
+  }
+}
+
+/**
+ * Create a semantic version programatically.
+ */
+export function createStable(
+  major: number,
+  minor: number,
+  patch: number,
+  opts?: { vprefix: boolean }
+): StableVer {
+  return {
+    major,
+    minor,
+    patch,
+    vprefix: opts?.vprefix ?? false,
+    version: `${major}.${minor}.${patch}`,
+  }
+}
+
+// export function render(ver:Omit<Ver,'version'>):string{
+//   return isPreview(ver as any)
+//   ? `${ver.major}.${ver.minor}.${ver.patch}`
+//   : `${ver.major}.${ver.minor}.${ver.patch}-${ver.preRelease}`
+// }
+
+export function isPreview(v: Ver): v is PreviewVer {
+  return (v as any).preRelease !== undefined
+}
+
+export function isStable(v: Ver): v is StableVer {
+  return !isPreview(v)
+}
 
 export function parsePreview(ver: string): null | PreviewVer {
   const result = parse(ver)
@@ -178,9 +231,9 @@ export function parse(ver: string): null | StableVer | PreviewVer {
 
   if (result[6]) {
     const vprefix = result[5] === 'v'
-    const major = result[6]
-    const minor = result[7]
-    const patch = result[8]
+    const major = parseInt(result[6], 10)
+    const minor = parseInt(result[7], 10)
+    const patch = parseInt(result[8], 10)
     const identifier = result[9]
     const buildNum = parseInt(result[10], 10)
     return {
@@ -197,9 +250,9 @@ export function parse(ver: string): null | StableVer | PreviewVer {
   }
 
   const vprefix = result[1] === 'v'
-  const major = result[2]
-  const minor = result[3]
-  const patch = result[4]
+  const major = parseInt(result[2], 10)
+  const minor = parseInt(result[3], 10)
+  const patch = parseInt(result[4], 10)
   return {
     version: `${major}.${minor}.${patch}`,
     vprefix,
@@ -209,6 +262,6 @@ export function parse(ver: string): null | StableVer | PreviewVer {
   }
 }
 
-export const parseToClass = SemVer.parse
+export const zeroVer = createStable(0, 0, 0)
 
-export { SemVer } from 'semver'
+export const zeroBuildNum = 0

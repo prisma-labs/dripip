@@ -2,9 +2,9 @@
 
 exports[`parse 0.0.1 1`] = `
 Object {
-  "major": "0",
-  "minor": "0",
-  "patch": "1",
+  "major": 0,
+  "minor": 0,
+  "patch": 1,
   "version": "0.0.1",
   "vprefix": false,
 }
@@ -12,9 +12,9 @@ Object {
 
 exports[`parse 0.0.11 1`] = `
 Object {
-  "major": "0",
-  "minor": "0",
-  "patch": "11",
+  "major": 0,
+  "minor": 0,
+  "patch": 11,
   "version": "0.0.11",
   "vprefix": false,
 }
@@ -22,9 +22,9 @@ Object {
 
 exports[`parse 0.1.0 1`] = `
 Object {
-  "major": "0",
-  "minor": "1",
-  "patch": "0",
+  "major": 0,
+  "minor": 1,
+  "patch": 0,
   "version": "0.1.0",
   "vprefix": false,
 }
@@ -32,9 +32,9 @@ Object {
 
 exports[`parse 0.11.0 1`] = `
 Object {
-  "major": "0",
-  "minor": "11",
-  "patch": "0",
+  "major": 0,
+  "minor": 11,
+  "patch": 0,
   "version": "0.11.0",
   "vprefix": false,
 }
@@ -42,9 +42,9 @@ Object {
 
 exports[`parse 1.0.0 1`] = `
 Object {
-  "major": "1",
-  "minor": "0",
-  "patch": "0",
+  "major": 1,
+  "minor": 0,
+  "patch": 0,
   "version": "1.0.0",
   "vprefix": false,
 }
@@ -52,9 +52,9 @@ Object {
 
 exports[`parse 11.0.0 1`] = `
 Object {
-  "major": "11",
-  "minor": "0",
-  "patch": "0",
+  "major": 11,
+  "minor": 0,
+  "patch": 0,
   "version": "11.0.0",
   "vprefix": false,
 }
@@ -62,9 +62,9 @@ Object {
 
 exports[`parse pre-releases 0.0.0-a.1 1`] = `
 Object {
-  "major": "0",
-  "minor": "0",
-  "patch": "0",
+  "major": 0,
+  "minor": 0,
+  "patch": 0,
   "preRelease": Object {
     "buildNum": 1,
     "identifier": "a",
@@ -76,9 +76,9 @@ Object {
 
 exports[`parse v-prefix v0.0.0 1`] = `
 Object {
-  "major": "0",
-  "minor": "0",
-  "patch": "0",
+  "major": 0,
+  "minor": 0,
+  "patch": 0,
   "version": "0.0.0",
   "vprefix": true,
 }
@@ -86,9 +86,9 @@ Object {
 
 exports[`parse v-prefix v0.0.0-a.1 1`] = `
 Object {
-  "major": "0",
-  "minor": "0",
-  "patch": "0",
+  "major": 0,
+  "minor": 0,
+  "patch": 0,
   "preRelease": Object {
     "buildNum": 1,
     "identifier": "a",

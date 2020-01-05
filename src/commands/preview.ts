@@ -4,10 +4,9 @@ import { indentBlock4 } from '../lib/utils'
 import * as Rel from '../lib/release'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
-import * as SemVer from 'semver'
 import * as Output from '../lib/output'
 import * as Publish from '../lib/publish'
-import { SemverStableVerParts, calcBumpType, bump } from '../lib/semver'
+import * as Semver from '../lib/semver'
 
 type ReleaseTypeInfo = {
   type: string
@@ -114,7 +113,7 @@ type ReleaseBrief = {
   nextPreviewNumber: number
   nextVersion: string
   commitsInRelease: string[]
-  bumpType: SemverStableVerParts
+  bumpType: Semver.MajMinPat
   isFirstVer: boolean
   isFirstVerPreRelease: boolean
   isFirstVerStable: boolean
@@ -140,39 +139,40 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
 
   // Calculate the next version
 
-  const stablePreReleaseIdentifier = 'next'
-  const bumpType = calcBumpType(series.commitsSinceStable.map(c => c.message))
+  const incType = Semver.calcBumpType(
+    series.commitsSinceStable.map(c => c.message)
+  )
 
-  if (bumpType === null) return null
+  if (incType === null) return null
 
-  const nextVerBuildNum =
+  const nextStable = Semver.incStable(
+    incType,
+    series.previousStable?.releases.stable ?? Semver.zeroVer
+  )
+
+  const nextVer = Semver.stableToPreview(
+    nextStable,
+    'next',
     (series.previousPreview?.releases.preview.preRelease.buildNum ??
-      Rel.zeroBuildNum) + 1
-
-  const nextStable = bump(
-    bumpType,
-    SemVer.parse(series.previousStable?.releases.stable.version ?? Rel.zeroVer)!
-  ).version
-
-  const nextVer =
-    nextStable + `-${stablePreReleaseIdentifier}.${nextVerBuildNum}`
+      Semver.zeroBuildNum) + 1
+  )
 
   // TODO simplify by exposing series struct as is, little value in the remix here
   return {
     currentStable: series.previousStable?.releases.stable.version ?? null,
     currentPreviewNumber:
       series.previousPreview?.releases.preview.preRelease.buildNum ?? null,
-    nextStable: nextStable,
-    nextPreviewNumber: nextVerBuildNum,
+    nextStable: nextStable.version,
+    nextPreviewNumber: nextVer.preRelease.buildNum,
     currentVersion:
       series.previousPreview?.releases.preview.version ??
       series.previousStable?.releases.stable.version ??
       null,
-    nextVersion: nextVer,
+    nextVersion: nextVer.version,
     commitsInRelease: series.previousPreview
       ? series.commitsSincePreview.map(c => c.message)
       : series.commitsSinceStable.map(c => c.message),
-    bumpType,
+    bumpType: incType,
     isFirstVer:
       series.previousStable === null && series.previousPreview === null,
     isFirstVerStable: series.previousStable === null,

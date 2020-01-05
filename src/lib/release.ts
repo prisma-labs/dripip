@@ -1,4 +1,4 @@
-import * as SemVer from './semver'
+import * as Semver from './semver'
 import * as Git from './git'
 import { findIndexFromEnd, last } from './utils'
 
@@ -29,8 +29,8 @@ export type Commit = {
   sha: string
   nonReleaseTags: string[]
   releases: {
-    stable: null | SemVer.StableVer
-    preview: null | SemVer.PreviewVer
+    stable: null | Semver.StableVer
+    preview: null | Semver.PreviewVer
   }
 }
 
@@ -39,7 +39,7 @@ export type StableCommit = {
   sha: string
   nonReleaseTags: string[]
   releases: {
-    stable: SemVer.StableVer
+    stable: Semver.StableVer
     preview: null
   }
 }
@@ -50,7 +50,7 @@ export type PreviewCommit = {
   nonReleaseTags: string[]
   releases: {
     stable: null
-    preview: SemVer.PreviewVer
+    preview: Semver.PreviewVer
   }
 }
 
@@ -60,7 +60,7 @@ export type MaybePreviewCommit = {
   nonReleaseTags: string[]
   releases: {
     stable: null
-    preview: null | SemVer.PreviewVer
+    preview: null | Semver.PreviewVer
   }
 }
 
@@ -101,8 +101,8 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
       sha,
       nonReleaseTags: c.tags.filter(isUnknownTag),
       releases: {
-        stable: SemVer.parse(c.tags.find(isStableTag) ?? ''),
-        preview: SemVer.parsePreview(c.tags.find(isPreviewTag) ?? ''),
+        stable: Semver.parse(c.tags.find(isStableTag) ?? ''),
+        preview: Semver.parsePreview(c.tags.find(isPreviewTag) ?? ''),
       },
     } as MaybePreviewCommit
   })
@@ -129,8 +129,8 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
           message: previousStable.message,
           nonReleaseTags: previousStable.tags.filter(isUnknownTag),
           releases: {
-            stable: SemVer.parse(previousStable.tags.find(isStableTag)!)!,
-            preview: SemVer.parsePreview(
+            stable: Semver.parse(previousStable.tags.find(isStableTag)!)!,
+            preview: Semver.parsePreview(
               previousStable.tags.find(isPreviewTag) ?? ''
             ),
           },
@@ -149,58 +149,27 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
 }
 
 function isUnknownTag(tag: string): boolean {
-  const ver = SemVer.parse(tag)
-  return ver === null
+  return Semver.parse(tag) === null
 }
 
 function isStableTag(tag: string): boolean {
-  const ver = SemVer.parseToClass(tag)
-  if (ver === null) return false
-  if (ver.prerelease.length === 0) return true
-  return false
+  const v = Semver.parse(tag)
+  if (v === null) return false
+  return Semver.isStable(v)
 }
 
 function isPreviewTag(tag: string): boolean {
-  const ver = SemVer.parseToClass(tag)
-  if (ver === null) return false
-  if (ver.prerelease[0] === 'next' && typeof ver.prerelease[1] === 'number')
-    return true
-  return false
+  const v = Semver.parse(tag)
+  if (v === null) return false
+  return Semver.isPreview(v)
 }
-
-/**
- * Is the given release a stable one?
- */
-export function isStable(release: SemVer.SemVer): boolean {
-  return release.prerelease.length === 0
-}
-
-/**
- * Is the given release a stable preview one?
- */
-export function isStablePreview(release: SemVer.SemVer): boolean {
-  return (
-    release.prerelease[0] === 'next' &&
-    String(release.prerelease[1]).match(/\d+/) !== null
-  )
-}
-
-export const zeroVer = '0.0.0'
-
-export const zeroBuildNum = 0
 
 //
 // Private helpers
 //
 
 async function findLatestStable(git: Git.Simple): Promise<null | string> {
-  return Git.findTag(git, {
-    matcher: candidate => {
-      const maybeSemVer = SemVer.parseToClass(candidate)
-      if (maybeSemVer === null) return false
-      return isStable(maybeSemVer)
-    },
-  })
+  return Git.findTag(git, { matcher: isStableTag })
 }
 
 // const zeroReleases = {

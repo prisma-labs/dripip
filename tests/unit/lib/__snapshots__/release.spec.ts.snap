@@ -48,9 +48,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "0",
-          "minor": "0",
-          "patch": "0",
+          "major": 0,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 1,
             "identifier": "next",
@@ -68,9 +68,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "0",
-        "minor": "0",
-        "patch": "0",
+        "major": 0,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 1,
           "identifier": "next",
@@ -87,9 +87,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "0",
-        "minor": "0",
-        "patch": "0",
+        "major": 0,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 1,
           "identifier": "next",
@@ -114,9 +114,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "0",
-          "minor": "0",
-          "patch": "0",
+          "major": 0,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 1,
             "identifier": "next",
@@ -151,9 +151,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "0",
-          "minor": "0",
-          "patch": "0",
+          "major": 0,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 2,
             "identifier": "next",
@@ -171,9 +171,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "0",
-        "minor": "0",
-        "patch": "0",
+        "major": 0,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 2,
           "identifier": "next",
@@ -190,9 +190,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "0",
-        "minor": "0",
-        "patch": "0",
+        "major": 0,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 2,
           "identifier": "next",
@@ -238,9 +238,9 @@ Object {
     "releases": Object {
       "preview": null,
       "stable": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "version": "1.0.0",
         "vprefix": false,
       },
@@ -287,9 +287,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "1",
-          "minor": "0",
-          "patch": "0",
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 1,
             "identifier": "next",
@@ -325,9 +325,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 1,
           "identifier": "next",
@@ -345,9 +345,9 @@ Object {
     "releases": Object {
       "preview": null,
       "stable": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "version": "1.0.0",
         "vprefix": false,
       },
@@ -384,9 +384,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "1",
-          "minor": "0",
-          "patch": "0",
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 1,
             "identifier": "next",
@@ -403,9 +403,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "1",
-          "minor": "0",
-          "patch": "0",
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 2,
             "identifier": "next",
@@ -422,9 +422,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "1",
-          "minor": "0",
-          "patch": "0",
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 3,
             "identifier": "next",
@@ -450,9 +450,9 @@ Object {
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
-          "major": "1",
-          "minor": "0",
-          "patch": "0",
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
           "preRelease": Object {
             "buildNum": 4,
             "identifier": "next",
@@ -470,9 +470,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 4,
           "identifier": "next",
@@ -489,9 +489,9 @@ Object {
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "preRelease": Object {
           "buildNum": 4,
           "identifier": "next",
@@ -509,9 +509,9 @@ Object {
     "releases": Object {
       "preview": null,
       "stable": Object {
-        "major": "1",
-        "minor": "0",
-        "patch": "0",
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
         "version": "1.0.0",
         "vprefix": false,
       },

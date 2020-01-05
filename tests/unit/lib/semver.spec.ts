@@ -118,20 +118,20 @@ describe('calcBumpType', () => {
   })
 })
 
-describe('bumpVer', () => {
+describe('incStable', () => {
   it('can bump patch', () => {
-    expect(Semver.bump('major', Semver.create(1, 1, 1)).version).toEqual(
-      '2.0.0'
-    )
+    expect(
+      Semver.incStable('major', Semver.createStable(1, 1, 1)).version
+    ).toEqual('2.0.0')
   })
   it('can bump minor', () => {
-    expect(Semver.bump('minor', Semver.create(1, 1, 1)).version).toEqual(
-      '1.2.0'
-    )
+    expect(
+      Semver.incStable('minor', Semver.createStable(1, 1, 1)).version
+    ).toEqual('1.2.0')
   })
   it('can bump major', () => {
-    expect(Semver.bump('major', Semver.create(1, 1, 1)).version).toEqual(
-      '2.0.0'
-    )
+    expect(
+      Semver.incStable('major', Semver.createStable(1, 1, 1)).version
+    ).toEqual('2.0.0')
   })
 })
