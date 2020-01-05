@@ -20,7 +20,7 @@ async function getLog(git: Git.Simple): Promise<SeriesLog> {
   const previousStableCommit = await findLatestStable(git)
   const commits = await Git.log(git, { since: previousStableCommit })
   return previousStableCommit
-    ? [commits.pop() as Git.LogEntry, commits]
+    ? [commits.shift() as Git.LogEntry, commits]
     : [null, commits]
 }
 

@@ -239,7 +239,7 @@ function createOutputters(opts: OutputterOptions) {
           sha: c.sha,
           preReleaseTag: c.releases.preview?.version,
           stableReleaseTag: c.releases.stable?.version,
-          otherTags: [], // TODO
+          otherTags: c.nonReleaseTags,
         },
       })
     } else {

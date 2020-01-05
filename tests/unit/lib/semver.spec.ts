@@ -25,6 +25,16 @@ describe('parse', () => {
     expect(Semver.parse('11.0.0')).toMatchSnapshot()
   })
 
+  describe('v-prefix', () => {
+    it('v0.0.0', () => {
+      expect(Semver.parse('v0.0.0')).toMatchSnapshot()
+    })
+
+    it('v0.0.0-a.1', () => {
+      expect(Semver.parse('v0.0.0-a.1')).toMatchSnapshot()
+    })
+  })
+
   describe('pre-releases', () => {
     it('0.0.0-a.1', () => {
       expect(Semver.parse('0.0.0-a.1')).toMatchSnapshot()

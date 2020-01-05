@@ -4,6 +4,7 @@ export type Ver = StableVer | PreviewVer
 
 export type StableVer = {
   version: string
+  vprefix: boolean
   major: string
   minor: string
   patch: string
@@ -11,6 +12,7 @@ export type StableVer = {
 
 export type PreviewVer = {
   version: string
+  vprefix: boolean
   major: string
   minor: string
   patch: string
@@ -169,18 +171,21 @@ export function parsePreview(ver: string): null | PreviewVer {
  */
 export function parse(ver: string): null | StableVer | PreviewVer {
   const result = ver.match(
-    /^(\d+).(\d+).(\d+)$|^(\d+).(\d+).(\d+)-(\w+).(\d+)$/
+    /^(v)?(\d+).(\d+).(\d+)$|^(v)?(\d+).(\d+).(\d+)-(\w+).(\d+)$/
   )
+
   if (result === null) return null
 
-  if (result[4]) {
-    const major = result[4]
-    const minor = result[5]
-    const patch = result[6]
-    const identifier = result[7]
-    const buildNum = parseInt(result[8], 10)
+  if (result[6]) {
+    const vprefix = result[5] === 'v'
+    const major = result[6]
+    const minor = result[7]
+    const patch = result[8]
+    const identifier = result[9]
+    const buildNum = parseInt(result[10], 10)
     return {
       version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
+      vprefix,
       major,
       minor,
       patch,
@@ -191,11 +196,13 @@ export function parse(ver: string): null | StableVer | PreviewVer {
     }
   }
 
-  const major = result[1]
-  const minor = result[2]
-  const patch = result[3]
+  const vprefix = result[1] === 'v'
+  const major = result[2]
+  const minor = result[3]
+  const patch = result[4]
   return {
     version: `${major}.${minor}.${patch}`,
+    vprefix,
     major,
     minor,
     patch,

@@ -6,6 +6,7 @@ Object {
   "minor": "0",
   "patch": "1",
   "version": "0.0.1",
+  "vprefix": false,
 }
 `;
 
@@ -15,6 +16,7 @@ Object {
   "minor": "0",
   "patch": "11",
   "version": "0.0.11",
+  "vprefix": false,
 }
 `;
 
@@ -24,6 +26,7 @@ Object {
   "minor": "1",
   "patch": "0",
   "version": "0.1.0",
+  "vprefix": false,
 }
 `;
 
@@ -33,6 +36,7 @@ Object {
   "minor": "11",
   "patch": "0",
   "version": "0.11.0",
+  "vprefix": false,
 }
 `;
 
@@ -42,6 +46,7 @@ Object {
   "minor": "0",
   "patch": "0",
   "version": "1.0.0",
+  "vprefix": false,
 }
 `;
 
@@ -51,6 +56,7 @@ Object {
   "minor": "0",
   "patch": "0",
   "version": "11.0.0",
+  "vprefix": false,
 }
 `;
 
@@ -64,5 +70,30 @@ Object {
     "identifier": "a",
   },
   "version": "0.0.0-a.1",
+  "vprefix": false,
+}
+`;
+
+exports[`parse v-prefix v0.0.0 1`] = `
+Object {
+  "major": "0",
+  "minor": "0",
+  "patch": "0",
+  "version": "0.0.0",
+  "vprefix": true,
+}
+`;
+
+exports[`parse v-prefix v0.0.0-a.1 1`] = `
+Object {
+  "major": "0",
+  "minor": "0",
+  "patch": "0",
+  "preRelease": Object {
+    "buildNum": 1,
+    "identifier": "a",
+  },
+  "version": "0.0.0-a.1",
+  "vprefix": true,
 }
 `;
