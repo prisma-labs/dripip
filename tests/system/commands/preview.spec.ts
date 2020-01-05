@@ -90,10 +90,10 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
             "Initial commit",
+            "chore: who knows",
+            "chore: add package.json",
+            "fix: 1",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -119,10 +119,10 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commitsInRelease": Array [
-            "feat: 1",
-            "chore: add package.json",
-            "chore: who knows",
             "Initial commit",
+            "chore: who knows",
+            "chore: add package.json",
+            "feat: 1",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -149,11 +149,11 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commitsInRelease": Array [
-            "feat: 1",
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
             "Initial commit",
+            "chore: who knows",
+            "chore: add package.json",
+            "fix: 1",
+            "feat: 1",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -184,14 +184,14 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "major",
           "commitsInRelease": Array [
+            "Initial commit",
+            "chore: who knows",
+            "chore: add package.json",
+            "fix: 1",
+            "feat: 1",
             "feat: 2
       BREAKING CHANGE:
       blah blah blah",
-            "feat: 1",
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
-            "Initial commit",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -223,8 +223,8 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "fix: 2",
             "fix: 1",
+            "fix: 2",
           ],
           "currentPreviewNumber": null,
           "currentStable": "0.1.0",
@@ -253,8 +253,8 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "fix: 3",
             "fix: 2",
+            "fix: 3",
           ],
           "currentPreviewNumber": 1,
           "currentStable": null,
@@ -306,8 +306,9 @@ describe('preflight assertions', () => {
   })
 
   it('fails semantically if there is already a preview release present', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: thing')
     await ws.git.addTag('v1.2.3-next.1')
-    const result: any = await ws.dripip('preview')
+    const result: any = await ws.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -325,8 +326,9 @@ describe('preflight assertions', () => {
   })
 
   it('fails semantically if there is already a stable release present', async () => {
+    await gitCreateEmptyCommit(ws.git, 'fix: thing')
     await ws.git.addTag('v1.2.3')
-    const result: any = await ws.dripip('preview')
+    const result: any = await ws.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -346,7 +348,7 @@ describe('preflight assertions', () => {
   it('fails semantically if there is a stable AND preview release', async () => {
     await ws.git.addTag('v1.2.3')
     await ws.git.addTag('v1.2.3-next.1')
-    const result: any = await ws.dripip('preview')
+    const result: any = await ws.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -369,14 +371,14 @@ describe('preflight assertions', () => {
     await ws.git.addTag('v1.2.3-next.1')
     await ws.git.addTag('foo')
     await ws.git.addTag('bar')
-    const result: any = await ws.dripip('preview')
+    const result: any = await ws.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
           "context": Object {
             "otherTags": Array [
-              "bar",
               "foo",
+              "bar",
             ],
             "preReleaseTag": "1.2.3-next.1",
             "sha": "__sha__",
@@ -392,7 +394,7 @@ describe('preflight assertions', () => {
 
   it('does not include non-release tags', async () => {
     await ws.git.addTag('foobar')
-    const result = await ws.dripip('preview --show-type')
+    const result = await ws.dripip('preview --show-type --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {

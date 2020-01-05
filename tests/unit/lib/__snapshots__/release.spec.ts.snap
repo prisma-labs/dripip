@@ -1,0 +1,522 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildSeries <empty> 1`] = `"Cannot build release series with given data. There is no previous stable release and no commits since. This would indicate an unexpected error or working with a git repo that has zero commits. The latter should be guarded by upstream checks. Therefore this is bad. There must be a bug."`;
+
+exports[`buildSeries none 1`] = `
+Object {
+  "commitsSincePreview": Array [],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "fix: thing 1",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": null,
+  "previousStable": null,
+}
+`;
+
+exports[`buildSeries none preview 1`] = `
+Object {
+  "commitsSincePreview": Array [],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 0.0.0-next.1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "0",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 1,
+            "identifier": "next",
+          },
+          "version": "0.0.0-next.1",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "foo @ 0.0.0-next.1",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "0",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 1,
+          "identifier": "next",
+        },
+        "version": "0.0.0-next.1",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": Object {
+    "message": "foo @ 0.0.0-next.1",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "0",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 1,
+          "identifier": "next",
+        },
+        "version": "0.0.0-next.1",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousStable": null,
+}
+`;
+
+exports[`buildSeries preview none none preview 1`] = `
+Object {
+  "commitsSincePreview": Array [],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "foo @ 0.0.0-next.1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "0",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 1,
+            "identifier": "next",
+          },
+          "version": "0.0.0-next.1",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 0.0.0-next.2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "0",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 2,
+            "identifier": "next",
+          },
+          "version": "0.0.0-next.2",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "foo @ 0.0.0-next.2",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "0",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 2,
+          "identifier": "next",
+        },
+        "version": "0.0.0-next.2",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": Object {
+    "message": "foo @ 0.0.0-next.2",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "0",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 2,
+          "identifier": "next",
+        },
+        "version": "0.0.0-next.2",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousStable": null,
+}
+`;
+
+exports[`buildSeries stable none 1`] = `
+Object {
+  "commitsSincePreview": Array [],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "fix: thing 1",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": null,
+  "previousStable": Object {
+    "message": "foo @ 1.0.0",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "version": "1.0.0",
+        "vprefix": false,
+      },
+    },
+    "sha": "sha",
+  },
+}
+`;
+
+exports[`buildSeries stable none none preview none 1`] = `
+Object {
+  "commitsSincePreview": Array [
+    Object {
+      "message": "fix: thing 3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "1",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 1,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.1",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "fix: thing 3",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": Object {
+    "message": "foo @ 1.0.0-next.1",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 1,
+          "identifier": "next",
+        },
+        "version": "1.0.0-next.1",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousStable": Object {
+    "message": "foo @ 1.0.0",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "version": "1.0.0",
+        "vprefix": false,
+      },
+    },
+    "sha": "sha",
+  },
+}
+`;
+
+exports[`buildSeries stable none none preview preview preview none preview 1`] = `
+Object {
+  "commitsSincePreview": Array [],
+  "commitsSinceStable": Array [
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "1",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 1,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.1",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "1",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 2,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.2",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "1",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 3,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.3",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.4",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": "1",
+          "minor": "0",
+          "patch": "0",
+          "preRelease": Object {
+            "buildNum": 4,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.4",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+  ],
+  "current": Object {
+    "message": "foo @ 1.0.0-next.4",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 4,
+          "identifier": "next",
+        },
+        "version": "1.0.0-next.4",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousPreview": Object {
+    "message": "foo @ 1.0.0-next.4",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "preRelease": Object {
+          "buildNum": 4,
+          "identifier": "next",
+        },
+        "version": "1.0.0-next.4",
+        "vprefix": false,
+      },
+      "stable": null,
+    },
+    "sha": "sha",
+  },
+  "previousStable": Object {
+    "message": "foo @ 1.0.0",
+    "nonReleaseTags": Array [],
+    "releases": Object {
+      "preview": null,
+      "stable": Object {
+        "major": "1",
+        "minor": "0",
+        "patch": "0",
+        "version": "1.0.0",
+        "vprefix": false,
+      },
+    },
+    "sha": "sha",
+  },
+}
+`;

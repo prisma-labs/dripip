@@ -1,4 +1,26 @@
-import * as Semver from 'semver'
+import * as SemVer from 'semver'
+
+export type Ver = StableVer | PreviewVer
+
+export type StableVer = {
+  version: string
+  vprefix: boolean
+  major: string
+  minor: string
+  patch: string
+}
+
+export type PreviewVer = {
+  version: string
+  vprefix: boolean
+  major: string
+  minor: string
+  patch: string
+  preRelease: {
+    identifier: string
+    buildNum: number
+  }
+}
 
 /**
  * Given a list of conventional commit messages (subject and body, the entire
@@ -81,18 +103,18 @@ export function bump(
   // | 'prepatch'
   // | 'pre',
   // preReleaseTypeIdentifier: string,
-  prevVer: Semver.SemVer
-): Semver.SemVer {
+  prevVer: SemVer.SemVer
+): SemVer.SemVer {
   // const buildNumPrefix = preReleaseTypeIdentifier
   //   ? `${preReleaseTypeIdentifier}.`
   //   : ''
   switch (bumpType) {
     case 'major':
-      return Semver.parse(`${prevVer.major + 1}.0.0`)!
+      return SemVer.parse(`${prevVer.major + 1}.0.0`)!
     case 'minor':
-      return Semver.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
+      return SemVer.parse(`${prevVer.major}.${prevVer.minor + 1}.0`)!
     case 'patch':
-      return Semver.parse(
+      return SemVer.parse(
         `${prevVer.major}.${prevVer.minor}.${prevVer.patch + 1}`
       )!
     // // TODO refactor
@@ -131,4 +153,62 @@ export function bump(
  * Create a semver instance programatically.
  */
 export const create = (maj: number, min: number, pat: number) =>
-  Semver.parse(`${maj}.${min}.${pat}`)!
+  SemVer.parse(`${maj}.${min}.${pat}`)!
+
+export function parsePreview(ver: string): null | PreviewVer {
+  const result = parse(ver)
+  if (result === null) return null
+  if ((result as any).preRelease) {
+    return result as PreviewVer
+  }
+  throw new Error(
+    `Given version string ${ver} could not be parsed as a preview.`
+  )
+}
+
+/**
+ * Parse a version string into structured data.
+ */
+export function parse(ver: string): null | StableVer | PreviewVer {
+  const result = ver.match(
+    /^(v)?(\d+).(\d+).(\d+)$|^(v)?(\d+).(\d+).(\d+)-(\w+).(\d+)$/
+  )
+
+  if (result === null) return null
+
+  if (result[6]) {
+    const vprefix = result[5] === 'v'
+    const major = result[6]
+    const minor = result[7]
+    const patch = result[8]
+    const identifier = result[9]
+    const buildNum = parseInt(result[10], 10)
+    return {
+      version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
+      vprefix,
+      major,
+      minor,
+      patch,
+      preRelease: {
+        identifier,
+        buildNum,
+      },
+    }
+  }
+
+  const vprefix = result[1] === 'v'
+  const major = result[2]
+  const minor = result[3]
+  const patch = result[4]
+  return {
+    version: `${major}.${minor}.${patch}`,
+    vprefix,
+    major,
+    minor,
+    patch,
+  }
+}
+
+export const parseToClass = SemVer.parse
+
+export { SemVer } from 'semver'

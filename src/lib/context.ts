@@ -1,15 +1,7 @@
 import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
 import * as Git from './git'
-import {
-  getReleasesAtCommit,
-  findLatestStable,
-  findLatestPreview,
-  CommitReleases,
-  StableRelease,
-  PreviewRelease,
-} from './utils'
-import * as SemVer from 'semver'
+import * as Rel from './release'
 import * as PackageJson from '../lib/package-json'
 
 export type scanOoptions = {
@@ -21,16 +13,11 @@ export type Context = {
   package: {
     name: string
   }
-  commitsSinceLastStable: Git.LogEntry[]
-  commitsSinceLastPreview: Git.LogEntry[]
+  series: Rel.Series
   // nextReleasesNowWouldBe: {
   //   stable: null | SemVer.SemVer
   //   preview: null | SemVer.SemVer
   // }
-  latestReleases: {
-    stable: null | StableRelease
-    preview: null | PreviewRelease
-  }
   githubRepo: {
     owner: string
     name: string
@@ -45,10 +32,6 @@ export type Context = {
       open: null | PullRequest
       closed: PullRequest[]
     }
-  }
-  currentCommit: {
-    sha: string
-    releases: CommitReleases
   }
 }
 
@@ -106,56 +89,19 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
   }
   // get the branch sync status
   const syncStatus = await Git.checkSyncStatus(git)
-  // get commit info
-  const currentCommitSHA = await Git.gitGetSha(git, { ref: 'head' })
-  const commitReleases = await getReleasesAtCommit(currentCommitSHA)
-  // get the latest releases
-  const maybeLatestStableVer = await findLatestStable(git)
-  const maybeLatestPreVerSinceStable = await findLatestPreview(
-    git,
-    maybeLatestStableVer
-  )
-  // get commits since the latest releases
-  const [commitsSinceLastStable, commitsSinceLastPreview] = await Promise.all([
-    Git.log(git, { since: maybeLatestStableVer }),
-    Git.log(git, { since: maybeLatestPreVerSinceStable }),
-  ])
+  // get the latest releases and commits since
+  const series = await Rel.getCurrentSeries(git)
   // get package info
   const packageJson = await PackageJson.read()
-
   if (packageJson === undefined) {
     // todo exception system
     throw new Error('could not find a package.json')
   }
 
-  // return the final result
   return {
+    series,
     package: {
       name: packageJson.name,
-    },
-    commitsSinceLastPreview,
-    commitsSinceLastStable,
-    latestReleases: {
-      stable:
-        maybeLatestStableVer === null
-          ? null
-          : {
-              type: 'stable',
-              sha: await Git.gitGetSha(git, { ref: maybeLatestStableVer }),
-              version: SemVer.parse(maybeLatestStableVer)!,
-            },
-      preview:
-        maybeLatestPreVerSinceStable === null
-          ? null
-          : {
-              type: 'preview',
-              sha: await Git.gitGetSha(git, {
-                ref: maybeLatestPreVerSinceStable,
-              }),
-              version: SemVer.parse(maybeLatestPreVerSinceStable)!,
-              buildNum: SemVer.parse(maybeLatestPreVerSinceStable)!
-                .prerelease[1] as number,
-            },
     },
     githubRepo: {
       owner: githubRepoAddress.owner,
@@ -168,10 +114,6 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
       isDetatched: branchesSummary.detached,
       prs: prsByState,
       syncStatus,
-    },
-    currentCommit: {
-      sha: currentCommitSHA,
-      releases: commitReleases,
     },
   }
 }
