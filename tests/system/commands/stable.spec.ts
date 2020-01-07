@@ -140,8 +140,8 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "context": Object {
             "commits": Array [
-              "chore: 1",
               "chore: 2",
+              "chore: 1",
             ],
           },
           "summary": "The release you attempting only contains chore commits which means no release is needed.",
@@ -166,7 +166,7 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "commits": Array [
             Object {
-              "message": "fix: 1",
+              "message": "fix: 2",
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -175,7 +175,7 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "fix: 2",
+              "message": "fix: 1",
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -207,43 +207,7 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "commits": Array [
             Object {
-              "message": "Initial commit",
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": "chore: who knows",
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": "chore: add package.json",
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": "feat: 1",
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": "fix: 1",
+              "message": "feat: 2",
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -261,7 +225,43 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "feat: 2",
+              "message": "fix: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "feat: 1",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "chore: add package.json",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "chore: who knows",
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__sha__",
+            },
+            Object {
+              "message": "Initial commit",
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,

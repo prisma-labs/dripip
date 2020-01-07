@@ -5,6 +5,7 @@
 
 import * as Git from '../../../src/lib/git'
 import * as Rel from '../../../src/lib/release'
+import { last } from '../../../src/lib/utils'
 
 describe('buildSeries', () => {
   it('<empty>', () => {
@@ -64,9 +65,9 @@ function n(): RawLogEntryValues {
 }
 
 function gitlog(...actions: (() => RawLogEntryValues)[]): Rel.Series {
-  const log = Git.parseRawLog(
-    Git.serializeLog(actions.map(f => f()).reverse())
-  ).map(Git.parseLogRefs)
-  const pstable = actions[0] === s ? (log.shift() as Git.LogEntry) : null
+  const log = Git.parseRawLog(Git.serializeLog(actions.map(f => f()))).map(
+    Git.parseLogRefs
+  )
+  const pstable = actions[0] === s ? (log.pop() as Git.LogEntry) : null
   return Rel.buildSeries([pstable, log])
 }

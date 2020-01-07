@@ -114,8 +114,7 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
     } as MaybePreviewCommit
   })
 
-  const prevPreviewI = findIndexFromEnd(
-    commitsSinceStable,
+  const prevPreviewI = commitsSinceStable.findIndex(
     c => c.releases.preview !== null
   )
 
@@ -124,7 +123,8 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
   if (prevPreviewI !== -1) {
     previousPreview = commitsSinceStable[prevPreviewI]! as PreviewCommit
     commitsSincePreview = commitsSinceStable.slice(
-      prevPreviewI + 1
+      0,
+      prevPreviewI
     ) as UnreleasedCommit[]
   }
 
@@ -151,7 +151,7 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
     // If there are no commits since stable and no stable that means we're on a
     // repo with no commit. This edge-case is ignored. It is assumed that it
     // will be validated for before calling this function.
-    current: last(commitsSinceStable) ?? previousStable2!,
+    current: commitsSinceStable[0] ?? previousStable2!,
   }
 }
 

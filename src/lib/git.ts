@@ -320,13 +320,11 @@ export async function findTag(
       // '--sort': 'taggerdate',
       '--merged': branchSummary.current,
     })
-    console.log(tagsString)
     tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
   }
 
   let lastTag: null | string = null
 
-  console.log(tagsByCommits)
   outerloop: for (const tbc of tagsByCommits) {
     for (const tag of tbc) {
       if (ops.matcher(tag)) {
@@ -437,7 +435,7 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
  * the exact order as the datums in this module. Hence this is for testing, not
  * external consumption.
  */
-export function serializeLog<T>(values: [string, string, string][]): string {
+export function serializeLog(values: [string, string, string][]): string {
   if (values.length === 0) return ''
   return (
     values.map(v => v.join(logEntryValueSepartaor)).join(logEntrySeparator) +
