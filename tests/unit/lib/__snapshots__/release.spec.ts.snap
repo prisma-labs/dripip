@@ -35,15 +35,6 @@ Object {
   "commitsSincePreview": Array [],
   "commitsSinceStable": Array [
     Object {
-      "message": "fix: thing 1",
-      "nonReleaseTags": Array [],
-      "releases": Object {
-        "preview": null,
-        "stable": null,
-      },
-      "sha": "sha",
-    },
-    Object {
       "message": "foo @ 0.0.0-next.1",
       "nonReleaseTags": Array [],
       "releases": Object {
@@ -58,6 +49,15 @@ Object {
           "version": "0.0.0-next.1",
           "vprefix": false,
         },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
         "stable": null,
       },
       "sha": "sha",
@@ -110,7 +110,7 @@ Object {
   "commitsSincePreview": Array [],
   "commitsSinceStable": Array [
     Object {
-      "message": "foo @ 0.0.0-next.1",
+      "message": "foo @ 0.0.0-next.2",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -118,21 +118,12 @@ Object {
           "minor": 0,
           "patch": 0,
           "preRelease": Object {
-            "buildNum": 1,
+            "buildNum": 2,
             "identifier": "next",
           },
-          "version": "0.0.0-next.1",
+          "version": "0.0.0-next.2",
           "vprefix": false,
         },
-        "stable": null,
-      },
-      "sha": "sha",
-    },
-    Object {
-      "message": "fix: thing 1",
-      "nonReleaseTags": Array [],
-      "releases": Object {
-        "preview": null,
         "stable": null,
       },
       "sha": "sha",
@@ -147,7 +138,16 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 0.0.0-next.2",
+      "message": "fix: thing 1",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 0.0.0-next.1",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -155,10 +155,10 @@ Object {
           "minor": 0,
           "patch": 0,
           "preRelease": Object {
-            "buildNum": 2,
+            "buildNum": 1,
             "identifier": "next",
           },
-          "version": "0.0.0-next.2",
+          "version": "0.0.0-next.1",
           "vprefix": false,
         },
         "stable": null,
@@ -265,16 +265,7 @@ Object {
   ],
   "commitsSinceStable": Array [
     Object {
-      "message": "fix: thing 1",
-      "nonReleaseTags": Array [],
-      "releases": Object {
-        "preview": null,
-        "stable": null,
-      },
-      "sha": "sha",
-    },
-    Object {
-      "message": "fix: thing 2",
+      "message": "fix: thing 3",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -302,7 +293,16 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 3",
+      "message": "fix: thing 2",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 1",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -362,25 +362,7 @@ Object {
   "commitsSincePreview": Array [],
   "commitsSinceStable": Array [
     Object {
-      "message": "fix: thing 1",
-      "nonReleaseTags": Array [],
-      "releases": Object {
-        "preview": null,
-        "stable": null,
-      },
-      "sha": "sha",
-    },
-    Object {
-      "message": "fix: thing 2",
-      "nonReleaseTags": Array [],
-      "releases": Object {
-        "preview": null,
-        "stable": null,
-      },
-      "sha": "sha",
-    },
-    Object {
-      "message": "foo @ 1.0.0-next.1",
+      "message": "foo @ 1.0.0-next.4",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -388,10 +370,38 @@ Object {
           "minor": 0,
           "patch": 0,
           "preRelease": Object {
-            "buildNum": 1,
+            "buildNum": 4,
             "identifier": "next",
           },
-          "version": "1.0.0-next.1",
+          "version": "1.0.0-next.4",
+          "vprefix": false,
+        },
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "fix: thing 3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": null,
+        "stable": null,
+      },
+      "sha": "sha",
+    },
+    Object {
+      "message": "foo @ 1.0.0-next.3",
+      "nonReleaseTags": Array [],
+      "releases": Object {
+        "preview": Object {
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
+          "preRelease": Object {
+            "buildNum": 3,
+            "identifier": "next",
+          },
+          "version": "1.0.0-next.3",
           "vprefix": false,
         },
         "stable": null,
@@ -418,7 +428,7 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.3",
+      "message": "foo @ 1.0.0-next.1",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -426,10 +436,10 @@ Object {
           "minor": 0,
           "patch": 0,
           "preRelease": Object {
-            "buildNum": 3,
+            "buildNum": 1,
             "identifier": "next",
           },
-          "version": "1.0.0-next.3",
+          "version": "1.0.0-next.1",
           "vprefix": false,
         },
         "stable": null,
@@ -437,7 +447,7 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 3",
+      "message": "fix: thing 2",
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -446,20 +456,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.4",
+      "message": "fix: thing 1",
       "nonReleaseTags": Array [],
       "releases": Object {
-        "preview": Object {
-          "major": 1,
-          "minor": 0,
-          "patch": 0,
-          "preRelease": Object {
-            "buildNum": 4,
-            "identifier": "next",
-          },
-          "version": "1.0.0-next.4",
-          "vprefix": false,
-        },
+        "preview": null,
         "stable": null,
       },
       "sha": "sha",

@@ -7,7 +7,7 @@ import { findIndexFromEnd, last } from './utils'
  * stable then commits are counted from start of history.
  */
 export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
-  return getLog(git).then(buildSeries)
+  return getLog().then(buildSeries)
 }
 
 /**
@@ -16,12 +16,19 @@ export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
  * tuple contains the  stable commit partitioned from the subsequent commits.
  * The stable commit may be null.
  */
-async function getLog(git: Git.Simple): Promise<SeriesLog> {
-  const previousStableCommit = await findLatestStable(git)
-  const commits = await Git.log(git, { since: previousStableCommit })
-  return previousStableCommit
-    ? [commits.shift() as Git.LogEntry, commits]
-    : [null, commits]
+async function getLog(): Promise<SeriesLog> {
+  const commits: Git.LogEntry[] = []
+  let previousStableCommit: null | Git.LogEntry = null
+
+  for await (const log of Git.streamLog()) {
+    if (log.tags.find(isStableTag)) {
+      previousStableCommit = log
+      break
+    }
+    commits.push(log)
+  }
+
+  return [previousStableCommit, commits]
 }
 
 export type Commit = {
@@ -107,8 +114,7 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
     } as MaybePreviewCommit
   })
 
-  const prevPreviewI = findIndexFromEnd(
-    commitsSinceStable,
+  const prevPreviewI = commitsSinceStable.findIndex(
     c => c.releases.preview !== null
   )
 
@@ -117,7 +123,8 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
   if (prevPreviewI !== -1) {
     previousPreview = commitsSinceStable[prevPreviewI]! as PreviewCommit
     commitsSincePreview = commitsSinceStable.slice(
-      prevPreviewI + 1
+      0,
+      prevPreviewI
     ) as UnreleasedCommit[]
   }
 
@@ -144,7 +151,7 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
     // If there are no commits since stable and no stable that means we're on a
     // repo with no commit. This edge-case is ignored. It is assumed that it
     // will be validated for before calling this function.
-    current: last(commitsSinceStable) ?? previousStable2!,
+    current: commitsSinceStable[0] ?? previousStable2!,
   }
 }
 

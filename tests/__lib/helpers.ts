@@ -102,7 +102,6 @@ const createDripipRunner = (optsBase?: DripipRunnerOptions) => (
   const pathToProject =
     '../' +
     path.relative((opts as any)['cwd'] || '.', path.join(__dirname, '../..'))
-  // console.log(pathToProject)
   return proc
     .run(
       `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command} --json`,

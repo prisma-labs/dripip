@@ -90,10 +90,10 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "Initial commit",
-            "chore: who knows",
-            "chore: add package.json",
             "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
+            "Initial commit",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -119,10 +119,10 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commitsInRelease": Array [
-            "Initial commit",
-            "chore: who knows",
-            "chore: add package.json",
             "feat: 1",
+            "chore: add package.json",
+            "chore: who knows",
+            "Initial commit",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -149,11 +149,11 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commitsInRelease": Array [
-            "Initial commit",
-            "chore: who knows",
-            "chore: add package.json",
-            "fix: 1",
             "feat: 1",
+            "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
+            "Initial commit",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -184,14 +184,14 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "major",
           "commitsInRelease": Array [
-            "Initial commit",
-            "chore: who knows",
-            "chore: add package.json",
-            "fix: 1",
-            "feat: 1",
             "feat: 2
       BREAKING CHANGE:
       blah blah blah",
+            "feat: 1",
+            "fix: 1",
+            "chore: add package.json",
+            "chore: who knows",
+            "Initial commit",
           ],
           "currentPreviewNumber": null,
           "currentStable": null,
@@ -223,8 +223,8 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "fix: 1",
             "fix: 2",
+            "fix: 1",
           ],
           "currentPreviewNumber": null,
           "currentStable": "0.1.0",
@@ -253,8 +253,8 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commitsInRelease": Array [
-            "fix: 2",
             "fix: 3",
+            "fix: 2",
           ],
           "currentPreviewNumber": 1,
           "currentStable": null,
