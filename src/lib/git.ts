@@ -317,14 +317,16 @@ export async function findTag(
     // TODO this method flattens tags on same commit to appear as adjacent tags
     // in the list. Seems incidentally technically ok for our current algorithm but dubious...
     const tagsString = await git.tag({
-      '--sort': 'taggerdate',
+      // '--sort': 'taggerdate',
       '--merged': branchSummary.current,
     })
+    console.log(tagsString)
     tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
   }
 
   let lastTag: null | string = null
 
+  console.log(tagsByCommits)
   outerloop: for (const tbc of tagsByCommits) {
     for (const tag of tbc) {
       if (ops.matcher(tag)) {
@@ -337,14 +339,17 @@ export async function findTag(
   return lastTag
 }
 
+export type LogEntryWithRefs = {
+  sha: string
+  refs: string
+  message: string
+}
+
 export type LogEntry = {
   sha: string
   tags: string[]
   message: string
 }
-
-const logSeparator = '$@<!____LOG____!>@$'
-const partSeparator = '$@<!____PROP____!>@$'
 
 /**
  * Fetch commit log from given ref or else its entirety. The since commit is
@@ -358,7 +363,7 @@ export async function log(
   // ~1 makes the range inclusive, since-commit will be in the result set
   if (ops?.since) gitArgs.push(`${ops.since}~1..head`)
   const rawLog = (await git.raw(gitArgs)) ?? ''
-  return parseLog(rawLog)
+  return parseRawLog(rawLog).map(parseLogRefs)
 }
 
 const logEntrySeparator = '$@<!____LOG____!>@$'
@@ -373,12 +378,57 @@ export const commitDatums: CommitDatum[] = [
   // { name: 'subject', code: 's' },
   // { name: 'body', code: 'b' },
 ]
+const commitDatumNames = commitDatums.map(datum => datum.name)
 
 export function gitLogFormat(commitDatums: CommitDatum[]): string {
   return (
     commitDatums.map(part => '%' + part.code).join(logEntryValueSepartaor) +
     logEntrySeparator
   )
+}
+
+export function parseRawLog(rawLog: string): LogEntryWithRefs[] {
+  const logStrings = rawLog.trim().split(logEntrySeparator)
+  logStrings.pop() // trailing separator
+  logStrings.reverse() // oldest first
+  return logStrings.reduce((logs, logString) => {
+    logs.push(parseRawLogEntry(logString))
+    return logs
+  }, [] as LogEntryWithRefs[])
+}
+
+export function parseRawLogEntry(rawLogEntry: string): LogEntryWithRefs {
+  let log = {} as LogEntryWithRefs
+  // propsRemaining and logParts are guaranteed to be the same length
+  // TODO should be a zip...
+  const propsRemaining = [...commitDatumNames]
+  const logParts = rawLogEntry.split(logEntryValueSepartaor)
+  while (propsRemaining.length > 0) {
+    // @ts-ignore
+    log[propsRemaining.shift()!] = logParts.shift()!.trim()
+  }
+  return log
+}
+
+/**
+ * Parse a raw git log into a list of structured commit entries. The given
+ * rawLog should be newest commits first, as per how git log returns items (ref:
+ * https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to#comment95151860_36636526).
+ * In turn, the items are here flipped so that oldest commits are first.
+ */
+export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
+  return {
+    ...rest,
+    tags: refs
+      .trim()
+      .split(', ')
+      .map(ref => {
+        const result = ref.match(/tag: (.+)/)
+        if (!result) return null
+        return result[1]
+      })
+      .filter((tagRef): tagRef is string => typeof tagRef === 'string'),
+  }
 }
 
 /**
@@ -395,46 +445,36 @@ export function serializeLog<T>(values: [string, string, string][]): string {
   )
 }
 
-/**
- * Parse a raw git log into a list of structured commit entries. The given
- * rawLog should be newest commits first, as per how git log returns items (ref:
- * https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to#comment95151860_36636526).
- * In turn, the items are here flipped so that oldest commits are first.
- */
-export function parseLog(rawLog: string): LogEntry[] {
-  const logStrings = rawLog.trim().split(logEntrySeparator)
-  logStrings.pop() // trailing separator
-  logStrings.reverse() // oldest first
-  const datumNames = commitDatums.map(datum => datum.name)
-  return logStrings
-    .reduce((logs, logString) => {
-      let log: any = {}
-      // propsRemaining and logParts are guaranteed to be the same length
-      // TODO should be a zip...
-      const propsRemaining = [...datumNames]
-      const logParts = logString.split(logEntryValueSepartaor)
-      while (propsRemaining.length > 0) {
-        log[propsRemaining.shift()!] = logParts.shift()!.trim()
-      }
-      logs.push(log)
-      return logs
-    }, [] as (Omit<LogEntry, 'tags'> & { refs: string })[])
-    .map(
-      ({ refs, ...rest }: { sha: string; refs: string; message: string }) => {
-        return {
-          ...rest,
-          tags: refs
-            .trim()
-            .split(', ')
-            .map(ref => {
-              const result = ref.match(/tag: (.+)/)
-              if (!result) return null
-              return result[1]
-            })
-            .filter((tagRef): tagRef is string => typeof tagRef === 'string'),
-        }
-      }
-    )
-}
+import * as CP from 'child_process'
 
-// export async function getNextStableReleaseWork(): string[] {}
+export async function* streamLog(opts?: {
+  cwd?: string
+}): AsyncGenerator<LogEntry> {
+  const logStream = CP.spawn(
+    'git',
+    ['log', `--format=${gitLogFormat(commitDatums)}`, '--no-merges'],
+    { cwd: opts?.cwd }
+  ).stdout
+
+  let buffer = ''
+  for await (const rawLogChunk of logStream) {
+    buffer += rawLogChunk
+    const rawLogs = buffer.split(logEntrySeparator)
+    // 1. No guarantee that we have a clean end of the raw log entry. It could be
+    //    short or it could contain some of the next log entry.
+    // 2. Safe `!` b/c at a minimum must be [ '' ]
+    const maybePartialRawLog = rawLogs.pop()!
+    buffer = maybePartialRawLog
+    for (const rawLog of rawLogs) {
+      yield parseLogRefs(parseRawLogEntry(rawLog))
+    }
+  }
+
+  // Flush the buffer. Should always contain the trailing separator since at
+  // last log entry.
+  const rawLogs = buffer.split(logEntrySeparator)
+  rawLogs.pop() // trailing log separator
+  for (const rawLog of rawLogs) {
+    yield parseLogRefs(parseRawLogEntry(rawLog))
+  }
+}
