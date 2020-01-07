@@ -294,6 +294,51 @@ export async function isTrunk(git: Simple): Promise<boolean> {
   return branchSumamry.current === 'master'
 }
 
+/**
+ * Get the last tag in the current branch that matches the given pattern.
+ * Returns null if no tag can be found.
+ */
+export async function findTag(
+  git: Simple,
+  ops: { matcher: (x: string) => boolean; since?: string }
+): Promise<null | string> {
+  // References about ordering:
+  // - https://stackoverflow.com/questions/18659959/git-tag-sorted-in-chronological-order-of-the-date-of-the-commit-pointed-to
+  // - https://git-scm.com/docs/git-for-each-ref#_field_names
+  // References about by-branch:
+  // - https://stackoverflow.com/a/39084124/499537
+  const branchSummary = await git.branch({})
+
+  let tagsByCommits: string[][]
+  if (ops.since) {
+    const logs = await log(git, { since: ops?.since ?? undefined })
+    tagsByCommits = logs.map(log => log.tags)
+  } else {
+    // TODO this method flattens tags on same commit to appear as adjacent tags
+    // in the list. Seems incidentally technically ok for our current algorithm but dubious...
+    const tagsString = await git.tag({
+      // '--sort': 'taggerdate',
+      '--merged': branchSummary.current,
+    })
+    console.log(tagsString)
+    tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
+  }
+
+  let lastTag: null | string = null
+
+  console.log(tagsByCommits)
+  outerloop: for (const tbc of tagsByCommits) {
+    for (const tag of tbc) {
+      if (ops.matcher(tag)) {
+        lastTag = tag
+        break outerloop
+      }
+    }
+  }
+
+  return lastTag
+}
+
 export type LogEntryWithRefs = {
   sha: string
   refs: string
@@ -304,6 +349,21 @@ export type LogEntry = {
   sha: string
   tags: string[]
   message: string
+}
+
+/**
+ * Fetch commit log from given ref or else its entirety. The since commit is
+ * inclusive. If given, it will be in your result set. Oldest commit comes first.
+ */
+export async function log(
+  git: Simple,
+  ops?: { since?: null | string }
+): Promise<LogEntry[]> {
+  const gitArgs = ['log', `--format=${gitLogFormat(commitDatums)}`]
+  // ~1 makes the range inclusive, since-commit will be in the result set
+  if (ops?.since) gitArgs.push(`${ops.since}~1..head`)
+  const rawLog = (await git.raw(gitArgs)) ?? ''
+  return parseRawLog(rawLog).map(parseLogRefs)
 }
 
 const logEntrySeparator = '$@<!____LOG____!>@$'
@@ -377,7 +437,7 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
  * the exact order as the datums in this module. Hence this is for testing, not
  * external consumption.
  */
-export function serializeLog(values: [string, string, string][]): string {
+export function serializeLog<T>(values: [string, string, string][]): string {
   if (values.length === 0) return ''
   return (
     values.map(v => v.join(logEntryValueSepartaor)).join(logEntrySeparator) +
