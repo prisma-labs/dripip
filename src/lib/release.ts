@@ -171,14 +171,6 @@ function isPreviewTag(tag: string): boolean {
   return Semver.isPreview(v)
 }
 
-//
-// Private helpers
-//
-
-async function findLatestStable(git: Git.Simple): Promise<null | string> {
-  return Git.findTag(git, { matcher: isStableTag })
-}
-
 // const zeroReleases = {
 //   stable: null,
 //   preview: null,
