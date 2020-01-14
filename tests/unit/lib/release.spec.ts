@@ -5,7 +5,6 @@
 
 import * as Git from '../../../src/lib/git'
 import * as Rel from '../../../src/lib/release'
-import { last } from '../../../src/lib/utils'
 
 describe('buildSeries', () => {
   it('<empty>', () => {
