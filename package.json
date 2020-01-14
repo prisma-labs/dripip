@@ -16,6 +16,8 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
+    "release:stable": "node dist/main stable",
+    "release:preview": "node dist/main preview",
     "format": "prettier --write '*/**/*.ts'",
     "dripip": "ts-node src/main",
     "clean": "rm -rf dist oclif.manifest.json",
