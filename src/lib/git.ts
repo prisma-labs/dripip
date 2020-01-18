@@ -103,9 +103,14 @@ export async function gitInitRepo(git: Simple): Promise<void> {
  */
 export async function gitCreateEmptyCommit(
   git: Simple,
-  messge: string
+  messge?: string
 ): Promise<void> {
-  await git.raw(['commit', '--allow-empty', '--message', messge])
+  await git.raw([
+    'commit',
+    '--allow-empty',
+    '--message',
+    messge ?? 'Nothing to see here, move along',
+  ])
 }
 
 /**

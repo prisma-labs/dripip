@@ -1,12 +1,7 @@
-import {
-  createWorkspace,
-  resetEnvironmentBeforeEachTest,
-} from '../../__lib/helpers'
+import { createWorkspace } from '../../__lib/helpers'
 import { gitCreateEmptyCommit } from '../../../src/lib/git'
 
 const ws = createWorkspace('preview')
-
-resetEnvironmentBeforeEachTest()
 
 describe('pr preview releases', () => {
   let instanceId: string
@@ -20,7 +15,7 @@ describe('pr preview releases', () => {
     await gitCreateEmptyCommit(ws.git, 'some work on new branch')
     // await ws.git.addRemote(
     //   'origin',
-    //   'https://github.com/prisma-labs/system-tests-repo.git'
+    //   'https://github.com/prisma-labs/dripip-system-tests.git'
     // )
     await ws.git.push('origin', branchName)
   })
@@ -47,7 +42,7 @@ describe('pr preview releases', () => {
         head: branchName,
         base: 'master',
         owner: 'prisma-labs',
-        repo: 'system-tests-repo',
+        repo: 'dripip-system-tests',
         title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
       })
     } catch (e) {

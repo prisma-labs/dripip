@@ -1,12 +1,16 @@
-import * as fs from 'fs-jetpack'
-import * as proc from './proc'
-import createGit from 'simple-git/promise'
-
 /**
  * This module handles the concerns of publishing. It handles interaction with
  * git tagging, pushing to the git origin, the package registry, etc.
  */
+import * as fs from 'fs-jetpack'
+import * as proc from './proc'
+import createGit from 'simple-git/promise'
+import { detectScriptRunner, assertAllCasesHandled } from './utils'
+
 type Options = {
+  /**
+   * Should the semver git tag have a "v" prefix.
+   */
   vPrefix?: boolean
 }
 
@@ -15,8 +19,13 @@ const defaultOpts: Options = {
 }
 
 type Release = {
+  /**
+   * The version to publish.
+   */
   version: string
-  isPreview: boolean
+  /**
+   * The npm dist tag to use for this release.
+   */
   distTag: string
 }
 
@@ -64,7 +73,25 @@ export async function publish(release: Release, givenOpts?: Options) {
 
   // publish to the npm registry
 
-  await proc.run(`npm publish --tag ${release.distTag}`, { require: true })
+  // If we are using a script runner then publish with that same tool. Otherwise
+  // default to using npm. The reason we need to do this is that problems occur
+  // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
+  // publish` failing due to an authentication error.
+  const scriptRunner = detectScriptRunner() ?? 'npm'
+  if (scriptRunner === 'npm') {
+    await proc.run(`${scriptRunner} publish --tag ${release.distTag}`, {
+      require: true,
+    })
+  } else if (scriptRunner === 'yarn') {
+    await proc.run(
+      `${scriptRunner} publish --tag ${release.distTag} --no-git-tag-version --new-version ${release.version}`,
+      {
+        require: true,
+      }
+    )
+  } else {
+    assertAllCasesHandled(scriptRunner)
+  }
   console.log('published package to the npm registry')
 
   const git = createGit()

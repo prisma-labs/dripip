@@ -23,13 +23,15 @@ export function createWorkspace(command: 'preview' | 'stable') {
     addDripipToWorkspace(
       WS.createWorkspace({
         name: command,
-        repo: 'git@github.com:prisma-labs/system-tests-repo.git',
+        repo: 'git@github.com:prisma-labs/dripip-system-tests.git',
         cache: {
-          version: '7',
+          version: '8',
         },
       })
     )
   )
+
+  resetEnvironmentBeforeEachTest()
 
   beforeEach(async () => {
     await Promise.all([
@@ -62,13 +64,19 @@ export function addOctokitToworkspace<T>(ws: T): T & { octokit: Octokit } {
  */
 export function addDripipToWorkspace<T extends {}>(
   ws: T
-): T & { dripip: ReturnType<typeof createDripipRunner> } {
-  beforeAll(async () => {
+): T & {
+  dripip: ReturnType<typeof createDripipRunner>
+  dripipRunString: string
+} {
+  beforeAll(() => {
     // @ts-ignore
-    ws.dripip = createDripipRunner({ cwd: ws.dir.path })
+    ws.dripip = createDripipRunner(ws.dir.pathToProject)
+    // @ts-ignore
+    ws.dripipRunString = createDripipRunString(ws.dir.pathToProject)
   })
 
-  return ws as T & { dripip: ReturnType<typeof createDripipRunner> }
+  // @ts-ignore
+  return ws
 }
 
 /**
@@ -89,25 +97,23 @@ type DripipRunnerOptions = proc.RunOptions & {
   raw?: boolean
 }
 
-const createDripipRunner = (optsBase?: DripipRunnerOptions) => (
-  command: string,
-  optsLocal?: DripipRunnerOptions
-): Promise<Record<string, any> | RunDripipResult> => {
-  const opts = {
-    ...optsBase,
-    ...optsLocal,
-  }
+function createDripipRunString(pathToProject: string) {
+  return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main`
+}
 
-  // TODO Why is the extra `../` needed...
-  const pathToProject =
-    '../' +
-    path.relative((opts as any)['cwd'] || '.', path.join(__dirname, '../..'))
-  return proc
-    .run(
-      `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main ${command} --json`,
-      opts
-    )
-    .then(result => {
+function createDripipRunner(pathToProject: string) {
+  return (
+    command: string,
+    optsLocal?: DripipRunnerOptions
+  ): Promise<Record<string, any> | RunDripipResult> => {
+    const opts = {
+      ...optsLocal,
+    }
+
+    const runString = `${createDripipRunString(
+      pathToProject
+    )} ${command} --json`
+    return proc.run(runString, opts).then(result => {
       if ((opts as any).raw === true) {
         // TODO remove given new json parse approach?
         delete result.command
@@ -134,6 +140,7 @@ const createDripipRunner = (optsBase?: DripipRunnerOptions) => (
         )
       }
     })
+  }
 }
 
 export { createDripipRunner }

@@ -1,11 +1,11 @@
 import * as jetpack from 'fs-jetpack'
 import * as Path from 'path'
 import createGit from 'simple-git/promise'
-import { gitInitRepo, Simple, gitResetToInitialCommit } from '../../src/lib/git'
+import { gitInitRepo, Simple } from '../../src/lib/git'
 import { createRunner } from '../../src/lib/proc'
 
 type Workspace = {
-  dir: { path: string; pathRelativeToGraphqlSanta: string; cacheHit: boolean }
+  dir: { path: string; pathRelativeToSource: string; cacheHit: boolean }
   run: ReturnType<typeof createRunner>
   fs: ReturnType<typeof jetpack.dir>
   git: Simple
@@ -76,7 +76,7 @@ async function doCreateWorkspace(config: Options): Promise<Workspace> {
     config.name
   }-${config.cache?.on === false ? Math.random() : cacheKey}`
 
-  dir.pathRelativeToGraphqlSanta =
+  dir.pathRelativeToSource =
     '../' + Path.relative(dir.path, Path.join(__dirname, '../..'))
 
   if ((await jetpack.existsAsync(dir.path)) !== false) {
