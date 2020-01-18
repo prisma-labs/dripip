@@ -1,4 +1,4 @@
-import * as Semver from '../../../src/lib/semver'
+import * as Semver from './semver'
 
 describe('parse', () => {
   it('0.0.1', () => {

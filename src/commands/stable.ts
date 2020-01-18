@@ -2,9 +2,8 @@ import Command, { flags } from '@oclif/command'
 import * as Output from '../lib/output'
 import * as Context from '../lib/context'
 import * as Semver from '../lib/semver'
-import { publish } from '../lib/publish'
+import { publish } from '../utils/publish'
 import createGit from 'simple-git/promise'
-import * as proc from '../lib/proc'
 
 export class Stable extends Command {
   static flags = {

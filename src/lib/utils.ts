@@ -117,13 +117,3 @@ export function last<T>(xs: T[]): null | T {
   if (xs.length === 0) return null
   return xs[xs.length - 1]
 }
-
-/**
- * Detect if being run within a yarn or npm script. Ref
- * https://stackoverflow.com/questions/51768743/how-to-detect-that-the-script-is-running-with-npm-or-yarn/51793644#51793644
- */
-export function detectScriptRunner(): null | 'npm' | 'yarn' {
-  if (process.env.npm_execpath?.match(/.+npm-cli.js$/)) return 'npm'
-  if (process.env.npm_execpath?.match(/.+yarn.js$/)) return 'yarn'
-  return null
-}

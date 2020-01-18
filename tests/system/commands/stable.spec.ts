@@ -134,7 +134,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'chore: 1')
     await gitCreateEmptyCommit(ws.git, 'chore: 2')
     await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -157,7 +157,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'fix: 1')
     await gitCreateEmptyCommit(ws.git, 'fix: 2')
     await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })
@@ -198,7 +198,7 @@ describe('increments upon the previous stable release based on conventional comm
     await gitCreateEmptyCommit(ws.git, 'chore: 1')
     await gitCreateEmptyCommit(ws.git, 'feat: 2')
     await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk-is foobar')
+    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })

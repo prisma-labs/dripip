@@ -5,7 +5,7 @@ import * as Rel from '../lib/release'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
 import * as Output from '../lib/output'
-import * as Publish from '../lib/publish'
+import * as Publish from '../utils/publish'
 import * as Semver from '../lib/semver'
 import * as Context from '../lib/context'
 
