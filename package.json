@@ -26,7 +26,7 @@
     "dev": "tsdx watch",
     "dev:test:unit": "tsdx test --testPathPattern '.*/src/.*' --verbose",
     "test:unit": "CI=true tsdx test --color --testPathPattern '.*/src/.*' --verbose",
-    "test:system": "CI=true tsdx test --color --testTimeout 10000 --testPathPattern '.*/system/.*' --verbose",
+    "test:system": "CI=true tsdx test --color --testTimeout 10000 --testPathPattern '.*/tests/.*' --verbose",
     "test": "CI=true tsdx test --color --testTimeout 10000 --verbose",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",

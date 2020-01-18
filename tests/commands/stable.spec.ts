@@ -1,6 +1,6 @@
 // TODO test that context honours the base branch setting of the repo
-import { createWorkspace } from '../../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../../src/lib/git'
+import { createWorkspace } from '../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('stable')
 
