@@ -1,6 +1,6 @@
 import createGit from 'simple-git/promise'
 import Octokit from '@octokit/rest'
-import * as Git from './git'
+import * as Git from '../lib/git'
 import * as Rel from './release'
 import * as PackageJson from '../lib/package-json'
 

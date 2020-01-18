@@ -3,7 +3,7 @@
 // assumption that the latest stable and all subsequent commits has been
 // fetched.
 
-import * as Git from './git'
+import * as Git from '../lib/git'
 import * as Rel from './release'
 
 describe('buildSeries', () => {

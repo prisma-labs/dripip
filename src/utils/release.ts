@@ -1,6 +1,5 @@
-import * as Semver from './semver'
-import * as Git from './git'
-import { findIndexFromEnd, last } from './utils'
+import * as Semver from '../lib/semver'
+import * as Git from '../lib/git'
 
 /**
  * Get the previous stable and commits since then. If there is no previous

@@ -1,4 +1,4 @@
-import { casesHandled } from './utils'
+import { casesHandled } from '../lib/utils'
 import { format } from 'util'
 
 type Ok<D = Record<string, any>> = {

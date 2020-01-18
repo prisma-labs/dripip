@@ -1,13 +1,13 @@
 import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
 import { indentBlock4 } from '../lib/utils'
-import * as Rel from '../lib/release'
+import * as Rel from '../utils/release'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
-import * as Output from '../lib/output'
+import * as Output from '../utils/output'
 import * as Publish from '../utils/publish'
 import * as Semver from '../lib/semver'
-import * as Context from '../lib/context'
+import * as Context from '../utils/context'
 
 type ReleaseTypeInfo = {
   type: string

@@ -1,6 +1,6 @@
 import Command, { flags } from '@oclif/command'
-import * as Output from '../lib/output'
-import * as Context from '../lib/context'
+import * as Output from '../utils/output'
+import * as Context from '../utils/context'
 import * as Semver from '../lib/semver'
 import { publish } from '../utils/publish'
 import createGit from 'simple-git/promise'
