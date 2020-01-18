@@ -1,5 +1,5 @@
-import { createWorkspace } from '../../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../../src/lib/git'
+import { createWorkspace } from '../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
 
