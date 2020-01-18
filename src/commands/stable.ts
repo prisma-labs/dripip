@@ -57,7 +57,6 @@ export class Stable extends Command {
     }
 
     await publish({
-      isPreview: false,
       version: newStableVer.version,
       distTag: 'latest',
     })

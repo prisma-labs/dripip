@@ -76,7 +76,6 @@ export class Preview extends Command {
       await Publish.publish({
         distTag: 'next',
         version: nextRelease.nextVersion,
-        isPreview: true,
       })
 
       // force update so the tag moves to a new commit

@@ -2,7 +2,8 @@
  * This module handles the concerns of publishing. It handles interaction with
  * git tagging, pushing to the git origin, the package registry, etc.
  */
-import * as fs from 'fs-jetpack'
+import * as fs from 'fs'
+import * as Path from 'path'
 import * as proc from './proc'
 import createGit from 'simple-git/promise'
 import { detectScriptRunner, assertAllCasesHandled } from './utils'
@@ -48,8 +49,11 @@ export async function publish(release: Release, givenOpts?: Options) {
 
   // Update package.json
 
-  const packageJsonPath = fs.path('package.json')
-  const packageJson = await fs.readAsync(packageJsonPath, 'json')
+  const packageJsonPath = Path.join(process.cwd(), 'package.json')
+  const packageJsonString = await fs.readFileSync(packageJsonPath, {
+    encoding: 'utf8',
+  })
+  const packageJson = JSON.parse(packageJsonString)
 
   if (!packageJson) {
     throw new Error(
@@ -68,7 +72,7 @@ export async function publish(release: Release, givenOpts?: Options) {
     version: release.version,
   }
 
-  await fs.writeAsync(packageJsonPath, updatedPackageJson)
+  await fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson))
   console.log('updated package.json in prep for publishing')
 
   // publish to the npm registry
