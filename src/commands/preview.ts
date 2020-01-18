@@ -7,6 +7,7 @@ import * as Git from '../lib/git'
 import * as Output from '../lib/output'
 import * as Publish from '../lib/publish'
 import * as Semver from '../lib/semver'
+import * as Context from '../lib/context'
 
 type ReleaseTypeInfo = {
   type: string
@@ -15,6 +16,11 @@ type ReleaseTypeInfo = {
 
 export class Preview extends Command {
   static flags = {
+    trunk: flags.string({
+      default: '',
+      description:
+        'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
+    }),
     /**
      * This flag is mostly used for debugging. It allows the user to see what
      * kind of preview release _would_ be made under the current conditions, and
@@ -52,18 +58,25 @@ export class Preview extends Command {
     //    2. show the tag author name
     //    3. show the the date the tag was made
 
-    const series = await Rel.getCurrentSeries(git)
+    const ctx = await Context.scan({
+      overrides: {
+        trunk: flags.trunk || null,
+      },
+    })
 
-    if (series.current.releases.stable || series.current.releases.preview) {
-      return send.commitAlreadyPreAndOrStableReleased(series.current)
+    if (
+      ctx.series.current.releases.stable ||
+      ctx.series.current.releases.preview
+    ) {
+      return send.commitAlreadyPreAndOrStableReleased(ctx.series.current)
     }
 
-    if (await Git.isTrunk(git)) {
+    if (ctx.currentBranch.isTrunk) {
       if (flags['show-type']) {
         return send.releaseType({ type: 'stable', reason: 'is_trunk' })
       }
 
-      const nextRelease = await calcNextStablePreview(series)
+      const nextRelease = await calcNextStablePreview(ctx.series)
 
       if (nextRelease === null) {
         return send.noReleaseToMake()
@@ -86,6 +99,7 @@ export class Preview extends Command {
       return
     }
 
+    // todo refator with ctx data
     const prCheck = await Git.checkBranchPR(git)
 
     if (prCheck.isPR === false) {

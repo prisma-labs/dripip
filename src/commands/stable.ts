@@ -8,7 +8,7 @@ import * as proc from '../lib/proc'
 
 export class Stable extends Command {
   static flags = {
-    'trunk-is': flags.string({
+    trunk: flags.string({
       default: '',
       description:
         'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
@@ -29,7 +29,7 @@ export class Stable extends Command {
     const check = createValidators({ json: flags.json })
     const ctx = await Context.scan({
       overrides: {
-        trunk: flags['trunk-is'] || null,
+        trunk: flags.trunk || null,
       },
     })
 
