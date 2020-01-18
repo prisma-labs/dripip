@@ -59,16 +59,8 @@ export class Stable extends Command {
     await publish({
       version: newStableVer.version,
       distTag: 'latest',
+      additiomalDistTags: ['next'],
     })
-
-    // Bring next pointer up to date too
-    await proc.run(
-      `npm dist-tags add ${ctx.package.name}@${newStableVer.version} next`,
-      {
-        require: true,
-      }
-    )
-    console.log('updated dist-tag "next"')
 
     // force update so the tag moves to a new commit
     await git.raw(['tag', '-f', 'latest'])

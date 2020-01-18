@@ -1,4 +1,4 @@
-import { assertAllCasesHandled } from './utils'
+import { casesHandled } from './utils'
 import { stripIndent } from 'common-tags'
 import { format } from 'util'
 
@@ -87,7 +87,7 @@ export function output(message: Message, opts: OutputOptions): void {
       let s = ''
       s += message.data
     } else {
-      assertAllCasesHandled(message)
+      casesHandled(message)
     }
   }
 }

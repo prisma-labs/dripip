@@ -6,7 +6,7 @@ import * as fs from 'fs'
 import * as Path from 'path'
 import * as proc from './proc'
 import createGit from 'simple-git/promise'
-import { detectScriptRunner, assertAllCasesHandled } from './utils'
+import { detectScriptRunner, casesHandled } from './utils'
 
 type Options = {
   /**
@@ -28,6 +28,7 @@ type Release = {
    * The npm dist tag to use for this release.
    */
   distTag: string
+  additiomalDistTags?: string[]
 }
 
 /**
@@ -82,21 +83,27 @@ export async function publish(release: Release, givenOpts?: Options) {
   // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
   // publish` failing due to an authentication error.
   const scriptRunner = detectScriptRunner() ?? 'npm'
-  if (scriptRunner === 'npm') {
-    await proc.run(`${scriptRunner} publish --tag ${release.distTag}`, {
-      require: true,
-    })
-  } else if (scriptRunner === 'yarn') {
-    await proc.run(
-      `${scriptRunner} publish --tag ${release.distTag} --no-git-tag-version --new-version ${release.version}`,
-      {
-        require: true,
-      }
-    )
-  } else {
-    assertAllCasesHandled(scriptRunner)
-  }
+  const runPublishString =
+    scriptRunner === 'npm'
+      ? `npm publish --tag ${release.distTag}`
+      : scriptRunner === 'yarn'
+      ? `${scriptRunner} publish --tag ${release.distTag} --no-git-tag-version --new-version ${release.version}`
+      : casesHandled(scriptRunner)
+  await proc.run(runPublishString, { require: true })
   console.log('published package to the npm registry')
+
+  if (release.additiomalDistTags) {
+    for (const distTag of release.additiomalDistTags) {
+      const runString =
+        scriptRunner === 'npm'
+          ? `npm dist-tags add ${packageJson.name}@${release.version} ${distTag}`
+          : scriptRunner === 'yarn'
+          ? `yarn tag add ${packageJson.name}@${release.version} ${distTag}`
+          : casesHandled(scriptRunner)
+      await proc.run(runString, { require: true })
+      console.log(`updated dist-tag "${distTag}" to point at this version`)
+    }
+  }
 
   const git = createGit()
   // TODO no invariant in system that checks that package.json was not modified
