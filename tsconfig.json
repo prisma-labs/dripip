@@ -9,5 +9,9 @@
     "declarationMap": true,
     "esModuleInterop": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "src/utils/semver.spec.ts",
+    "tests/unit/lib/release.spec.ts"
+  ]
 }

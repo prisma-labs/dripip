@@ -128,9 +128,9 @@ export async function run(
 
 /**
  * Util that binds a command to run making it easy to abstract a parent command.
- * 
+ *
  * @example
- * 
+ *
  *    const git = createRunner('git')
  *    const result = await git('status')
  */
@@ -204,7 +204,7 @@ function parseCommandString(cmd: string): { name: string; args: string[] } {
 
 /**
  * Is the given exit code a failure or success? Intended for internal use,
- * handles null which is convenient for this module. 
+ * handles null which is convenient for this module.
  */
 function isFailedExitCode(exitCode: null | number): boolean {
   return typeof exitCode === 'number' && exitCode !== 0

@@ -1,5 +1,5 @@
-import * as Git from '../../src/lib/git'
-import * as WS from '../__lib/workspace'
+import * as Git from '../src/lib/git'
+import * as WS from './__lib/workspace'
 
 const ws = WS.createWorkspace({
   name: 'system-git',

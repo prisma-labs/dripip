@@ -24,6 +24,32 @@ type PackageJson = {
  */
 export async function read(): Promise<undefined | PackageJson> {
   return fs.readAsync('package.json', 'json')
+
+  // if (!packageJson) {
+  //   throw new Error(
+  //     `Looked for but could not find a package.json file at ${packageJsonPath}. This file is required for publishing to the npm registry.`
+  //   )
+  // }
+
+  // if (typeof packageJson !== 'object') {
+  //   throw new Error(
+  //     `Found a package.json file at ${packageJsonPath} but it appears to be malformed. It did not parse into an object but rather: ${packageJson}`
+  //   )
+  // }
+}
+
+/**
+ * Read the package.json file synchronously.
+ */
+export function readSync(): undefined | PackageJson {
+  return fs.read('package.json', 'json')
+}
+
+/**
+ * Write the package.json file.
+ */
+export async function write(object: object): Promise<void> {
+  return fs.writeAsync('package.json', object)
 }
 
 /**

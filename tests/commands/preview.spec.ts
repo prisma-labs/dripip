@@ -1,5 +1,5 @@
-import { createWorkspace } from '../../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../../src/lib/git'
+import { createWorkspace } from '../__lib/helpers'
+import { gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
 
@@ -17,7 +17,7 @@ describe('pr preview releases', () => {
     //   'origin',
     //   'https://github.com/prisma-labs/dripip-system-tests.git'
     // )
-    await ws.git.push('origin', branchName)
+    await ws.git.raw(['push', '--set-upstream', 'origin', branchName])
   })
 
   it('treats release as a pr preview if circleci env vars signify there is a pr', async () => {

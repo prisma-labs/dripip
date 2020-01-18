@@ -70,9 +70,9 @@ export function addDripipToWorkspace<T extends {}>(
 } {
   beforeAll(() => {
     // @ts-ignore
-    ws.dripip = createDripipRunner(ws.dir.pathToProject)
+    ws.dripip = createDripipRunner(ws.dir.path, ws.dir.pathRelativeToSource)
     // @ts-ignore
-    ws.dripipRunString = createDripipRunString(ws.dir.pathToProject)
+    ws.dripipRunString = createDripipRunString(ws.dir.pathRelativeToSource)
   })
 
   // @ts-ignore
@@ -101,15 +101,17 @@ function createDripipRunString(pathToProject: string) {
   return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main`
 }
 
-function createDripipRunner(pathToProject: string) {
+function createDripipRunner(cwd: string, pathToProject: string) {
   return (
     command: string,
     optsLocal?: DripipRunnerOptions
   ): Promise<Record<string, any> | RunDripipResult> => {
     const opts = {
       ...optsLocal,
+      cwd,
     }
 
+    //@ts-ignore
     const runString = `${createDripipRunString(
       pathToProject
     )} ${command} --json`
