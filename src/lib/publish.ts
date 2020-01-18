@@ -113,6 +113,11 @@ export async function publish(release: Release, givenOpts?: Options) {
           e.message.match(/error Couldn't add tag./) &&
           e.message.match(/error An unexpected error occurred: ""./)
         ) {
+          try {
+            fs.unlinkSync(Path.join(process.cwd(), 'yarn-error.log'))
+          } catch (e) {
+            // silence error
+          }
           // silence error
         } else {
           throw e
