@@ -73,7 +73,10 @@ export async function publish(release: Release, givenOpts?: Options) {
     version: release.version,
   }
 
-  await fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson))
+  await fs.writeFileSync(
+    packageJsonPath,
+    JSON.stringify(updatedPackageJson, null, 2)
+  )
   console.log('updated package.json in prep for publishing')
 
   // publish to the npm registry
@@ -100,7 +103,21 @@ export async function publish(release: Release, givenOpts?: Options) {
           : scriptRunner === 'yarn'
           ? `yarn tag add ${packageJson.name}@${release.version} ${distTag}`
           : casesHandled(scriptRunner)
-      await proc.run(runString, { require: true })
+      // There is a bug with yarn where tag change command errors out but
+      // actually work, ref: https://github.com/yarnpkg/yarn/issues/7823
+      try {
+        await proc.run(runString, { require: true })
+      } catch (e) {
+        if (
+          scriptRunner === 'yarn' &&
+          e.message.match(/error Couldn't add tag./) &&
+          e.message.match(/error An unexpected error occurred: ""./)
+        ) {
+          // silence error
+        } else {
+          throw e
+        }
+      }
       console.log(`updated dist-tag "${distTag}" to point at this version`)
     }
   }
