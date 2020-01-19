@@ -113,6 +113,14 @@ export async function gitCreateEmptyCommit(
   ])
 }
 
+export async function createFixCommit(git: Simple, msg?: string) {
+  return gitCreateEmptyCommit(git, `fix: ${msg ?? 'tu tu tu'}`)
+}
+
+export async function createFeatCommit(git: Simple, msg?: string) {
+  return gitCreateEmptyCommit(git, `feat: ${msg ?? 'ti ti ti'}`)
+}
+
 /**
  * Delete all tags in the repo.
  */
