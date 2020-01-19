@@ -1,4 +1,4 @@
-import * as fs from "fs-jetpack";
+import * as fs from 'fs-jetpack'
 
 type Json =
   | null
@@ -6,24 +6,24 @@ type Json =
   | number
   | boolean
   | { [property: string]: Json }
-  | Json[];
+  | Json[]
 
-type JsonObject = { [property: string]: Json };
+type JsonObject = { [property: string]: Json }
 
 type PackageJsonUpdater = (
   packageJson: Record<string, any>
-) => Record<string, any>;
+) => Record<string, any>
 
 type PackageJson = {
-  name: string;
-  version: string;
-};
+  name: string
+  version: string
+}
 
 /**
  * Read the package.json file.
  */
 export async function read(cwd: string): Promise<undefined | PackageJson> {
-  return fs.readAsync(fs.path(cwd, "package.json"), "json");
+  return fs.readAsync(fs.path(cwd, 'package.json'), 'json')
 
   // if (!packageJson) {
   //   throw new Error(
@@ -42,14 +42,14 @@ export async function read(cwd: string): Promise<undefined | PackageJson> {
  * Read the package.json file synchronously.
  */
 export function readSync(cwd: string): undefined | PackageJson {
-  return fs.read(fs.path(cwd, "package.json"), "json");
+  return fs.read(fs.path(cwd, 'package.json'), 'json')
 }
 
 /**
  * Write the package.json file.
  */
 export async function write(cwd: string, object: object): Promise<void> {
-  return fs.writeAsync(fs.path(cwd, "package.json"), object);
+  return fs.writeAsync(fs.path(cwd, 'package.json'), object)
 }
 
 /**
@@ -61,21 +61,21 @@ export async function update(
   cwd: string,
   updater: PackageJsonUpdater
 ): Promise<void> {
-  const packageJson = await read(cwd);
+  const packageJson = await read(cwd)
   if (packageJson) {
-    const packageJsonUpdated = await updater(packageJson);
-    await fs.writeAsync(fs.path(cwd, "package.json"), packageJsonUpdated);
+    const packageJsonUpdated = await updater(packageJson)
+    await fs.writeAsync(fs.path(cwd, 'package.json'), packageJsonUpdated)
   }
 }
 
 export function create(cwd?: string) {
-  cwd = cwd ?? process.cwd();
+  cwd = cwd ?? process.cwd()
   return {
     read: read.bind(null, cwd),
     readSync: readSync.bind(null, cwd),
     write: write.bind(null, cwd),
-    update: update.bind(null, cwd)
-  };
+    update: update.bind(null, cwd),
+  }
 }
 
-export type PJ = ReturnType<typeof create>;
+export type PJ = ReturnType<typeof create>
