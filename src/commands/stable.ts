@@ -1,6 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Output from '../utils/output'
 import * as Context from '../utils/context'
+import * as Rel from '../utils/release'
 import * as Semver from '../lib/semver'
 import { publish } from '../utils/publish'
 import createGit from 'simple-git/promise'
@@ -36,20 +37,11 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    const bumpType = Semver.calcIncType(
-      ctx.series.commitsSinceStable.map(c => c.message)
-    )
+    const newStableVer = Rel.getNextStable(ctx.series)
 
-    if (bumpType === null) {
-      return show.noReleaseNeeded(ctx)
+    if (Rel.isNoReleaseReason(newStableVer)) {
+      return show.noReleaseNeeded(ctx, newStableVer)
     }
-
-    const newStableVer = Semver.incStable(
-      bumpType,
-      ctx.series.previousStable === null
-        ? Semver.zeroVer
-        : ctx.series.previousStable.releases.stable
-    )
 
     if (flags['dry-run']) {
       return show.dryRun(ctx, newStableVer.version)
@@ -76,17 +68,33 @@ type OutputterOptions = {
 }
 
 function createShowers(opts: OutputterOptions) {
-  function noReleaseNeeded(ctx: Context.Context): void {
-    Output.outputException(
-      'only_chore_like_changes',
-      'The release you attempting only contains chore commits which means no release is needed.',
-      {
-        json: opts.json,
-        context: {
-          commits: ctx.series.commitsSinceStable.map(c => c.message),
-        },
-      }
-    )
+  function noReleaseNeeded(
+    ctx: Context.Context,
+    reason: Rel.NoReleaseReason
+  ): void {
+    if (reason === 'no_meaningful_change') {
+      Output.outputException(
+        'only_chore_like_changes', // todo replace this with reason forward
+        'The release you attempting only contains chore commits which means no release is needed.',
+        {
+          json: opts.json,
+          context: {
+            commits: ctx.series.commitsSinceStable.map(c => c.message),
+          },
+        }
+      )
+    } else if (reason === 'empty_series') {
+      Output.outputException(
+        reason,
+        'There are no commits to release since the last stable.',
+        {
+          json: opts.json,
+          context: {
+            commits: ctx.series.commitsSinceStable.map(c => c.message),
+          },
+        }
+      )
+    }
   }
 
   function dryRun(ctx: Context.Context, newVer: string): void {

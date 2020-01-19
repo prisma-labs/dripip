@@ -170,13 +170,50 @@ function isPreviewTag(tag: string): boolean {
   return Semver.isPreview(v)
 }
 
+// function getNextVer(series: Series): Semver.PreviewVer {
+//   if (series.previousPreview === null) {
+//     return series.previousPreview
+//   }
+// }
+
+export type NoReleaseReason = 'empty_series' | 'no_meaningful_change'
+
+export function isNoReleaseReason(x: unknown): x is NoReleaseReason {
+  return x === 'no_meaningful_change' || x === 'empty_series'
+}
+
+/**
+ * Get the next stable from a given series. If null is returned it means no new
+ * stable release can be made for the given series.
+ */
+export function getNextStable(
+  series: Series
+): NoReleaseReason | Semver.StableVer {
+  if (series.commitsSinceStable.length === 0) {
+    return 'empty_series'
+  }
+
+  const bumpType = Semver.calcIncType(
+    series.commitsSinceStable.map(c => c.message)
+  )
+
+  if (bumpType === null) return 'no_meaningful_change'
+
+  return Semver.incStable(
+    bumpType,
+    series.previousStable === null
+      ? Semver.zeroVer
+      : series.previousStable.releases.stable
+  )
+}
+
 //
 // Private helpers
 //
 
-async function findLatestStable(git: Git.Simple): Promise<null | string> {
-  return Git.findTag(git, { matcher: isStableTag })
-}
+// async function findLatestStable(git: Git.Simple): Promise<null | string> {
+//   return Git.findTag(git, { matcher: isStableTag })
+// }
 
 // const zeroReleases = {
 //   stable: null,
