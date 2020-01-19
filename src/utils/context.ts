@@ -92,7 +92,7 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
   // get the latest releases and commits since
   const series = await Rel.getCurrentSeries(git)
   // get package info
-  const packageJson = await PackageJson.read()
+  const packageJson = await PackageJson.read(process.cwd())
   if (packageJson === undefined) {
     // todo exception system
     throw new Error('could not find a package.json')
