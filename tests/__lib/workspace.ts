@@ -14,6 +14,7 @@ type Workspace = {
 type Options = {
   name: string
   repo?: string
+  git?: boolean
   cache?: {
     on?: boolean
     version?: string
@@ -24,12 +25,12 @@ type Options = {
 /**
  * Workspace creator coupled to jest.
  */
-export function createWorkspace(config: Options): Workspace {
+export function createWorkspace(opts: Options): Workspace {
   const ws = {} as Workspace
   // TODO track the git commit started on, then reset hard to it after each test
 
   beforeAll(async () => {
-    Object.assign(ws, await doCreateWorkspace(config))
+    Object.assign(ws, await doCreateWorkspace(opts))
     // In case of a cache hit where we manually debugged the directory or
     // somehow else it changed.
   })
@@ -37,10 +38,12 @@ export function createWorkspace(config: Options): Workspace {
   beforeEach(async () => {
     await ws.fs.removeAsync(ws.dir.path)
     await ws.fs.dirAsync(ws.dir.path)
-    if (config.repo) {
-      await ws.git.clone(config.repo, ws.dir.path)
-    } else {
-      await gitInitRepo(ws.git)
+    if (opts.git !== false) {
+      if (opts.repo) {
+        await ws.git.clone(opts.repo, ws.dir.path)
+      } else {
+        await gitInitRepo(ws.git)
+      }
     }
   })
 
@@ -53,28 +56,38 @@ export function createWorkspace(config: Options): Workspace {
 /**
  * Create a generic workspace to perform work in.
  */
-async function doCreateWorkspace(config: Options): Promise<Workspace> {
+async function doCreateWorkspace(optsGiven: Options): Promise<Workspace> {
   //
   // Setup Dir
   //
+  const opts = {
+    git: true,
+    ...optsGiven,
+  }
+
+  let cacheKey: string
+  if (opts.cache?.on) {
+    const yarnLockHash =
+      opts.cache?.includeLock === true
+        ? jetpack.inspect('yarn.lock', {
+            checksum: 'md5',
+          })!.md5
+        : 'off'
+    const ver = '8'
+    const testVer = opts.cache?.version ?? 'off'
+    const currentGitBranch = (
+      await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])
+    ).trim()
+    cacheKey = `v${ver}-yarnlock-${yarnLockHash}-gitbranch-${currentGitBranch}-testv${testVer}`
+  } else {
+    cacheKey = Math.random()
+      .toString()
+      .slice(2)
+  }
+
   const projectName = require('../../package.json').name
   const dir = {} as Workspace['dir']
-  const yarnLockHash =
-    config.cache?.includeLock === true
-      ? jetpack.inspect('yarn.lock', {
-          checksum: 'md5',
-        })!.md5
-      : 'off'
-  const ver = '8'
-  const testVer = config.cache?.version ?? 'off'
-  const currentGitBranch = (
-    await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])
-  ).trim()
-  const cacheKey = `v${ver}-yarnlock-${yarnLockHash}-gitbranch-${currentGitBranch}-testv${testVer}`
-
-  dir.path = `/tmp/${projectName}-integration-test-project-bases/${
-    config.name
-  }-${config.cache?.on === false ? Math.random() : cacheKey}`
+  dir.path = `/tmp/${projectName}-integration-test-project-bases/${opts.name}-${cacheKey}`
 
   dir.pathRelativeToSource =
     '../' + Path.relative(dir.path, Path.join(__dirname, '../..'))
@@ -87,32 +100,30 @@ async function doCreateWorkspace(config: Options): Promise<Workspace> {
   }
 
   console.log('cache %s for %s', dir.cacheHit ? 'hit' : 'miss', dir.path)
+  const ws: any = {}
 
   //
   // Setup Tools
   //
-  const fs = jetpack.dir(dir.path)
-  const run = createRunner(dir.path)
-  const git = createGit(dir.path)
-
-  //
-  // Setup Project (if needed, cacheable)
-  //
-  if (!dir.cacheHit) {
-    if (config.repo) {
-      await git.clone(config.repo, dir.path)
-    } else {
-      await gitInitRepo(git)
+  ws.dir = dir
+  ws.fs = jetpack.dir(dir.path)
+  ws.run = createRunner(dir.path)
+  if (opts.git) {
+    ws.git = createGit(dir.path)
+    //
+    // Setup Project (if needed, cacheable)
+    //
+    if (!dir.cacheHit) {
+      if (opts.repo) {
+        await ws.git.clone(opts.repo, dir.path)
+      } else {
+        await gitInitRepo(ws.git)
+      }
     }
   }
 
   //
   // Return a workspace
   //
-  return {
-    dir,
-    fs,
-    run,
-    git,
-  }
+  return ws
 }
