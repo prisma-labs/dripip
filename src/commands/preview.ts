@@ -21,6 +21,10 @@ export class Preview extends Command {
       description:
         'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
     }),
+    ['build-num']: flags.integer({
+      description:
+        'Force a build number. Should not be needed generally. For exceptional cases.',
+    }),
     /**
      * This flag is mostly used for debugging. It allows the user to see what
      * kind of preview release _would_ be made under the current conditions, and
@@ -76,7 +80,10 @@ export class Preview extends Command {
         return send.releaseType({ type: 'stable', reason: 'is_trunk' })
       }
 
-      const nextRelease = await calcNextStablePreview(ctx.series)
+      const nextRelease = await calcNextStablePreview(
+        ctx.series,
+        flags['build-num']
+      )
 
       if (nextRelease === null) {
         return send.noReleaseToMake()
@@ -141,7 +148,10 @@ type ReleaseBrief = {
  * 3. Bump last stable version by bump type, thus producing the next version.
  * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
  */
-function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
+function calcNextStablePreview(
+  series: Rel.Series,
+  forceBuildNum: number | undefined
+): null | ReleaseBrief {
   // We need all the commits since the last stable release to calculate the
   // pre-release. The pre-release is a bump against the last stable plus a
   // build number. The bump type used to bump is based on the aggregate of
@@ -166,8 +176,9 @@ function calcNextStablePreview(series: Rel.Series): null | ReleaseBrief {
   const nextVer = Semver.stableToPreview(
     nextStable,
     'next',
-    (series.previousPreview?.releases.preview.preRelease.buildNum ??
-      Semver.zeroBuildNum) + 1
+    forceBuildNum ??
+      (series.previousPreview?.releases.preview.preRelease.buildNum ??
+        Semver.zeroBuildNum) + 1
   )
 
   // TODO simplify by exposing series struct as is, little value in the remix here

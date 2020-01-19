@@ -41,11 +41,12 @@ async function publish(
     const runString = `yarn publish --tag ${input.tag} --no-git-tag-version --new-version ${input.version}`
     await proc.run(runString, { require: true })
   } else if (manType === 'npm') {
-    const pj = (await PJ.read())! // assume present and valid package.json has been validated already
-    await PJ.write({ ...pj, version: input.version })
+    const pj = PJ.create(process.cwd())
+    const pjd = (await pj.read())! // assume present and valid package.json has been validated already
+    await pj.write({ ...pjd, version: input.version })
     const runString = `npm publish --tag ${input.tag}`
     await proc.run(runString, { require: true })
-    await PJ.write(pj)
+    await pj.write(pjd)
   } else {
     casesHandled(manType)
   }
@@ -95,7 +96,7 @@ async function tag(
 
 export async function create(input: { defualt: PackageManagerType }) {
   const packageManagerType = detectScriptRunner() ?? input.defualt
-  const packageJson = PJ.readSync()! // todo
+  const packageJson = PJ.readSync(process.cwd())! // todo
   return {
     publish: publish.bind(null, packageManagerType),
     tag: tag.bind(null, packageManagerType, packageJson.name),

@@ -1,5 +1,9 @@
 import { createWorkspace } from '../__lib/helpers'
-import { gitCreateEmptyCommit } from '../../src/lib/git'
+import {
+  gitCreateEmptyCommit,
+  createFixCommit,
+  createFeatCommit,
+} from '../../src/lib/git'
 
 const ws = createWorkspace('preview')
 
@@ -73,6 +77,34 @@ describe('stable preview releases', () => {
         },
         "kind": "ok",
         "type": "release_type",
+      }
+    `)
+  })
+
+  it.only('if build-num flag passed, the build number is forced to be it', async () => {
+    createFixCommit(ws.git)
+    await ws.git.addTag('0.1.0')
+    createFeatCommit(ws.git)
+    const result = await ws.dripip('preview --build-num 2 --dry-run')
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "bumpType": "minor",
+          "commitsInRelease": Array [
+            "feat: ti ti ti",
+          ],
+          "currentPreviewNumber": null,
+          "currentStable": "0.1.0",
+          "currentVersion": "0.1.0",
+          "isFirstVer": false,
+          "isFirstVerPreRelease": true,
+          "isFirstVerStable": false,
+          "nextPreviewNumber": 2,
+          "nextStable": "0.2.0",
+          "nextVersion": "0.2.0-next.2",
+        },
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
