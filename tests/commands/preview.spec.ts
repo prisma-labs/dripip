@@ -81,7 +81,7 @@ describe('stable preview releases', () => {
     `)
   })
 
-  it.only('if build-num flag passed, the build number is forced to be it', async () => {
+  it('if build-num flag passed, the build number is forced to be it', async () => {
     createFixCommit(ws.git)
     await ws.git.addTag('0.1.0')
     createFeatCommit(ws.git)
@@ -90,18 +90,10 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "minor",
-          "commitsInRelease": Array [
+          "commits": Array [
             "feat: ti ti ti",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": "0.1.0",
-          "currentVersion": "0.1.0",
-          "isFirstVer": false,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": false,
-          "nextPreviewNumber": 2,
-          "nextStable": "0.2.0",
-          "nextVersion": "0.2.0-next.2",
+          "version": "0.2.0-next.2",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -116,21 +108,13 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "patch",
-          "commitsInRelease": Array [
+          "commits": Array [
             "fix: 1",
             "chore: add package.json",
             "chore: who knows",
             "Initial commit",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": null,
-          "currentVersion": null,
-          "isFirstVer": true,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": true,
-          "nextPreviewNumber": 1,
-          "nextStable": "0.0.1",
-          "nextVersion": "0.0.1-next.1",
+          "version": "0.0.1-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -145,21 +129,13 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "minor",
-          "commitsInRelease": Array [
+          "commits": Array [
             "feat: 1",
             "chore: add package.json",
             "chore: who knows",
             "Initial commit",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": null,
-          "currentVersion": null,
-          "isFirstVer": true,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": true,
-          "nextPreviewNumber": 1,
-          "nextStable": "0.1.0",
-          "nextVersion": "0.1.0-next.1",
+          "version": "0.1.0-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -175,22 +151,14 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "minor",
-          "commitsInRelease": Array [
+          "commits": Array [
             "feat: 1",
             "fix: 1",
             "chore: add package.json",
             "chore: who knows",
             "Initial commit",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": null,
-          "currentVersion": null,
-          "isFirstVer": true,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": true,
-          "nextPreviewNumber": 1,
-          "nextStable": "0.1.0",
-          "nextVersion": "0.1.0-next.1",
+          "version": "0.1.0-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -210,7 +178,7 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "major",
-          "commitsInRelease": Array [
+          "commits": Array [
             "feat: 2
       BREAKING CHANGE:
       blah blah blah",
@@ -220,15 +188,7 @@ describe('stable preview releases', () => {
             "chore: who knows",
             "Initial commit",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": null,
-          "currentVersion": null,
-          "isFirstVer": true,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": true,
-          "nextPreviewNumber": 1,
-          "nextStable": "1.0.0",
-          "nextVersion": "1.0.0-next.1",
+          "version": "1.0.0-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -249,19 +209,11 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "patch",
-          "commitsInRelease": Array [
+          "commits": Array [
             "fix: 2",
             "fix: 1",
           ],
-          "currentPreviewNumber": null,
-          "currentStable": "0.1.0",
-          "currentVersion": "0.1.0",
-          "isFirstVer": false,
-          "isFirstVerPreRelease": true,
-          "isFirstVerStable": false,
-          "nextPreviewNumber": 1,
-          "nextStable": "0.1.1",
-          "nextVersion": "0.1.1-next.1",
+          "version": "0.1.1-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -279,19 +231,11 @@ describe('stable preview releases', () => {
       Object {
         "data": Object {
           "bumpType": "patch",
-          "commitsInRelease": Array [
+          "commits": Array [
             "fix: 3",
             "fix: 2",
           ],
-          "currentPreviewNumber": 1,
-          "currentStable": null,
-          "currentVersion": "0.0.1-next.1",
-          "isFirstVer": false,
-          "isFirstVerPreRelease": false,
-          "isFirstVerStable": true,
-          "nextPreviewNumber": 2,
-          "nextStable": "0.0.1",
-          "nextVersion": "0.0.1-next.2",
+          "version": "0.0.1-next.2",
         },
         "kind": "ok",
         "type": "dry_run",

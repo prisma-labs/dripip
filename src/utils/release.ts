@@ -1,6 +1,11 @@
 import * as Semver from '../lib/semver'
 import * as Git from '../lib/git'
 
+export type Release = {
+  bumpType: Semver.MajMinPat
+  version: Semver.Ver
+}
+
 /**
  * Get the previous stable and commits since then. If there is no previous
  * stable then commits are counted from start of history.
@@ -82,9 +87,9 @@ export type UnreleasedCommit = {
 
 export type Series = {
   previousStable: null | StableCommit
-  commitsSinceStable: MaybePreviewCommit[]
+  commitsInNextStable: MaybePreviewCommit[]
   previousPreview: null | PreviewCommit
-  commitsSincePreview: UnreleasedCommit[]
+  commitsInNextPreview: UnreleasedCommit[]
   current: Commit
 }
 
@@ -93,18 +98,20 @@ export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
 /**
  * Build structured series data from a raw series log.
  */
-export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
-  if (previousStable === null && commitsSince.length === 0) {
+export function buildSeries([
+  previousStable,
+  commitsSincePrevStable,
+]: SeriesLog): Series {
+  if (previousStable === null && commitsSincePrevStable.length === 0) {
     throw new Error(
       `Cannot build release series with given data. There is no previous stable release and no commits since. This would indicate an unexpected error or working with a git repo that has zero commits. The latter should be guarded by upstream checks. Therefore this is bad. There must be a bug.`
     )
   }
 
-  const commitsSinceStable = commitsSince.map(c => {
-    const { message, sha } = c
+  const commitsInNextStable = commitsSincePrevStable.map(c => {
     return {
-      message,
-      sha,
+      message: c.message,
+      sha: c.sha,
       nonReleaseTags: c.tags.filter(isUnknownTag),
       releases: {
         stable: Semver.parse(c.tags.find(isStableTag) ?? ''),
@@ -113,19 +120,22 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
     } as MaybePreviewCommit
   })
 
-  const prevPreviewI = commitsSinceStable.findIndex(
+  const previousPreviewIndex = commitsInNextStable.findIndex(
     c => c.releases.preview !== null
   )
 
-  let previousPreview: null | PreviewCommit = null
-  let commitsSincePreview: UnreleasedCommit[] = []
-  if (prevPreviewI !== -1) {
-    previousPreview = commitsSinceStable[prevPreviewI]! as PreviewCommit
-    commitsSincePreview = commitsSinceStable.slice(
-      0,
-      prevPreviewI
-    ) as UnreleasedCommit[]
-  }
+  const previousPreview =
+    previousPreviewIndex === -1
+      ? null
+      : (commitsInNextStable[previousPreviewIndex]! as PreviewCommit)
+
+  const commitsInNextPreview: UnreleasedCommit[] =
+    previousPreviewIndex === -1
+      ? (commitsInNextStable as UnreleasedCommit[])
+      : (commitsInNextStable.slice(
+          0,
+          previousPreviewIndex
+        ) as UnreleasedCommit[])
 
   const previousStable2 =
     previousStable === null
@@ -144,13 +154,13 @@ export function buildSeries([previousStable, commitsSince]: SeriesLog): Series {
 
   return {
     previousStable: previousStable2,
-    commitsSinceStable,
     previousPreview,
-    commitsSincePreview,
+    commitsInNextStable,
+    commitsInNextPreview,
     // If there are no commits since stable and no stable that means we're on a
     // repo with no commit. This edge-case is ignored. It is assumed that it
     // will be validated for before calling this function.
-    current: commitsSinceStable[0] ?? previousStable2!,
+    current: commitsInNextStable[0] ?? previousStable2!,
   }
 }
 
@@ -183,28 +193,54 @@ export function isNoReleaseReason(x: unknown): x is NoReleaseReason {
 }
 
 /**
- * Get the next stable from a given series. If null is returned it means no new
- * stable release can be made for the given series.
+ * Get the next stable from a given series. If a release cannot be made for the
+ * given series then a code indicating why will be returned.
  */
-export function getNextStable(
-  series: Series
-): NoReleaseReason | Semver.StableVer {
-  if (series.commitsSinceStable.length === 0) {
+export function getNextStable(series: Series): NoReleaseReason | Release {
+  if (series.commitsInNextStable.length === 0) {
     return 'empty_series'
   }
 
   const bumpType = Semver.calcIncType(
-    series.commitsSinceStable.map(c => c.message)
+    series.commitsInNextStable.map(c => c.message)
   )
 
   if (bumpType === null) return 'no_meaningful_change'
 
-  return Semver.incStable(
+  const version = Semver.incStable(
     bumpType,
     series.previousStable === null
       ? Semver.zeroVer
       : series.previousStable.releases.stable
   )
+
+  return { bumpType, version }
+}
+
+export function getNextPreview(series: Series): NoReleaseReason | Release {
+  if (series.commitsInNextStable.length === 0) {
+    return 'empty_series'
+  }
+
+  const bumpType = Semver.calcIncType(
+    series.commitsInNextStable.map(c => c.message)
+  )
+
+  if (bumpType === null) return 'no_meaningful_change'
+
+  const nextStable = Semver.incStable(
+    bumpType,
+    series.previousStable?.releases.stable ?? Semver.zeroVer
+  )
+
+  const version = Semver.stableToPreview(
+    nextStable,
+    'next',
+    (series.previousPreview?.releases.preview.preRelease.buildNum ??
+      Semver.zeroBuildNum) + 1
+  )
+
+  return { bumpType, version }
 }
 
 //

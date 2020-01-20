@@ -1,6 +1,6 @@
 import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
-import { indentBlock4 } from '../lib/utils'
+import { indentBlock4, casesHandled } from '../lib/utils'
 import * as Rel from '../utils/release'
 import { stripIndents } from 'common-tags'
 import * as Git from '../lib/git'
@@ -80,22 +80,26 @@ export class Preview extends Command {
         return send.releaseType({ type: 'stable', reason: 'is_trunk' })
       }
 
-      const nextRelease = await calcNextStablePreview(
-        ctx.series,
-        flags['build-num']
-      )
+      const release = Rel.getNextPreview(ctx.series)
 
-      if (nextRelease === null) {
-        return send.noReleaseToMake()
+      if (Rel.isNoReleaseReason(release)) {
+        return send.noReleaseToMake(release)
+      }
+
+      if (flags['build-num']) {
+        release.version = Semver.setBuildNum(
+          release.version as Semver.PreviewVer,
+          flags['build-num']
+        )
       }
 
       if (flags['dry-run']) {
-        return send.dryRun(nextRelease)
+        return send.dryRun(ctx.series, release)
       }
 
       await Publish.publish({
         distTag: 'next',
-        version: nextRelease.nextVersion,
+        version: release.version.version,
       })
 
       // force update so the tag moves to a new commit
@@ -139,71 +143,6 @@ type ReleaseBrief = {
   isFirstVerStable: boolean
 }
 
-/**
- * 1. Find the last pre-release on the current branch. Take its build number. If
- *    none use 1.
- * 2. Calculate the semver bump type. Do this by analyizing the commits on the
- *    branch between HEAD and the last stable git tag.  The highest change type
- *    found is used. If no previous stable git tag use 0.0.1.
- * 3. Bump last stable version by bump type, thus producing the next version.
- * 4. Construct new version {nextVer}-next.{buildNum}. Example: 1.2.3-next.1.
- */
-function calcNextStablePreview(
-  series: Rel.Series,
-  forceBuildNum: number | undefined
-): null | ReleaseBrief {
-  // We need all the commits since the last stable release to calculate the
-  // pre-release. The pre-release is a bump against the last stable plus a
-  // build number. The bump type used to bump is based on the aggregate of
-  // all commits since the last stable. While the build number always
-  // increments the maj/min/pat may only increment upon the first
-  // pre-release, unless a later pre-release incurs a higher-order bump-type
-  // e.g. begin with patch-kind changes followed later by min-kind changes.
-
-  // Calculate the next version
-
-  const incType = Semver.calcIncType(
-    series.commitsSinceStable.map(c => c.message)
-  )
-
-  if (incType === null) return null
-
-  const nextStable = Semver.incStable(
-    incType,
-    series.previousStable?.releases.stable ?? Semver.zeroVer
-  )
-
-  const nextVer = Semver.stableToPreview(
-    nextStable,
-    'next',
-    forceBuildNum ??
-      (series.previousPreview?.releases.preview.preRelease.buildNum ??
-        Semver.zeroBuildNum) + 1
-  )
-
-  // TODO simplify by exposing series struct as is, little value in the remix here
-  return {
-    currentStable: series.previousStable?.releases.stable.version ?? null,
-    currentPreviewNumber:
-      series.previousPreview?.releases.preview.preRelease.buildNum ?? null,
-    nextStable: nextStable.version,
-    nextPreviewNumber: nextVer.preRelease.buildNum,
-    currentVersion:
-      series.previousPreview?.releases.preview.version ??
-      series.previousStable?.releases.stable.version ??
-      null,
-    nextVersion: nextVer.version,
-    commitsInRelease: series.previousPreview
-      ? series.commitsSincePreview.map(c => c.message)
-      : series.commitsSinceStable.map(c => c.message),
-    bumpType: incType,
-    isFirstVer:
-      series.previousStable === null && series.previousPreview === null,
-    isFirstVerStable: series.previousStable === null,
-    isFirstVerPreRelease: series.previousPreview === null,
-  }
-}
-
 type OutputterOptions = {
   json: boolean
 }
@@ -225,12 +164,19 @@ function createOutputters(opts: OutputterOptions) {
   /**
    * Output no release to make notice.
    */
-  function noReleaseToMake(): void {
+  function noReleaseToMake(reason: Rel.NoReleaseReason): void {
     Output.output(
-      Output.createException('no_release_to_make', {
-        summary:
-          'All commits are either meta or not conforming to conventional commit. No release will be made.',
-      }),
+      reason === 'no_meaningful_change'
+        ? // todo forward reason code
+          Output.createException('no_release_to_make', {
+            summary:
+              'All commits are either meta or not conforming to conventional commit. No release will be made.',
+          })
+        : reason === 'empty_series'
+        ? Output.createException(reason, {
+            summary: 'There are no commits to release since the last stable.',
+          })
+        : (casesHandled(reason) as never),
       { json: opts.json }
     )
   }
@@ -278,8 +224,12 @@ function createOutputters(opts: OutputterOptions) {
     }
   }
 
-  function dryRun(info: ReleaseBrief): void {
-    Output.outputOk('dry_run', info)
+  function dryRun(series: Rel.Series, nextRel: Rel.Release): void {
+    Output.outputOk('dry_run', {
+      bumpType: nextRel.bumpType,
+      version: nextRel.version.version,
+      commits: series.commitsInNextPreview.map(c => c.message),
+    })
   }
 
   return {
