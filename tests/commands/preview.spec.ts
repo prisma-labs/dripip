@@ -24,22 +24,6 @@ describe('pr preview releases', () => {
     await ws.git.raw(['push', '--set-upstream', 'origin', branchName])
   })
 
-  it('treats release as a pr preview if circleci env vars signify there is a pr', async () => {
-    process.env.CIRCLECI = 'true'
-    process.env.CIRCLE_PULL_REQUEST = 'true'
-    const result = await ws.dripip('preview --show-type')
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "reason": "ci_env_var",
-          "type": "pr",
-        },
-        "kind": "ok",
-        "type": "release_type",
-      }
-    `)
-  })
-
   it('treats releases as a pr preview if on branch with open pr', async () => {
     try {
       await ws.octokit.pulls.create({

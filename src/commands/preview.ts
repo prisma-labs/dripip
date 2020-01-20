@@ -9,7 +9,7 @@ import * as Publish from '../utils/publish'
 import * as Semver from '../lib/semver'
 import * as Context from '../utils/context'
 
-type ReleaseTypeInfo = {
+type PreviewTypeFound = {
   type: string
   reason: string
 }
@@ -110,37 +110,21 @@ export class Preview extends Command {
       return
     }
 
-    // todo refator with ctx data
-    const prCheck = await Git.checkBranchPR(git)
-
-    if (prCheck.isPR === false) {
+    if (!ctx.currentBranch.prs.open) {
+      // todo show helpful info if found past closed prs
       return send.invalidBranchForPreRelease()
     }
 
     if (flags['show-type']) {
       return send.releaseType({
         type: 'pr',
-        reason: prCheck.inferredBy,
+        reason: 'git_branch_github_api',
       })
     }
 
     // TODO
     return process.stdout.write('todo: pr preview release')
   }
-}
-
-type ReleaseBrief = {
-  currentVersion: null | string
-  currentStable: null | string
-  currentPreviewNumber: null | number
-  nextStable: string
-  nextPreviewNumber: number
-  nextVersion: string
-  commitsInRelease: string[]
-  bumpType: Semver.MajMinPat
-  isFirstVer: boolean
-  isFirstVerPreRelease: boolean
-  isFirstVerStable: boolean
 }
 
 type OutputterOptions = {
@@ -151,7 +135,7 @@ function createOutputters(opts: OutputterOptions) {
   /**
    * Output the release type.
    */
-  function releaseType(info: ReleaseTypeInfo): void {
+  function releaseType(info: PreviewTypeFound): void {
     if (opts.json) {
       Output.outputOk('release_type', info)
     } else {
