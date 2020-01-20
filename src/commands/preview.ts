@@ -43,6 +43,7 @@ export class Preview extends Command {
     json: flags.boolean({
       default: false,
       description: 'format output as JSON',
+      char: 'j',
     }),
   }
 
