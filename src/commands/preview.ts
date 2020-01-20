@@ -24,6 +24,7 @@ export class Preview extends Command {
     ['build-num']: flags.integer({
       description:
         'Force a build number. Should not be needed generally. For exceptional cases.',
+      char: 'n',
     }),
     /**
      * This flag is mostly used for debugging. It allows the user to see what
