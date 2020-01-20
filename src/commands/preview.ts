@@ -38,6 +38,7 @@ export class Preview extends Command {
     'dry-run': flags.boolean({
       default: false,
       description: 'output what the next version would be if released now',
+      char: 'd',
     }),
     json: flags.boolean({
       default: false,
