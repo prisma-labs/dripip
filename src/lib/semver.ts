@@ -1,4 +1,4 @@
-export type Ver = StableVer | PreviewVer
+export type Ver = StableVer | PreviewVer | PullRequestVer
 
 export type StableVer = {
   version: string
@@ -17,6 +17,19 @@ export type PreviewVer = {
   preRelease: {
     identifier: string
     buildNum: number
+  }
+}
+
+export type PullRequestVer = {
+  version: string
+  vprefix: boolean
+  major: number
+  minor: number
+  patch: number
+  preRelease: {
+    identifier: 'pr'
+    prNum: number
+    shortSha: string
   }
 }
 

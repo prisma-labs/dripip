@@ -97,7 +97,10 @@ export class Preview extends Command {
       }
 
       if (flags['dry-run']) {
-        return send.dryRun(ctx.series, release)
+        return send.dryRun(ctx, {
+          bumpType: release.bumpType,
+          version: release.version.version,
+        })
       }
 
       await Publish.publish({
@@ -125,8 +128,29 @@ export class Preview extends Command {
       })
     }
 
-    // TODO
-    return process.stdout.write('todo: pr preview release')
+    const version = {
+      major: 0,
+      minor: 0,
+      patch: 0,
+      version: `0.0.0-pr.${
+        ctx.currentBranch.prs.open!.number
+      }.${ctx.series.current.sha.slice(0, 7)}`,
+      vprefix: false,
+      preRelease: {
+        identifier: 'pr',
+        prNum: ctx.currentBranch.prs.open!.number,
+        shortSha: ctx.series.current.sha.slice(0, 7),
+      },
+    } as Semver.PullRequestVer
+
+    if (flags['dry-run']) {
+      return send.dryRun(ctx, { version: version.version })
+    }
+
+    await Publish.publish({
+      distTag: `pr.${ctx.currentBranch.prs.open!.number}`,
+      version: version.version,
+    })
   }
 }
 
@@ -211,11 +235,12 @@ function createOutputters(opts: OutputterOptions) {
     }
   }
 
-  function dryRun(series: Rel.Series, nextRel: Rel.Release): void {
+  function dryRun(ctx: Context.Context, data: Record<string, unknown>): void {
     Output.outputOk('dry_run', {
-      bumpType: nextRel.bumpType,
-      version: nextRel.version.version,
-      commits: series.commitsInNextPreview.map(c => c.message),
+      // bumpType: nextRel.bumpType,
+      // version: nextRel.version.version,
+      commits: ctx.series.commitsInNextPreview.map(c => c.message),
+      ...data,
     })
   }
 
