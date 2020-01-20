@@ -218,6 +218,17 @@ export function parse(ver: string): null | StableVer | PreviewVer {
   }
 }
 
+export function setBuildNum(ver: PreviewVer, buildNum: number): PreviewVer {
+  return {
+    ...ver,
+    preRelease: {
+      ...ver.preRelease,
+      buildNum,
+    },
+    version: `${ver.major}.${ver.minor}.${ver.patch}-${ver.preRelease.identifier}.${buildNum}`,
+  }
+}
+
 export const zeroVer = createStable(0, 0, 0)
 
 export const zeroBuildNum = 0

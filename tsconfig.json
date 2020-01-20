@@ -13,5 +13,6 @@
     "src",
     "src/utils/semver.spec.ts",
     "tests/unit/lib/release.spec.ts"
-  ]
+  ],
+  "exclude": ["src/**/*.spec.ts"]
 }

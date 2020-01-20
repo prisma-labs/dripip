@@ -37,18 +37,18 @@ export class Stable extends Command {
     if (!check.branchSynced(ctx)) return
     if (!check.notAlreadyStableReleased(ctx)) return
 
-    const newStableVer = Rel.getNextStable(ctx.series)
+    const release = Rel.getNextStable(ctx.series)
 
-    if (Rel.isNoReleaseReason(newStableVer)) {
-      return show.noReleaseNeeded(ctx, newStableVer)
+    if (Rel.isNoReleaseReason(release)) {
+      return show.noReleaseNeeded(ctx, release)
     }
 
     if (flags['dry-run']) {
-      return show.dryRun(ctx, newStableVer.version)
+      return show.dryRun(ctx, release)
     }
 
     await publish({
-      version: newStableVer.version,
+      version: release.version.version,
       distTag: 'latest',
       additiomalDistTags: ['next'],
     })
@@ -79,7 +79,7 @@ function createShowers(opts: OutputterOptions) {
         {
           json: opts.json,
           context: {
-            commits: ctx.series.commitsSinceStable.map(c => c.message),
+            commits: ctx.series.commitsInNextStable.map(c => c.message),
           },
         }
       )
@@ -90,17 +90,17 @@ function createShowers(opts: OutputterOptions) {
         {
           json: opts.json,
           context: {
-            commits: ctx.series.commitsSinceStable.map(c => c.message),
+            commits: ctx.series.commitsInNextStable.map(c => c.message),
           },
         }
       )
     }
   }
 
-  function dryRun(ctx: Context.Context, newVer: string): void {
+  function dryRun(ctx: Context.Context, release: Rel.Release): void {
     Output.outputOk('dry_run', {
-      newVer,
-      commits: ctx.series.commitsSinceStable,
+      ...release,
+      commits: ctx.series.commitsInNextStable,
     })
   }
 
