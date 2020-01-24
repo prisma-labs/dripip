@@ -1,5 +1,6 @@
 import * as Semver from '../lib/semver'
 import * as Git from '../lib/git'
+import * as ConventionalCommit from '../lib/conventional-commit'
 
 export type Release = {
   bumpType: Semver.MajMinPat
@@ -201,7 +202,7 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
     return 'empty_series'
   }
 
-  const bumpType = Semver.calcIncType(
+  const bumpType = ConventionalCommit.calcBumpType(
     series.commitsInNextStable.map(c => c.message)
   )
 
@@ -222,7 +223,7 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
     return 'empty_series'
   }
 
-  const bumpType = Semver.calcIncType(
+  const bumpType = ConventionalCommit.calcBumpType(
     series.commitsInNextStable.map(c => c.message)
   )
 

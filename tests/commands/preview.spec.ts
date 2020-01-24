@@ -155,7 +155,7 @@ describe('stable preview releases', () => {
     await gitCreateEmptyCommit(ws.git, 'feat: 1')
     await gitCreateEmptyCommit(
       ws.git,
-      'feat: 2\nBREAKING CHANGE:\nblah blah blah'
+      'feat: 2\n\nBREAKING CHANGE:\nblah blah blah'
     )
     const result = await ws.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
@@ -164,6 +164,7 @@ describe('stable preview releases', () => {
           "bumpType": "major",
           "commits": Array [
             "feat: 2
+
       BREAKING CHANGE:
       blah blah blah",
             "feat: 1",

@@ -1,0 +1,114 @@
+import * as Semver from './semver'
+
+/**
+ * Given a list of conventional commit messages (subject and body, the entire
+ * message for the commit) calculate what the package version containing these
+ * changes should be. Returns `null` if all changes were meta or unconforming.
+ */
+export function calcBumpType(
+  commitMessages: string[]
+): null | Semver.MajMinPat {
+  let semverPart: null | Semver.MajMinPat = null
+  for (const m of commitMessages) {
+    const cc = parse(m)
+    // Commits that do not conform to conventional commit standard are discarded
+    if (!cc) continue
+
+    // chore type commits are considered to not change the runtime in any way
+    if (isMetaChange(cc)) {
+      continue
+    }
+
+    // Nothing can be be higher so we've reached our final value effectively.
+    if (cc.breakingChange) {
+      semverPart = 'major'
+      break
+    }
+
+    // If already at minor continue, now looking only for major changes
+    if (semverPart === 'minor') {
+      continue
+    }
+
+    if (isMinorChange(cc)) {
+      semverPart = 'minor'
+      continue
+    }
+
+    semverPart = 'patch'
+  }
+
+  return semverPart
+}
+
+function isMinorChange(conventionalCommit: ConventionalCommit): boolean {
+  return ['feat', 'feature'].includes(conventionalCommit.type)
+}
+
+function isMetaChange(conventionalCommit: ConventionalCommit): boolean {
+  return ['chore'].includes(conventionalCommit.type)
+}
+
+type ConventionalCommit = {
+  type: string
+  scope: null | string
+  description: string
+  body: null | string
+  breakingChange: null | string
+  footers: { type: string; body: string }[]
+}
+
+const pattern = /^([^:\v(]+)(?:\(([^\v()]+)\))?:\s*([^\n]+)(?:\n\n((?:.|\n)+))?$/
+
+export function parse(message: string): null | ConventionalCommit {
+  const result = message.match(pattern)
+  if (!result) return null
+  const [, type, scope, description, rest] = result
+
+  let breakingChange = null
+  let body = null
+  let footers: ConventionalCommit['footers'] = []
+
+  if (rest) {
+    const rawFooters: string[] = []
+
+    let currFooter = -1
+    let currSection = 'body'
+    for (const para of rest.split(/\n\n/)) {
+      if (para.match(/^\s*BREAKING[-\s]CHANGE\s*:\s*.+/)) {
+        currSection = 'breaking_change'
+        breakingChange =
+          (breakingChange ?? '') +
+          '\n\n' +
+          para.replace(/^\s*BREAKING[-\s]CHANGE\s*:\s*/, '')
+      } else if (para.match(/^\s*[\w-]+\s*:\s*.+/)) {
+        currSection = 'footers'
+        rawFooters.push(para)
+        currFooter++
+      } else if (currSection === 'body') {
+        body = (body ?? '') + '\n\n' + para
+      } else if (currSection === 'breaking_change') {
+        breakingChange = (breakingChange ?? '') + '\n\n' + para
+      } else {
+        rawFooters[currFooter] += '\n\n' + para
+      }
+    }
+
+    footers = rawFooters.map(f => {
+      const [, type, body] = f.trim().split(/^\s*([\w-]+)\s*:/)
+      return {
+        type: type.trim(),
+        body: body.trim(),
+      }
+    })
+  }
+
+  return {
+    type: type.trim(),
+    scope: scope?.trim() ?? null,
+    description: description.trim(),
+    body: body?.trim() ?? null,
+    footers: footers ?? [],
+    breakingChange: breakingChange?.trim() ?? null,
+  }
+}
