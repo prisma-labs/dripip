@@ -75,7 +75,18 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commits": Array [
-            "feat: ti ti ti",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "ti ti ti",
+                "footers": Array [],
+                "scope": null,
+                "type": "feat",
+              },
+              "raw": "feat: ti ti ti",
+            },
           ],
           "version": "0.2.0-next.2",
         },
@@ -93,10 +104,46 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commits": Array [
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
-            "Initial commit",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "add package.json",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: add package.json",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "who knows",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: who knows",
+            },
+            Object {
+              "parsed": null,
+              "raw": "Initial commit",
+            },
           ],
           "version": "0.0.1-next.1",
         },
@@ -114,10 +161,46 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commits": Array [
-            "feat: 1",
-            "chore: add package.json",
-            "chore: who knows",
-            "Initial commit",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "feat",
+              },
+              "raw": "feat: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "add package.json",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: add package.json",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "who knows",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: who knows",
+            },
+            Object {
+              "parsed": null,
+              "raw": "Initial commit",
+            },
           ],
           "version": "0.1.0-next.1",
         },
@@ -136,11 +219,58 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "minor",
           "commits": Array [
-            "feat: 1",
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
-            "Initial commit",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "feat",
+              },
+              "raw": "feat: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "add package.json",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: add package.json",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "who knows",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: who knows",
+            },
+            Object {
+              "parsed": null,
+              "raw": "Initial commit",
+            },
           ],
           "version": "0.1.0-next.1",
         },
@@ -161,19 +291,77 @@ describe('stable preview releases', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
-          "bumpType": "major",
+          "bumpType": "minor",
           "commits": Array [
-            "feat: 2
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": "blah blah blah",
+                "completesInitialDevelopment": false,
+                "description": "2",
+                "footers": Array [],
+                "scope": null,
+                "type": "feat",
+              },
+              "raw": "feat: 2
 
       BREAKING CHANGE:
       blah blah blah",
-            "feat: 1",
-            "fix: 1",
-            "chore: add package.json",
-            "chore: who knows",
-            "Initial commit",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "feat",
+              },
+              "raw": "feat: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 1",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "add package.json",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: add package.json",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "who knows",
+                "footers": Array [],
+                "scope": null,
+                "type": "chore",
+              },
+              "raw": "chore: who knows",
+            },
+            Object {
+              "parsed": null,
+              "raw": "Initial commit",
+            },
           ],
-          "version": "1.0.0-next.1",
+          "version": "0.1.0-next.1",
         },
         "kind": "ok",
         "type": "dry_run",
@@ -195,8 +383,30 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commits": Array [
-            "fix: 2",
-            "fix: 1",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "2",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 2",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "1",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 1",
+            },
           ],
           "version": "0.1.1-next.1",
         },
@@ -217,8 +427,30 @@ describe('stable preview releases', () => {
         "data": Object {
           "bumpType": "patch",
           "commits": Array [
-            "fix: 3",
-            "fix: 2",
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "3",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 3",
+            },
+            Object {
+              "parsed": Object {
+                "body": null,
+                "breakingChange": null,
+                "completesInitialDevelopment": false,
+                "description": "2",
+                "footers": Array [],
+                "scope": null,
+                "type": "fix",
+              },
+              "raw": "fix: 2",
+            },
           ],
           "version": "0.0.1-next.2",
         },

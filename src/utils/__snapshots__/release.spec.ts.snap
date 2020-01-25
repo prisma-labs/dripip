@@ -6,7 +6,18 @@ exports[`buildSeries none 1`] = `
 Object {
   "commitsInNextPreview": Array [
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -17,7 +28,18 @@ Object {
   ],
   "commitsInNextStable": Array [
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -27,7 +49,18 @@ Object {
     },
   ],
   "current": Object {
-    "message": "fix: thing 1",
+    "message": Object {
+      "parsed": Object {
+        "body": null,
+        "breakingChange": null,
+        "completesInitialDevelopment": false,
+        "description": "thing 1",
+        "footers": Array [],
+        "scope": null,
+        "type": "fix",
+      },
+      "raw": "fix: thing 1",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
@@ -35,6 +68,8 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": true,
   "previousPreview": null,
   "previousStable": null,
 }
@@ -45,7 +80,10 @@ Object {
   "commitsInNextPreview": Array [],
   "commitsInNextStable": Array [
     Object {
-      "message": "foo @ 0.0.0-next.1",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 0.0.0-next.1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -64,7 +102,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -74,7 +123,10 @@ Object {
     },
   ],
   "current": Object {
-    "message": "foo @ 0.0.0-next.1",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 0.0.0-next.1",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -92,8 +144,13 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": true,
   "previousPreview": Object {
-    "message": "foo @ 0.0.0-next.1",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 0.0.0-next.1",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -120,7 +177,10 @@ Object {
   "commitsInNextPreview": Array [],
   "commitsInNextStable": Array [
     Object {
-      "message": "foo @ 0.0.0-next.2",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 0.0.0-next.2",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -139,7 +199,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 2",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 2",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 2",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -148,7 +219,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -157,7 +239,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 0.0.0-next.1",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 0.0.0-next.1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -177,7 +262,10 @@ Object {
     },
   ],
   "current": Object {
-    "message": "foo @ 0.0.0-next.2",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 0.0.0-next.2",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -195,8 +283,13 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": true,
   "previousPreview": Object {
-    "message": "foo @ 0.0.0-next.2",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 0.0.0-next.2",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -222,7 +315,18 @@ exports[`buildSeries stable none 1`] = `
 Object {
   "commitsInNextPreview": Array [
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -233,7 +337,18 @@ Object {
   ],
   "commitsInNextStable": Array [
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -243,7 +358,18 @@ Object {
     },
   ],
   "current": Object {
-    "message": "fix: thing 1",
+    "message": Object {
+      "parsed": Object {
+        "body": null,
+        "breakingChange": null,
+        "completesInitialDevelopment": false,
+        "description": "thing 1",
+        "footers": Array [],
+        "scope": null,
+        "type": "fix",
+      },
+      "raw": "fix: thing 1",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
@@ -251,9 +377,14 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": false,
   "previousPreview": null,
   "previousStable": Object {
-    "message": "foo @ 1.0.0",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
@@ -274,7 +405,18 @@ exports[`buildSeries stable none none preview none 1`] = `
 Object {
   "commitsInNextPreview": Array [
     Object {
-      "message": "fix: thing 3",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 3",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 3",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -285,7 +427,18 @@ Object {
   ],
   "commitsInNextStable": Array [
     Object {
-      "message": "fix: thing 3",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 3",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 3",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -294,7 +447,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.1",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 1.0.0-next.1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -313,7 +469,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 2",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 2",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 2",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -322,7 +489,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -332,7 +510,18 @@ Object {
     },
   ],
   "current": Object {
-    "message": "fix: thing 3",
+    "message": Object {
+      "parsed": Object {
+        "body": null,
+        "breakingChange": null,
+        "completesInitialDevelopment": false,
+        "description": "thing 3",
+        "footers": Array [],
+        "scope": null,
+        "type": "fix",
+      },
+      "raw": "fix: thing 3",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
@@ -340,8 +529,13 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": false,
   "previousPreview": Object {
-    "message": "foo @ 1.0.0-next.1",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0-next.1",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -360,7 +554,10 @@ Object {
     "sha": "sha",
   },
   "previousStable": Object {
-    "message": "foo @ 1.0.0",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
@@ -382,7 +579,10 @@ Object {
   "commitsInNextPreview": Array [],
   "commitsInNextStable": Array [
     Object {
-      "message": "foo @ 1.0.0-next.4",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 1.0.0-next.4",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -401,7 +601,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 3",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 3",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 3",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -410,7 +621,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.3",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 1.0.0-next.3",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -429,7 +643,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.2",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 1.0.0-next.2",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -448,7 +665,10 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "foo @ 1.0.0-next.1",
+      "message": Object {
+        "parsed": null,
+        "raw": "foo @ 1.0.0-next.1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": Object {
@@ -467,7 +687,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 2",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 2",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 2",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -476,7 +707,18 @@ Object {
       "sha": "sha",
     },
     Object {
-      "message": "fix: thing 1",
+      "message": Object {
+        "parsed": Object {
+          "body": null,
+          "breakingChange": null,
+          "completesInitialDevelopment": false,
+          "description": "thing 1",
+          "footers": Array [],
+          "scope": null,
+          "type": "fix",
+        },
+        "raw": "fix: thing 1",
+      },
       "nonReleaseTags": Array [],
       "releases": Object {
         "preview": null,
@@ -486,7 +728,10 @@ Object {
     },
   ],
   "current": Object {
-    "message": "foo @ 1.0.0-next.4",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0-next.4",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -504,8 +749,13 @@ Object {
     },
     "sha": "sha",
   },
+  "hasBreakingChange": false,
+  "isInitialDevelopment": false,
   "previousPreview": Object {
-    "message": "foo @ 1.0.0-next.4",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0-next.4",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": Object {
@@ -524,7 +774,10 @@ Object {
     "sha": "sha",
   },
   "previousStable": Object {
-    "message": "foo @ 1.0.0",
+    "message": Object {
+      "parsed": null,
+      "raw": "foo @ 1.0.0",
+    },
     "nonReleaseTags": Array [],
     "releases": Object {
       "preview": null,
