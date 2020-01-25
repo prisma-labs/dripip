@@ -18,7 +18,6 @@ export function calcBumpType(
 
     // Completing initial development is a spec extension
     // https://github.com/conventional-commits/conventionalcommits.org/pull/214
-    // with
     if (isInitialDevelopment && cc.completesInitialDevelopment) return 'major'
 
     if (isMetaChange(cc)) {
@@ -72,24 +71,25 @@ export type ConventionalCommit = {
   completesInitialDevelopment: boolean
 }
 
-const pattern = /^([^:\v(]+)(?:\(([^\v()]+)\))?:\s*([^\n]+)(?:\n\n((?:.|\n)+))?$/
+const pattern = /^([^:\r\n(]+)(?:\(([^\r\n()]+)\))?:\s*([^\r\n]+)(.*)$/s
 
 export function parse(message: string): null | ConventionalCommit {
   const result = message.match(pattern)
   if (!result) return null
-  const [, type, scope, description, rest] = result
+  let [, type, scope, description, rest] = result
 
   let completesInitialDevelopment = false
   let breakingChange = null
   let body = null
   let footers: ConventionalCommit['footers'] = []
 
+  rest = rest?.trim()
   if (rest) {
     const rawFooters: string[] = []
 
     let currFooter = -1
     let currSection = 'body'
-    for (const para of rest.split(/\n\n/)) {
+    for (const para of rest.split(/(?:\r?\n){2}/)) {
       if (para.match(/\s*COMPLETES[-\s]INITIAL[-\s]DEVELOPMENT\s*/)) {
         completesInitialDevelopment = true
       } else if (para.match(/^\s*BREAKING[-\s]CHANGE\s*:\s*.*/)) {
@@ -97,8 +97,8 @@ export function parse(message: string): null | ConventionalCommit {
         breakingChange =
           (breakingChange ?? '') +
           '\n\n' +
-          para.replace(/^\s*BREAKING[-\s]CHANGE\s*:\s*/, '')
-      } else if (para.match(/^\s*[\w-]+\s*:\s*.*/)) {
+          para.replace(/^BREAKING[-\s]CHANGE\s*:/, '')
+      } else if (para.match(/^\s*[\w-]+\s*:.*/)) {
         currSection = 'footers'
         rawFooters.push(para)
         currFooter++
