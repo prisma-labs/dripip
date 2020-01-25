@@ -71,26 +71,25 @@ export type ConventionalCommit = {
   completesInitialDevelopment: boolean
 }
 
-const pattern = /^([^:\r\n(]+)(?:\(([^\r\n()]+)\))?:\s*([^\r\n]+)(.*)$/s
+const pattern = /^([^:\r\n(]+)(?:\(([^\r\n()]+)\))?:\s*([^\r\n]+)[\n\r]*(.*)$/s
 
 export function parse(message: string): null | ConventionalCommit {
   const result = message.match(pattern)
   if (!result) return null
-  let [, type, scope, description, rest] = result
+  const [, type, scope, description, rest] = result
 
   let completesInitialDevelopment = false
   let breakingChange = null
   let body = null
   let footers: ConventionalCommit['footers'] = []
 
-  rest = rest?.trim()
   if (rest) {
     const rawFooters: string[] = []
 
     let currFooter = -1
     let currSection = 'body'
     for (const para of rest.split(/(?:\r?\n){2}/)) {
-      if (para.match(/\s*COMPLETES[-\s]INITIAL[-\s]DEVELOPMENT\s*/)) {
+      if (para.match(/^COMPLETES[-\s]INITIAL[-\s]DEVELOPMENT\s*/)) {
         completesInitialDevelopment = true
       } else if (para.match(/^\s*BREAKING[-\s]CHANGE\s*:\s*.*/)) {
         currSection = 'breaking_change'

@@ -131,6 +131,9 @@ describe(parse.name, () => {
     ['t: d\n\nb\n\nCOMPLETES-INITIAL-DEVELOPMENT', { type: 't', description: 'd', body: 'b', scope: null, footers: [], breakingChange: null, completesInitialDevelopment: true }],
     ['t: d\n\nb\n\nt1:b1\n\nCOMPLETES-INITIAL-DEVELOPMENT\n\nt2:b2', { type: 't', description: 'd', body: 'b', scope: null, footers: [{ type:'t1', body:'b1' },{ type:'t2', body:'b2' }], breakingChange: null , completesInitialDevelopment: true }],
     ['t: d\n\nb\n\nCOMPLETES-INITIAL-DEVELOPMENT\n\nBREAKING CHANGE:\n\nfoo', { type: 't', description: 'd', body: 'b', scope: null, footers: [], breakingChange: 'foo', completesInitialDevelopment: true }],
+    // not completing initial development
+    ['t: d\n\n  COMPLETES INITIAL DEVELOPMENT', { type: 't', description: 'd', body: 'COMPLETES INITIAL DEVELOPMENT', scope: null, footers: [], breakingChange: null, completesInitialDevelopment: false }],
+    ['t: d\n\n"COMPLETES INITIAL DEVELOPMENT"', { type: 't', description: 'd', body: '"COMPLETES INITIAL DEVELOPMENT"', scope: null, footers: [], breakingChange: null, completesInitialDevelopment: false }],
     // windows newlines
     ['t: d\r\n\r\nt1:b1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1' }], breakingChange: null , completesInitialDevelopment: false }],
     ['t: d\r\n\r\nt1:\r\n\r\nb1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1' }], breakingChange: null , completesInitialDevelopment: false }],
