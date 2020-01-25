@@ -1,6 +1,18 @@
 import { calcBumpType, parse } from './conventional-commit'
 
 describe(calcBumpType.name, () => {
+  it('invalid message formats cause the commit to be ignored', () => {
+    expect(calcBumpType(false, ['unknown'])).toEqual(null)
+    expect(calcBumpType(false, ['unknown', 'fix: 1'])).toEqual('patch')
+    expect(calcBumpType(false, ['unknown', 'feat: 1'])).toEqual('minor')
+    expect(
+      calcBumpType(false, ['unknown\n\nBREAKING CHANGE: foo\nfoobar'])
+    ).toEqual(null)
+    expect(
+      calcBumpType(false, ['unknown', 'fix: 1\n\nBREAKING CHANGE: foo'])
+    ).toEqual('major')
+  })
+
   describe('initial development', () => {
     it('BREAKING CHANGE bumps minor', () => {
       expect(
@@ -13,6 +25,7 @@ describe(calcBumpType.name, () => {
       ).toEqual('major')
     })
   })
+
   describe('post initial development', () => {
     it('COMPLETES INITIAL DEVELOPMENT is ignored', () => {
       expect(
@@ -67,26 +80,16 @@ describe(calcBumpType.name, () => {
         calcBumpType(false, ['chore: 1', 'fix: 1\n\nBREAKING CHANGE: foo'])
       ).toEqual('major')
     })
-
-    it('invalid message formats cause the commit to be ignored', () => {
-      expect(calcBumpType(false, ['unknown'])).toEqual(null)
-      expect(calcBumpType(false, ['unknown', 'fix: 1'])).toEqual('patch')
-      expect(calcBumpType(false, ['unknown', 'feat: 1'])).toEqual('minor')
-      expect(
-        calcBumpType(false, ['unknown\n\nBREAKING CHANGE: foo\nfoobar'])
-      ).toEqual(null)
-      expect(
-        calcBumpType(false, ['unknown', 'fix: 1\n\nBREAKING CHANGE: foo'])
-      ).toEqual('major')
-    })
   })
 })
 
 describe(parse.name, () => {
   // prettier-ignore
   it.each([
+    // type, description
     ['t: d', { type: 't', description: 'd', body: null, scope: null, footers: [], breakingChange: null , completesInitialDevelopment: false }],
     ['tt: dd', { type: 'tt', description: 'dd', body: null, scope: null, footers: [], breakingChange: null , completesInitialDevelopment: false }],
+    // scope
     ['t(s): d', { type: 't', description: 'd', body: null, scope: 's', footers: [], breakingChange: null , completesInitialDevelopment: false }],
     ['t(ss): d', { type: 't', description: 'd', body: null, scope: 'ss', footers: [], breakingChange: null , completesInitialDevelopment: false }],
     // body
@@ -113,7 +116,8 @@ describe(parse.name, () => {
     ['a b', null],
     ['a() b', null],
     ['a(): b', null],
-    ['a: b\nd', null],
+    // spec invalid but we tolerate it: single line feed instead of two
+    ['t: d\nb', { type: 't', description: 'd', body: 'b', scope: null, footers: [], breakingChange: null , completesInitialDevelopment: false }],
     // breaking change
     ['t: d\n\nBREAKING CHANGE: foo', { type: 't', description: 'd', body: null, scope: null, footers: [], breakingChange: 'foo' , completesInitialDevelopment: false }],
     ['t: d\n\nBREAKING-CHANGE:\n\nfoo\n\nbar ', { type: 't', description: 'd', body: null, scope: null, footers: [], breakingChange: 'foo\n\nbar' , completesInitialDevelopment: false }],
@@ -121,12 +125,18 @@ describe(parse.name, () => {
     ['t: d\n\nb\n\nBREAKING CHANGE: foo\n\nt1:t1', { type: 't', description: 'd', body: 'b', scope: null, footers: [{ type:'t1', body:'t1' }], breakingChange: 'foo' , completesInitialDevelopment: false }],
     ['t: d\n\nb\n\nt1:t1\n\nBREAKING CHANGE: foo  ', { type: 't', description: 'd', body: 'b', scope: null, footers: [{ type:'t1', body:'t1' }], breakingChange: 'foo' , completesInitialDevelopment: false }],
     // completing initial development
-    // an extension to the spec https://github.com/conventional-commits/conventionalcommits.org/pull/214
+    // a spec extension https://github.com/conventional-commits/conventionalcommits.org/pull/214
     ['t: d\n\nCOMPLETES INITIAL DEVELOPMENT', { type: 't', description: 'd', body: null, scope: null, footers: [], breakingChange: null, completesInitialDevelopment: true }],
     ['t: d\n\nCOMPLETES-INITIAL-DEVELOPMENT', { type: 't', description: 'd', body: null, scope: null, footers: [], breakingChange: null, completesInitialDevelopment: true }],
     ['t: d\n\nb\n\nCOMPLETES-INITIAL-DEVELOPMENT', { type: 't', description: 'd', body: 'b', scope: null, footers: [], breakingChange: null, completesInitialDevelopment: true }],
     ['t: d\n\nb\n\nt1:b1\n\nCOMPLETES-INITIAL-DEVELOPMENT\n\nt2:b2', { type: 't', description: 'd', body: 'b', scope: null, footers: [{ type:'t1', body:'b1' },{ type:'t2', body:'b2' }], breakingChange: null , completesInitialDevelopment: true }],
     ['t: d\n\nb\n\nCOMPLETES-INITIAL-DEVELOPMENT\n\nBREAKING CHANGE:\n\nfoo', { type: 't', description: 'd', body: 'b', scope: null, footers: [], breakingChange: 'foo', completesInitialDevelopment: true }],
+    // windows newlines
+    ['t: d\r\n\r\nt1:b1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1' }], breakingChange: null , completesInitialDevelopment: false }],
+    ['t: d\r\n\r\nt1:\r\n\r\nb1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1' }], breakingChange: null , completesInitialDevelopment: false }],
+    // todo these tests show that we do not accurately retain windows newlines
+    ['t: d\r\n\r\nt1:\r\n\r\nb1\r\n\r\nb1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1\n\nb1' }], breakingChange: null , completesInitialDevelopment: false }],
+    ['t: d\r\n\r\nt1:\r\n\r\nb1\r\n\r\n\r\nb1', { type: 't', description: 'd', body: null, scope: null, footers: [{ type:'t1', body:'b1\n\n\r\nb1' }], breakingChange: null , completesInitialDevelopment: false }],
   ])(
     '%s',
     (given, expected) => {
