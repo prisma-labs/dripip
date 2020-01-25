@@ -5,9 +5,8 @@
 
 import * as Git from '../lib/git'
 import * as Rel from './release'
-import { inspect } from 'util'
 
-describe.only('buildSeries', () => {
+describe('buildSeries', () => {
   it('one breaking change commit makes the series breaking', () => {
     expect(gitlog(n, breaking, p).hasBreakingChange).toEqual(true)
   })
