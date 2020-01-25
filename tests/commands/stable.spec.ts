@@ -140,8 +140,30 @@ describe('increments upon the previous stable release based on conventional comm
         "data": Object {
           "context": Object {
             "commits": Array [
-              "chore: 2",
-              "chore: 1",
+              Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                },
+                "raw": "chore: 2",
+              },
+              Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                },
+                "raw": "chore: 1",
+              },
             ],
           },
           "summary": "The release you attempting only contains chore commits which means no release is needed.",
@@ -164,9 +186,21 @@ describe('increments upon the previous stable release based on conventional comm
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
+          "bumpType": "patch",
           "commits": Array [
             Object {
-              "message": "fix: 2",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                },
+                "raw": "fix: 2",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -175,7 +209,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "fix: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                },
+                "raw": "fix: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -184,7 +229,13 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "newVer": "0.1.1",
+          "version": Object {
+            "major": 0,
+            "minor": 1,
+            "patch": 1,
+            "version": "0.1.1",
+            "vprefix": false,
+          },
         },
         "kind": "ok",
         "type": "dry_run",
@@ -205,9 +256,21 @@ describe('increments upon the previous stable release based on conventional comm
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
+          "bumpType": "minor",
           "commits": Array [
             Object {
-              "message": "feat: 2",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "feat",
+                },
+                "raw": "feat: 2",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -216,7 +279,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                },
+                "raw": "chore: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -225,7 +299,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "fix: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                },
+                "raw": "fix: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -234,7 +319,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "feat: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "feat",
+                },
+                "raw": "feat: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -243,7 +339,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: add package.json",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "add package.json",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                },
+                "raw": "chore: add package.json",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -252,7 +359,18 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: who knows",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "who knows",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                },
+                "raw": "chore: who knows",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -261,7 +379,10 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "Initial commit",
+              "message": Object {
+                "parsed": null,
+                "raw": "Initial commit",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -270,7 +391,13 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "newVer": "0.1.0",
+          "version": Object {
+            "major": 0,
+            "minor": 1,
+            "patch": 0,
+            "version": "0.1.0",
+            "vprefix": false,
+          },
         },
         "kind": "ok",
         "type": "dry_run",
