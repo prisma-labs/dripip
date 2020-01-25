@@ -5,8 +5,18 @@
 
 import * as Git from '../lib/git'
 import * as Rel from './release'
+import { inspect } from 'util'
 
-describe('buildSeries', () => {
+describe.only('buildSeries', () => {
+  it('one breaking change commit makes the series breaking', () => {
+    expect(gitlog(n, breaking, p).hasBreakingChange).toEqual(true)
+  })
+  it('tracks if is initial development', () => {
+    expect(gitlog(p).isInitialDevelopment).toEqual(true)
+  })
+  it('tracks if is not initial development', () => {
+    expect(gitlog(s, p).isInitialDevelopment).toEqual(false)
+  })
   it('<empty>', () => {
     expect(() => gitlog()).toThrowErrorMatchingSnapshot()
   })
@@ -46,12 +56,26 @@ beforeEach(() => {
   sMaj = 0
 })
 
+/**
+ * breaking change commit
+ */
+function breaking(): RawLogEntryValues {
+  const ver = `${sMaj}.0.0-next.${pNum}`
+  return ['sha', `tag: ${ver}`, `foo: bar\n\nBREAKING CHANGE: foo`]
+}
+
+/**
+ * preview-released commit
+ */
 function p(): RawLogEntryValues {
   pNum++
   const ver = `${sMaj}.0.0-next.${pNum}`
   return ['sha', `tag: ${ver}`, `foo @ ${ver}`]
 }
 
+/**
+ * stable-released commit
+ */
 function s(): RawLogEntryValues {
   sMaj++
   pNum = 0
@@ -59,6 +83,9 @@ function s(): RawLogEntryValues {
   return ['sha', `tag: ${ver}`, `foo @ ${ver}`]
 }
 
+/**
+ * unreleaesd commit
+ */
 function n(): RawLogEntryValues {
   return ['sha', '', `fix: thing ${noneCounter++}`]
 }
