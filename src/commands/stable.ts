@@ -1,10 +1,9 @@
 import Command, { flags } from '@oclif/command'
-import * as Output from '../utils/output'
-import * as Context from '../utils/context'
-import * as Rel from '../utils/release'
-import * as Semver from '../lib/semver'
-import { publish } from '../utils/publish'
 import createGit from 'simple-git/promise'
+import * as Context from '../utils/context'
+import * as Output from '../utils/output'
+import { publish } from '../utils/publish'
+import * as Rel from '../utils/release'
 
 export class Stable extends Command {
   static flags = {
@@ -22,6 +21,10 @@ export class Stable extends Command {
       default: false,
       description: 'format output as JSON',
       char: 'j',
+    }),
+    'skip-npm': flags.boolean({
+      default: false,
+      description: 'skip the step of publishing the package to npm',
     }),
   }
   async run() {
@@ -49,11 +52,13 @@ export class Stable extends Command {
       return show.dryRun(ctx, release)
     }
 
-    await publish({
-      version: release.version.version,
-      distTag: 'latest',
-      additiomalDistTags: ['next'],
-    })
+    if (!flags['skip-npm']) {
+      await publish({
+        version: release.version.version,
+        distTag: 'latest',
+        additiomalDistTags: ['next'],
+      })
+    }
 
     // force update so the tag moves to a new commit
     await git.raw(['tag', '-f', 'latest'])

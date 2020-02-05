@@ -1,13 +1,12 @@
 import Command, { flags } from '@oclif/command'
-import createGit from 'simple-git/promise'
-import { indentBlock4, casesHandled } from '../lib/utils'
-import * as Rel from '../utils/release'
 import { stripIndents } from 'common-tags'
-import * as Git from '../lib/git'
+import createGit from 'simple-git/promise'
+import * as Semver from '../lib/semver'
+import { casesHandled, indentBlock4 } from '../lib/utils'
+import * as Context from '../utils/context'
 import * as Output from '../utils/output'
 import * as Publish from '../utils/publish'
-import * as Semver from '../lib/semver'
-import * as Context from '../utils/context'
+import * as Rel from '../utils/release'
 
 type PreviewTypeFound = {
   type: string
@@ -40,6 +39,10 @@ export class Preview extends Command {
       default: false,
       description: 'output what the next version would be if released now',
       char: 'd',
+    }),
+    'skip-npm': flags.boolean({
+      default: false,
+      description: 'skip the step of publishing the package to npm',
     }),
     json: flags.boolean({
       default: false,
@@ -100,10 +103,13 @@ export class Preview extends Command {
         return send.dryRun(ctx.series, release)
       }
 
-      await Publish.publish({
-        distTag: 'next',
-        version: release.version.version,
-      })
+      // todo test skip-npm
+      if (!flags['skip-npm']) {
+        await Publish.publish({
+          distTag: 'next',
+          version: release.version.version,
+        })
+      }
 
       // force update so the tag moves to a new commit
       await git.raw(['tag', '-f', 'next'])
