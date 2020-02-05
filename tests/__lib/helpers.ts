@@ -1,8 +1,7 @@
-import * as path from 'path'
+import { Octokit } from '@octokit/rest'
+import { format } from 'util'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
-import { format } from 'util'
-import Octokit from '@octokit/rest'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
