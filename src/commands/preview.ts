@@ -40,6 +40,7 @@ export class Preview extends Command {
       description: 'output what the next version would be if released now',
       char: 'd',
     }),
+    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',
@@ -103,13 +104,13 @@ export class Preview extends Command {
         return send.dryRun(ctx.series, release)
       }
 
-      // todo test skip-npm
-      if (!flags['skip-npm']) {
-        await Publish.publish({
+      await Publish.publish(
+        {
           distTag: 'next',
           version: release.version.version,
-        })
-      }
+        },
+        { skipNPM: flags['skip-npm'] }
+      )
 
       // force update so the tag moves to a new commit
       await git.raw(['tag', '-f', 'next'])

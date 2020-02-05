@@ -2,18 +2,20 @@
  * This module handles the concerns of publishing. It handles interaction with
  * git tagging, pushing to the git origin, the package registry, etc.
  */
-import * as Pacman from '../lib/pacman'
 import createGit from 'simple-git/promise'
+import * as Pacman from '../lib/pacman'
 
 type Options = {
   /**
    * Should the semver git tag have a "v" prefix.
    */
   gitTagVPrefix?: boolean
+  skipNPM?: boolean
 }
 
 const defaultOpts: Options = {
   gitTagVPrefix: false,
+  skipNPM: false,
 }
 
 type Release = {
@@ -45,25 +47,27 @@ export async function publish(release: Release, givenOpts?: Options) {
     ...givenOpts,
   }
 
-  // publish to the npm registry
-  //
-  // If we are using a script runner then publish with that same tool. Otherwise
-  // default to using npm. The reason we need to do this is that problems occur
-  // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
-  // publish` failing due to an authentication error.
-  const pacman = await Pacman.create({ defualt: 'npm' })
-  await pacman.publish({ version: release.version, tag: release.distTag })
-  console.log('published package to the npm registry')
+  if (!opts.skipNPM) {
+    // publish to the npm registry
+    //
+    // If we are using a script runner then publish with that same tool. Otherwise
+    // default to using npm. The reason we need to do this is that problems occur
+    // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
+    // publish` failing due to an authentication error.
+    const pacman = await Pacman.create({ defualt: 'npm' })
+    await pacman.publish({ version: release.version, tag: release.distTag })
+    console.log('published package to the npm registry')
 
-  // When publishing it is sometimes desirable to update other dist tags to
-  // point at the new version. For example "next" should never fall behind stable,
-  // etc.
-  //
-  // todo parallel optimize?
-  if (release.additiomalDistTags) {
-    for (const distTag of release.additiomalDistTags) {
-      await pacman.tag({ packageVersion: release.version, tagName: distTag })
-      console.log(`updated dist-tag "${distTag}" to point at this version`)
+    // When publishing it is sometimes desirable to update other dist tags to
+    // point at the new version. For example "next" should never fall behind stable,
+    // etc.
+    //
+    // todo parallel optimize?
+    if (release.additiomalDistTags) {
+      for (const distTag of release.additiomalDistTags) {
+        await pacman.tag({ packageVersion: release.version, tagName: distTag })
+        console.log(`updated dist-tag "${distTag}" to point at this version`)
+      }
     }
   }
 

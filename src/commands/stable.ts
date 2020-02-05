@@ -22,6 +22,7 @@ export class Stable extends Command {
       description: 'format output as JSON',
       char: 'j',
     }),
+    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',
@@ -52,13 +53,14 @@ export class Stable extends Command {
       return show.dryRun(ctx, release)
     }
 
-    if (!flags['skip-npm']) {
-      await publish({
+    await publish(
+      {
         version: release.version.version,
         distTag: 'latest',
         additiomalDistTags: ['next'],
-      })
-    }
+      },
+      { skipNPM: flags['skip-npm'] }
+    )
 
     // force update so the tag moves to a new commit
     await git.raw(['tag', '-f', 'latest'])
