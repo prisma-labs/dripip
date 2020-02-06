@@ -111,10 +111,11 @@ function renderMarkdown(log: ChangeLog): string {
     'chores',
   ]
 
-  let doc = order
+  const doc = order
+    .filter(sectionName => {
+      return log[sectionName].commits.length > 0
+    })
     .map(sectionName => {
-      if (log[sectionName].commits.length === 0) return ''
-
       if (sectionName === 'breaking') {
         return (
           stripIndents`
@@ -147,11 +148,9 @@ function renderMarkdown(log: ChangeLog): string {
         ` + '\n'
       )
     })
-    .join('\n')
 
   if (log.unspecified.commits.length) {
-    doc += '\n'
-    doc +=
+    doc.push(
       stripIndents`
         ${renderMarkdownSectionTitle(log.unspecified.label)}
 
@@ -159,9 +158,10 @@ function renderMarkdown(log: ChangeLog): string {
           .map(c => `${shortSha(c)} ${c.message.raw}`)
           .join('\n- ')}
       ` + '\n'
+    )
   }
 
-  return doc
+  return doc.join('\n')
 }
 
 function renderMarkdownSectionCommits(cs: Commit[]): string {

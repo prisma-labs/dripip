@@ -23,6 +23,7 @@ describe('.render()', () => {
         )
       ).toMatchSnapshot()
     })
+    // todo test case for a section with no commits
   })
 })
 
