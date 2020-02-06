@@ -27,6 +27,7 @@ exports[`.render() option markdown renders breaking features fixes improvements 
 
 #### Unspecified Changes
 
-- shasha# non conforming commit
+- shasha# non conforming commit b
+- shasha# non conforming commit a
 "
 `;

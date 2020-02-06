@@ -1,7 +1,7 @@
 /**
  * This module deals with building changelogs from a serieses.
  */
-import { stripIndent, stripIndents } from 'common-tags'
+import { stripIndents } from 'common-tags'
 import { Commit, Series } from '../utils/release'
 import { casesHandled } from './utils'
 
@@ -152,13 +152,13 @@ function renderMarkdown(log: ChangeLog): string {
   if (log.unspecified.commits.length) {
     doc += '\n'
     doc +=
-      stripIndent`
-      ${renderMarkdownSectionTitle(log.unspecified.label)}
+      stripIndents`
+        ${renderMarkdownSectionTitle(log.unspecified.label)}
 
-      - ${log.unspecified.commits
-        .map(c => `${shortSha(c)} ${c.message.raw}`)
-        .join('\n- ')}
-    ` + '\n'
+        - ${log.unspecified.commits
+          .map(c => `${shortSha(c)} ${c.message.raw}`)
+          .join('\n- ')}
+      ` + '\n'
   }
 
   return doc

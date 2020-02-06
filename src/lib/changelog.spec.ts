@@ -13,11 +13,12 @@ describe('.render()', () => {
           { message: 'fix: b' },
           { message: 'feat: b' },
           { message: 'refactor: a' },
-          { message: 'non conforming commit' },
+          { message: 'non conforming commit b' },
           { message: 'chore: a' },
           { message: 'feat: a\n\nBREAKING CHANGE:\ntoto' },
           { message: 'perf: a' },
           { message: 'fix: a' },
+          { message: 'non conforming commit a' },
           { message: 'feat: blah', version: '0.1.0' }
         )
       ).toMatchSnapshot()
