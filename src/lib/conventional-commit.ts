@@ -61,7 +61,10 @@ function isMetaChange(conventionalCommit: ConventionalCommit): boolean {
   return ['chore'].includes(conventionalCommit.type)
 }
 
+type Kind = 'feat' | 'fix' | 'chore' | 'other'
+
 export type ConventionalCommit = {
+  typeKind: Kind
   type: string
   scope: null | string
   description: string
@@ -119,8 +122,11 @@ export function parse(message: string): null | ConventionalCommit {
     })
   }
 
+  const typeTrimmed = type.trim()
+
   return {
-    type: type.trim(),
+    typeKind: getKind(typeTrimmed),
+    type: typeTrimmed,
     scope: scope?.trim() ?? null,
     description: description.trim(),
     body: body?.trim() ?? null,
@@ -128,4 +134,11 @@ export function parse(message: string): null | ConventionalCommit {
     breakingChange: breakingChange?.trim() ?? null,
     completesInitialDevelopment,
   }
+}
+
+function getKind(s: string): Kind {
+  if (s === 'feat') return 'feat'
+  if (s === 'fix') return 'fix'
+  if (s === 'chore') return 'chore'
+  return 'other'
 }
