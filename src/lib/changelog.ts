@@ -1,6 +1,7 @@
 /**
  * This module deals with building changelogs from a serieses.
  */
+import Chalk from 'chalk'
 import { stripIndents } from 'common-tags'
 import { Commit, Series } from '../utils/release'
 import { casesHandled } from './utils'
@@ -50,7 +51,7 @@ type ChangeLog = {
   }
 }
 
-function emptyChangelog(): ChangeLog {
+export function empty(): ChangeLog {
   return {
     breaking: { commits: [], label: 'BREAKING CHANGES' },
     features: { commits: [], label: 'Features' },
@@ -62,7 +63,7 @@ function emptyChangelog(): ChangeLog {
 }
 
 function organize(series: Series): ChangeLog {
-  const log = emptyChangelog()
+  const log = empty()
 
   for (const c of series.commitsInNextStable) {
     if (c.message.parsed === null) {
@@ -97,95 +98,176 @@ export function render(
   series: Series,
   opts: { type: 'plain' | 'markdown' }
 ): string {
-  if (opts.type === 'markdown') return renderMarkdown(organize(series))
-  if (opts.type === 'plain') return '' // todo
+  if (opts.type === 'markdown') return Markdown.render(organize(series))
+  if (opts.type === 'plain') return Plain.render(organize(series))
   casesHandled(opts.type)
 }
 
-function renderMarkdown(log: ChangeLog): string {
-  const order: (keyof Omit<ChangeLog, 'unspecified'>)[] = [
-    'breaking',
-    'features',
-    'fixes',
-    'improvements',
-    'chores',
-  ]
+namespace Plain {
+  export function render(log: ChangeLog): string {
+    const order: (keyof Omit<ChangeLog, 'unspecified'>)[] = [
+      'breaking',
+      'features',
+      'fixes',
+      'improvements',
+      'chores',
+    ]
 
-  const doc = order
-    .filter(sectionName => {
-      return log[sectionName].commits.length > 0
-    })
-    .map(sectionName => {
-      if (sectionName === 'breaking') {
+    const doc = order
+      .filter(sectionName => {
+        return log[sectionName].commits.length > 0
+      })
+      .map(sectionName => {
+        if (sectionName === 'breaking') {
+          return (
+            sectionTitle(log[sectionName].label) +
+            '\n\n' +
+            sectionCommits(log[sectionName].commits, { breaking: false }) +
+            '\n'
+          )
+        }
+
+        if (sectionName === 'improvements') {
+          return (
+            sectionTitle(log[sectionName].label) +
+            '\n\n' +
+            sectionCommits(log[sectionName].commits, { type: true }) +
+            '\n'
+          )
+        }
+
         return (
-          stripIndents`
-            ${renderMarkdownSectionTitle(log[sectionName].label)}
-  
-            ${log[sectionName].commits
-              .map(c => renderMarkdownSectionCommit(c, { breaking: false }))
-              .join('\n')}
-          ` + '\n'
+          sectionTitle(log[sectionName].label) +
+          '\n\n' +
+          sectionCommits(log[sectionName].commits) +
+          '\n'
         )
-      }
+      })
 
-      if (sectionName === 'improvements') {
-        return (
-          stripIndents`
-            ${renderMarkdownSectionTitle(log[sectionName].label)}
-  
-            ${log[sectionName].commits
-              .map(c => renderMarkdownSectionCommit(c, { type: true }))
-              .join('\n')}
-          ` + '\n'
-        )
-      }
-
-      return (
-        stripIndents`
-          ${renderMarkdownSectionTitle(log[sectionName].label)}
-
-          ${renderMarkdownSectionCommits(log[sectionName].commits)}
-        ` + '\n'
+    if (log.unspecified.commits.length) {
+      doc.push(
+        sectionTitle(log.unspecified.label) +
+          '\n\n' +
+          '  ' +
+          log.unspecified.commits
+            .map(c => `${Chalk.gray(shortSha(c))} ${c.message.raw}`)
+            .join('\n  ') +
+          '\n'
       )
-    })
+    }
 
-  if (log.unspecified.commits.length) {
-    doc.push(
-      stripIndents`
-        ${renderMarkdownSectionTitle(log.unspecified.label)}
+    return doc.join('\n')
+  }
+
+  function sectionCommits(cs: Commit[], opts?: CommitRenderOpts): string {
+    return cs.map(c => sectionCommit(c, opts)).join('\n')
+  }
+
+  function sectionTitle(title: string): string {
+    return Chalk.magenta(title)
+  }
+
+  type CommitRenderOpts = { type?: boolean; breaking?: boolean }
+
+  function sectionCommit(c: Commit, opts?: CommitRenderOpts): string {
+    const sha = Chalk.gray(shortSha(c))
+    const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
+    const description = ' ' + c.message.parsed.description
+    const breaking =
+      opts?.breaking === false
+        ? ''
+        : c.message.parsed.breakingChange
+        ? Chalk.red(' (breaking)')
+        : ''
+    return `  ${sha}${breaking}${type}${description}`
+  }
+}
+
+namespace Markdown {
+  export function render(log: ChangeLog): string {
+    const order: (keyof Omit<ChangeLog, 'unspecified'>)[] = [
+      'breaking',
+      'features',
+      'fixes',
+      'improvements',
+      'chores',
+    ]
+
+    const doc = order
+      .filter(sectionName => {
+        return log[sectionName].commits.length > 0
+      })
+      .map(sectionName => {
+        if (sectionName === 'breaking') {
+          return (
+            stripIndents`
+            ${sectionTitle(log[sectionName].label)}
+  
+            ${log[sectionName].commits
+              .map(c => sectionCommit(c, { breaking: false }))
+              .join('\n')}
+          ` + '\n'
+          )
+        }
+
+        if (sectionName === 'improvements') {
+          return (
+            stripIndents`
+            ${sectionTitle(log[sectionName].label)}
+  
+            ${log[sectionName].commits
+              .map(c => sectionCommit(c, { type: true }))
+              .join('\n')}
+          ` + '\n'
+          )
+        }
+
+        return (
+          stripIndents`
+          ${sectionTitle(log[sectionName].label)}
+
+          ${sectionCommits(log[sectionName].commits)}
+        ` + '\n'
+        )
+      })
+
+    if (log.unspecified.commits.length) {
+      doc.push(
+        stripIndents`
+        ${sectionTitle(log.unspecified.label)}
 
         - ${log.unspecified.commits
           .map(c => `${shortSha(c)} ${c.message.raw}`)
           .join('\n- ')}
       ` + '\n'
-    )
+      )
+    }
+
+    return doc.join('\n')
+  }
+  function sectionCommits(cs: Commit[]): string {
+    return cs.map(c => sectionCommit(c)).join('\n')
   }
 
-  return doc.join('\n')
-}
+  function sectionTitle(title: string): string {
+    return `#### ${title}`
+  }
 
-function renderMarkdownSectionCommits(cs: Commit[]): string {
-  return cs.map(c => renderMarkdownSectionCommit(c)).join('\n')
-}
-
-function renderMarkdownSectionTitle(title: string): string {
-  return `#### ${title}`
-}
-
-function renderMarkdownSectionCommit(
-  c: Commit,
-  opts?: { type?: boolean; breaking?: boolean }
-): string {
-  const sha = shortSha(c)
-  const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
-  const description = ' ' + c.message.parsed.description
-  const breaking =
-    opts?.breaking === false
-      ? ''
-      : c.message.parsed.breakingChange
-      ? ' (breaking)'
-      : ''
-  return `- ${sha}${breaking}${type}${description}`
+  function sectionCommit(
+    c: Commit,
+    opts?: { type?: boolean; breaking?: boolean }
+  ): string {
+    const sha = shortSha(c)
+    const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
+    const description = ' ' + c.message.parsed.description
+    const breaking =
+      opts?.breaking === false
+        ? ''
+        : c.message.parsed.breakingChange
+        ? ' (breaking)'
+        : ''
+    return `- ${sha}${breaking}${type}${description}`
+  }
 }
 
 function shortSha(c: Commit): string {

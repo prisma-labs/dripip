@@ -41,6 +41,7 @@
     "@octokit/rest": "^16.35.2",
     "@types/parse-git-config": "^3.0.0",
     "@types/parse-github-url": "^1.0.0",
+    "chalk": "^3.0.0",
     "common-tags": "^1.8.0",
     "fs-jetpack": "^2.2.3",
     "globby": "^10.0.1",

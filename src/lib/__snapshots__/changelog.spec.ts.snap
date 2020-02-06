@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.render() option markdown renders breaking features fixes improvements chores unknowns 1`] = `
+exports[`.render() option markdown renders release notes for the current release series 1`] = `
 "#### BREAKING CHANGES
 
 - shasha# a
@@ -29,5 +29,37 @@ exports[`.render() option markdown renders breaking features fixes improvements 
 
 - shasha# non conforming commit b
 - shasha# non conforming commit a
+"
+`;
+
+exports[`.render() plain renders release notes for the current release series 1`] = `
+"[35mBREAKING CHANGES[39m
+
+  [90mshasha#[39m a
+
+[35mFeatures[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m[31m (breaking)[39m a
+
+[35mFixes[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m a
+
+[35mImprovements[39m
+
+  [90mshasha#[39m refactor: a
+  [90mshasha#[39m perf: a
+
+[35mChores[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m a
+
+[35mUnspecified Changes[39m
+
+  [90mshasha#[39m non conforming commit b
+  [90mshasha#[39m non conforming commit a
 "
 `;
