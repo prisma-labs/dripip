@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`.render() option markdown renders breaking features fixes improvements chores unknowns 1`] = `
+"#### BREAKING CHANGES
+
+- shasha# a
+
+#### Features
+
+- shasha# b
+- shasha# (breaking) a
+
+#### Fixes
+
+- shasha# b
+- shasha# a
+
+#### Improvements
+
+- shasha# refactor: a
+- shasha# perf: a
+
+#### Chores
+
+- shasha# b
+- shasha# a
+"
+`;

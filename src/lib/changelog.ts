@@ -68,17 +68,24 @@ function organize(series: Series): ChangeLog {
     if (c.message.parsed === null) {
       log.unspecified.commits.push(c.message.raw)
     }
+
     const cp = c.message.parsed
-    if (cp.kind === 'feat') {
+
+    // breaking changes are collected as a group in addition to by type.
+    if (cp.breakingChange) {
+      log.breaking.commits.push(c)
+    }
+
+    if (cp.typeKind === 'feat') {
       log.features.commits.push(c)
-    } else if (cp.kind === 'fix') {
+    } else if (cp.typeKind === 'fix') {
       log.fixes.commits.push(c)
-    } else if (cp.kind === 'chore') {
+    } else if (cp.typeKind === 'chore') {
       log.chores.commits.push(c)
-    } else if (cp.kind === 'other') {
+    } else if (cp.typeKind === 'other') {
       log.improvements.commits.push(c)
     } else {
-      casesHandled(cp.kind)
+      casesHandled(cp.typeKind)
     }
   }
 
@@ -97,21 +104,45 @@ export function render(
 function renderMarkdown(log: ChangeLog): string {
   const order: (keyof Omit<ChangeLog, 'unspecified'>)[] = [
     'breaking',
-    'chores',
     'features',
     'fixes',
     'improvements',
+    'chores',
   ]
 
   let doc = order
     .map(sectionName => {
       if (log[sectionName].commits.length === 0) return ''
 
+      if (sectionName === 'breaking') {
+        return (
+          stripIndents`
+            ${renderMarkdownSectionTitle(log[sectionName].label)}
+  
+            ${log[sectionName].commits
+              .map(c => renderMarkdownSectionCommit(c, { breaking: false }))
+              .join('\n')}
+          ` + '\n'
+        )
+      }
+
+      if (sectionName === 'improvements') {
+        return (
+          stripIndents`
+            ${renderMarkdownSectionTitle(log[sectionName].label)}
+  
+            ${log[sectionName].commits
+              .map(c => renderMarkdownSectionCommit(c, { type: true }))
+              .join('\n')}
+          ` + '\n'
+        )
+      }
+
       return (
         stripIndents`
-          #### ${log[sectionName].label}
+          ${renderMarkdownSectionTitle(log[sectionName].label)}
 
-          ${renderMarkdownCommitSection(log[sectionName].commits)}
+          ${renderMarkdownSectionCommits(log[sectionName].commits)}
         ` + '\n'
       )
     })
@@ -119,7 +150,7 @@ function renderMarkdown(log: ChangeLog): string {
 
   if (log.unspecified.commits.length) {
     doc += stripIndent`
-      #### ${log.unspecified.label}
+      ${renderMarkdownSectionTitle(log.unspecified.label)}
 
       - ${log.unspecified.commits.join('\n- ')}
     `
@@ -128,10 +159,26 @@ function renderMarkdown(log: ChangeLog): string {
   return doc
 }
 
-function renderMarkdownCommitSection(cs: Commit[]): string {
-  return cs
-    .map(c => {
-      return `- ${c.sha.slice(0, 7)} ${c.message.parsed.description}`
-    })
-    .join('\n')
+function renderMarkdownSectionCommits(cs: Commit[]): string {
+  return cs.map(c => renderMarkdownSectionCommit(c)).join('\n')
+}
+
+function renderMarkdownSectionTitle(title: string): string {
+  return `#### ${title}`
+}
+
+function renderMarkdownSectionCommit(
+  c: Commit,
+  opts?: { type?: boolean; breaking?: boolean }
+): string {
+  const sha = c.sha.slice(0, 7)
+  const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
+  const description = ' ' + c.message.parsed.description
+  const breaking =
+    opts?.breaking === false
+      ? ''
+      : c.message.parsed.breakingChange
+      ? ' (breaking)'
+      : ''
+  return `- ${sha}${breaking}${type}${description}`
 }

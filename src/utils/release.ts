@@ -1,7 +1,6 @@
-import * as Semver from '../lib/semver'
-import * as Git from '../lib/git'
 import * as ConventionalCommit from '../lib/conventional-commit'
-import { parse } from 'querystring'
+import * as Git from '../lib/git'
+import * as Semver from '../lib/semver'
 
 export type Release = {
   bumpType: Semver.MajMinPat
@@ -14,6 +13,25 @@ export type Release = {
  */
 export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
   return getLog().then(buildSeries)
+}
+
+/**
+ * Like `getLog` but works on the given data. Useful for unit testing with mock
+ * log data.
+ */
+export function fromLogs(entries: Git.LogEntry[]): Series {
+  const commits: Git.LogEntry[] = []
+  let previousStableCommit: null | Git.LogEntry = null
+
+  for (const log of entries) {
+    if (log.tags.find(isStableTag)) {
+      previousStableCommit = log
+      break
+    }
+    commits.push(log)
+  }
+
+  return buildSeries([previousStableCommit, commits])
 }
 
 /**
