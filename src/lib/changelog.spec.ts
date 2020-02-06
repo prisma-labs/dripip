@@ -13,6 +13,7 @@ describe('.render()', () => {
           { message: 'fix: b' },
           { message: 'feat: b' },
           { message: 'refactor: a' },
+          { message: 'non conforming commit' },
           { message: 'chore: a' },
           { message: 'feat: a\n\nBREAKING CHANGE:\ntoto' },
           { message: 'perf: a' },

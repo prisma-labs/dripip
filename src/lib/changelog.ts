@@ -46,7 +46,7 @@ type ChangeLog = {
    */
   unspecified: {
     label: string
-    commits: string[]
+    commits: Commit[]
   }
 }
 
@@ -66,7 +66,8 @@ function organize(series: Series): ChangeLog {
 
   for (const c of series.commitsInNextStable) {
     if (c.message.parsed === null) {
-      log.unspecified.commits.push(c.message.raw)
+      log.unspecified.commits.push(c)
+      continue
     }
 
     const cp = c.message.parsed
@@ -149,11 +150,15 @@ function renderMarkdown(log: ChangeLog): string {
     .join('\n')
 
   if (log.unspecified.commits.length) {
-    doc += stripIndent`
+    doc += '\n'
+    doc +=
+      stripIndent`
       ${renderMarkdownSectionTitle(log.unspecified.label)}
 
-      - ${log.unspecified.commits.join('\n- ')}
-    `
+      - ${log.unspecified.commits
+        .map(c => `${shortSha(c)} ${c.message.raw}`)
+        .join('\n- ')}
+    ` + '\n'
   }
 
   return doc
@@ -171,7 +176,7 @@ function renderMarkdownSectionCommit(
   c: Commit,
   opts?: { type?: boolean; breaking?: boolean }
 ): string {
-  const sha = c.sha.slice(0, 7)
+  const sha = shortSha(c)
   const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
   const description = ' ' + c.message.parsed.description
   const breaking =
@@ -181,4 +186,8 @@ function renderMarkdownSectionCommit(
       ? ' (breaking)'
       : ''
   return `- ${sha}${breaking}${type}${description}`
+}
+
+function shortSha(c: Commit): string {
+  return c.sha.slice(0, 7)
 }

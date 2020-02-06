@@ -55,6 +55,7 @@ async function getLog(): Promise<SeriesLog> {
   return [previousStableCommit, commits]
 }
 
+// todo non-conforming aka. non-conventional commits
 type CommitBase = {
   message: {
     raw: string
