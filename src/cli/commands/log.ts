@@ -1,7 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import { inspect } from 'util'
-import * as ChangeLog from '../lib/changelog'
-import * as Context from '../utils/context'
+import * as ChangeLog from '../../lib/changelog'
+import * as Context from '../../utils/context'
 
 export class Log extends Command {
   static flags = {

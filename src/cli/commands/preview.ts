@@ -1,12 +1,12 @@
 import Command, { flags } from '@oclif/command'
 import { stripIndents } from 'common-tags'
 import createGit from 'simple-git/promise'
-import * as Semver from '../lib/semver'
-import { casesHandled, indentBlock4 } from '../lib/utils'
-import * as Context from '../utils/context'
-import * as Output from '../utils/output'
-import * as Publish from '../utils/publish'
-import * as Rel from '../utils/release'
+import * as Semver from '../../lib/semver'
+import { casesHandled, indentBlock4 } from '../../lib/utils'
+import * as Context from '../../utils/context'
+import * as Output from '../../utils/output'
+import * as Publish from '../../utils/publish'
+import * as Rel from '../../utils/release'
 
 type PreviewTypeFound = {
   type: string

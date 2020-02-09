@@ -1,9 +1,9 @@
 import Command, { flags } from '@oclif/command'
 import createGit from 'simple-git/promise'
-import * as Context from '../utils/context'
-import * as Output from '../utils/output'
-import { publish } from '../utils/publish'
-import * as Rel from '../utils/release'
+import * as Context from '../../utils/context'
+import * as Output from '../../utils/output'
+import { publish } from '../../utils/publish'
+import * as Rel from '../../utils/release'
 
 export class Stable extends Command {
   static flags = {

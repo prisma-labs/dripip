@@ -4,7 +4,7 @@
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/main",
   "bin": {
-    "dripip": "dist/main.js"
+    "dripip": "dist/cli/main.js"
   },
   "repository": "git@github.com:prisma-labs/dripip.git",
   "author": "Jason Kuhrt <jasonkuhrt@me.com>",
@@ -73,7 +73,7 @@
     "singleQuote": true
   },
   "oclif": {
-    "commands": "./dist/commands",
+    "commands": "./dist/cli/commands",
     "bin": "dripip",
     "plugins": [
       "@oclif/plugin-help"
