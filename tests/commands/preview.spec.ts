@@ -1,11 +1,10 @@
-import { createWorkspace } from '../__lib/helpers'
 import {
-  gitCreateEmptyCommit,
-  createFixCommit,
   createFeatCommit,
+  createFixCommit,
+  gitCreateEmptyCommit,
 } from '../../src/lib/git'
 
-const ws = createWorkspace('preview')
+const ctx = createContext('preview')
 
 describe('pr preview releases', () => {
   let instanceId: string
@@ -15,18 +14,18 @@ describe('pr preview releases', () => {
     instanceId = String(Math.random()).replace('0.', '')
     branchName = 'feat/foo-' + instanceId
     // https://github.com/steveukx/git-js/issues/14#issuecomment-45430322
-    await ws.git.checkout(['-b', branchName])
-    await gitCreateEmptyCommit(ws.git, 'some work on new branch')
+    await ctx.git.checkout(['-b', branchName])
+    await gitCreateEmptyCommit(ctx.git, 'some work on new branch')
     // await ws.git.addRemote(
     //   'origin',
     //   'https://github.com/prisma-labs/dripip-system-tests.git'
     // )
-    await ws.git.raw(['push', '--set-upstream', 'origin', branchName])
+    await ctx.git.raw(['push', '--set-upstream', 'origin', branchName])
   })
 
   it('treats releases as a pr preview if on branch with open pr', async () => {
     try {
-      await ws.octokit.pulls.create({
+      await ctx.octokit.pulls.create({
         head: branchName,
         base: 'master',
         owner: 'prisma-labs',
@@ -36,7 +35,7 @@ describe('pr preview releases', () => {
     } catch (e) {
       console.log(e)
     }
-    const result = await ws.dripip('preview --show-type')
+    const result = await ctx.dripip('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -52,7 +51,7 @@ describe('pr preview releases', () => {
 
 describe('stable preview releases', () => {
   it('treats release as stable preview if on trunk', async () => {
-    const result = await ws.dripip('preview --show-type')
+    const result = await ctx.dripip('preview --show-type')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -66,10 +65,10 @@ describe('stable preview releases', () => {
   })
 
   it('if build-num flag passed, the build number is forced to be it', async () => {
-    createFixCommit(ws.git)
-    await ws.git.addTag('0.1.0')
-    createFeatCommit(ws.git)
-    const result = await ws.dripip('preview --build-num 2 --dry-run')
+    createFixCommit(ctx.git)
+    await ctx.git.addTag('0.1.0')
+    createFeatCommit(ctx.git)
+    const result = await ctx.dripip('preview --build-num 2 --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -84,6 +83,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "feat",
+                "typeKind": "feat",
               },
               "raw": "feat: ti ti ti",
             },
@@ -97,8 +97,8 @@ describe('stable preview releases', () => {
   })
 
   it('if no stable release exists then pre-releases with just patch-affecting commits begin from stable version 0.0.1', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    const result = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -113,6 +113,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 1",
             },
@@ -125,6 +126,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: add package.json",
             },
@@ -137,6 +139,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: who knows",
             },
@@ -154,8 +157,8 @@ describe('stable preview releases', () => {
   })
 
   it('if no stable release exists then pre-releases with at least one minor-affecting commits begin from stable version 0.1.0', async () => {
-    await gitCreateEmptyCommit(ws.git, 'feat: 1')
-    const result = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 1')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -170,6 +173,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "feat",
+                "typeKind": "feat",
               },
               "raw": "feat: 1",
             },
@@ -182,6 +186,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: add package.json",
             },
@@ -194,6 +199,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: who knows",
             },
@@ -211,9 +217,9 @@ describe('stable preview releases', () => {
   })
 
   it('if patch-affecting and minor-affecting commits in release bump type is minor', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'feat: 1')
-    const result = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 1')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -228,6 +234,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "feat",
+                "typeKind": "feat",
               },
               "raw": "feat: 1",
             },
@@ -240,6 +247,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 1",
             },
@@ -252,6 +260,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: add package.json",
             },
@@ -264,6 +273,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: who knows",
             },
@@ -281,13 +291,13 @@ describe('stable preview releases', () => {
   })
 
   it('if patch-affecting and minor-affecting and breaking change commits in release bump type is major', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'feat: 1')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 1')
     await gitCreateEmptyCommit(
-      ws.git,
+      ctx.git,
       'feat: 2\n\nBREAKING CHANGE:\nblah blah blah'
     )
-    const result = await ws.dripip('preview --dry-run')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -302,6 +312,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "feat",
+                "typeKind": "feat",
               },
               "raw": "feat: 2
 
@@ -317,6 +328,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "feat",
+                "typeKind": "feat",
               },
               "raw": "feat: 1",
             },
@@ -329,6 +341,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 1",
             },
@@ -341,6 +354,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: add package.json",
             },
@@ -353,6 +367,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "chore",
+                "typeKind": "chore",
               },
               "raw": "chore: who knows",
             },
@@ -370,12 +385,12 @@ describe('stable preview releases', () => {
   })
 
   it('pre-releases only consider commits since last stable', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'feat: 1')
-    await ws.git.addAnnotatedTag('0.1.0', '0.1.0')
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'fix: 2')
-    const result = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 1')
+    await ctx.git.addAnnotatedTag('0.1.0', '0.1.0')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 2')
+    const result = await ctx.dripip('preview --dry-run')
     // note how the feat commit leading to 0.1.0 is ignored below otherwise we'd
     // see 0.2.0
     expect(result).toMatchInlineSnapshot(`
@@ -392,6 +407,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 2",
             },
@@ -404,6 +420,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 1",
             },
@@ -417,11 +434,11 @@ describe('stable preview releases', () => {
   })
 
   it('pre-releases increment from previous pre-release build number', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await ws.git.addAnnotatedTag('0.0.1-next.1', '0.0.1-next.1')
-    await gitCreateEmptyCommit(ws.git, 'fix: 2')
-    await gitCreateEmptyCommit(ws.git, 'fix: 3')
-    const result = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await ctx.git.addAnnotatedTag('0.0.1-next.1', '0.0.1-next.1')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 2')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 3')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -436,6 +453,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 3",
             },
@@ -448,6 +466,7 @@ describe('stable preview releases', () => {
                 "footers": Array [],
                 "scope": null,
                 "type": "fix",
+                "typeKind": "fix",
               },
               "raw": "fix: 2",
             },
@@ -479,8 +498,8 @@ describe('preflight assertions', () => {
   )
 
   it('fails semantically if not on trunk and branch has no open pr', async () => {
-    await ws.git.checkoutLocalBranch('feat/foo')
-    const result = await ws.dripip('preview --dry-run')
+    await ctx.git.checkoutLocalBranch('feat/foo')
+    const result = await ctx.dripip('preview --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -494,9 +513,9 @@ describe('preflight assertions', () => {
   })
 
   it('fails semantically if there is already a preview release present', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: thing')
-    await ws.git.addTag('v1.2.3-next.1')
-    const result: any = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: thing')
+    await ctx.git.addTag('v1.2.3-next.1')
+    const result: any = await ctx.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -514,9 +533,9 @@ describe('preflight assertions', () => {
   })
 
   it('fails semantically if there is already a stable release present', async () => {
-    await gitCreateEmptyCommit(ws.git, 'fix: thing')
-    await ws.git.addTag('v1.2.3')
-    const result: any = await ws.dripip('preview --dry-run')
+    await gitCreateEmptyCommit(ctx.git, 'fix: thing')
+    await ctx.git.addTag('v1.2.3')
+    const result: any = await ctx.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -534,9 +553,9 @@ describe('preflight assertions', () => {
   })
 
   it('fails semantically if there is a stable AND preview release', async () => {
-    await ws.git.addTag('v1.2.3')
-    await ws.git.addTag('v1.2.3-next.1')
-    const result: any = await ws.dripip('preview --dry-run')
+    await ctx.git.addTag('v1.2.3')
+    await ctx.git.addTag('v1.2.3-next.1')
+    const result: any = await ctx.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -555,11 +574,11 @@ describe('preflight assertions', () => {
   })
 
   it('renders other tags found if any', async () => {
-    await ws.git.addTag('v1.2.3')
-    await ws.git.addTag('v1.2.3-next.1')
-    await ws.git.addTag('foo')
-    await ws.git.addTag('bar')
-    const result: any = await ws.dripip('preview --dry-run')
+    await ctx.git.addTag('v1.2.3')
+    await ctx.git.addTag('v1.2.3-next.1')
+    await ctx.git.addTag('foo')
+    await ctx.git.addTag('bar')
+    const result: any = await ctx.dripip('preview --dry-run')
     expect(replaceSHA(result)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
@@ -581,8 +600,8 @@ describe('preflight assertions', () => {
   })
 
   it('does not include non-release tags', async () => {
-    await ws.git.addTag('foobar')
-    const result = await ws.dripip('preview --show-type --dry-run')
+    await ctx.git.addTag('foobar')
+    const result = await ctx.dripip('preview --show-type --dry-run')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {

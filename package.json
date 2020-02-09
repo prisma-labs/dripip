@@ -23,11 +23,11 @@
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
     "build": "yarn -s build:oclif && tsc",
-    "dev": "tsdx watch",
-    "dev:test": "tsdx test --testPathPattern '.*/src/.*'",
-    "test:unit": "CI=true tsdx test --color --testPathPattern '.*/src/.*' --verbose",
-    "test:system": "CI=true tsdx test --color --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
-    "test": "CI=true tsdx test --color --testTimeout 15000 --verbose",
+    "dev": "tsc --watch",
+    "dev:test": "jest --watch --testPathPattern '.*/src/.*'",
+    "test:unit": "jest --testPathPattern '.*/src/.*'",
+    "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*'",
+    "test": "jest  --testTimeout 15000 --verbose",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",
     "build:doc": "yarn -s build:doc:commands && yarn -s build:doc:toc",
@@ -58,11 +58,13 @@
     "@types/tmp": "^0.1.0",
     "doctoc": "^1.4.0",
     "jest": "^24.9.0",
+    "jest-watch-suspend": "^1.1.2",
+    "jest-watch-toggle-config": "^1.0.2",
+    "jest-watch-typeahead": "^0.4.2",
     "prettier": "^1.19.1",
     "tmp": "^0.1.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
-    "tsdx": "^0.12.0",
     "typescript": "^3.6.4"
   },
   "prettier": {
@@ -76,5 +78,35 @@
     "plugins": [
       "@oclif/plugin-help"
     ]
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "watchPlugins": [
+      "jest-watch-suspend",
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname",
+      [
+        "jest-watch-toggle-config",
+        {
+          "setting": "verbose"
+        }
+      ]
+    ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ],
+    "setupFiles": [
+      "./tests/_setup.ts"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tests/tsconfig.json",
+        "diagnostics": {
+          "ignoreCodes": [
+            151001
+          ]
+        }
+      }
+    }
   }
 }

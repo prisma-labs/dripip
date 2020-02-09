@@ -17,7 +17,7 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createWorkspace(command: 'preview' | 'stable') {
+export function createContext(command: 'preview' | 'stable') {
   const ws = addOctokitToworkspace(
     addDripipToWorkspace(
       WS.createWorkspace({

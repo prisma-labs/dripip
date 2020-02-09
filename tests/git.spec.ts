@@ -1,7 +1,6 @@
 import * as Git from '../src/lib/git'
-import * as WS from './__lib/workspace'
 
-const ws = WS.createWorkspace({
+const ws = createWorkspace({
   name: 'system-git',
 })
 
