@@ -109,14 +109,12 @@ export class Preview extends Command {
           distTag: 'next',
           version: release.version.version,
         },
-        { skipNPM: flags['skip-npm'] }
+        {
+          skipNPM: flags['skip-npm'],
+          gitTagForDistTags: true,
+        }
       )
 
-      // force update so the tag moves to a new commit
-      await git.raw(['tag', '-f', 'next'])
-      await git.raw(['push', 'origin', ':refs/tags/next'])
-      await git.raw(['push', '--tags'])
-      console.log('updated git-tag "next"')
       return
     }
 

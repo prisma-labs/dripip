@@ -59,16 +59,11 @@ export class Stable extends Command {
         distTag: 'latest',
         additiomalDistTags: ['next'],
       },
-      { skipNPM: flags['skip-npm'] }
+      {
+        skipNPM: flags['skip-npm'],
+        gitTagForDistTags: true,
+      }
     )
-
-    // force update so the tag moves to a new commit
-    await git.raw(['tag', '-f', 'latest'])
-    await git.raw(['tag', '-f', 'next'])
-    // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
-    await git.raw(['push', 'origin', ':refs/tags/latest', ':refs/tags/next'])
-    await git.raw(['push', '--tags'])
-    console.log('updated git-tags "latest" "next"')
   }
 }
 

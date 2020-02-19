@@ -11,11 +11,16 @@ type Options = {
    */
   gitTagVPrefix?: boolean
   skipNPM?: boolean
+  /**
+   * Should each given dist tag have a corresponding git tag made?
+   */
+  gitTagForDistTags?: boolean
 }
 
 const defaultOpts: Options = {
   gitTagVPrefix: false,
   skipNPM: false,
+  gitTagForDistTags: true,
 }
 
 type Release = {
@@ -89,6 +94,23 @@ export async function publish(release: Release, givenOpts?: Options) {
     : release.version
   await git.addAnnotatedTag(versionTag, versionTag)
   console.log(`tagged this commit with ${versionTag}`)
+
+  // Tag the git commit with the given dist tag names
+  //
+  if (opts.gitTagForDistTags) {
+    // todo parallel optimize?
+    const distTags = [release.distTag, ...(release.additiomalDistTags ?? [])]
+    for (const distTag of distTags) {
+      // dist tags are movable pointers. Except for init case it is expected to
+      // exist in the git repo. So use force to move the tag.
+      // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
+      // todo provide nice semantic descriptions for each dist tag
+      await git.raw(['tag', '--force', '--message', distTag, distTag])
+      await git.raw(['push', 'origin', `:refs/tags/${distTag}`])
+      console.log('updated git tag %j', distTag)
+    }
+    await git.raw(['push', '--tags'])
+  }
 
   // Push the git commits
   //
