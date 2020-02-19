@@ -106,10 +106,9 @@ export async function publish(release: Release, givenOpts?: Options) {
       // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
       // todo provide nice semantic descriptions for each dist tag
       await git.raw(['tag', '--force', '--message', distTag, distTag])
-      await git.raw(['push', 'origin', `:refs/tags/${distTag}`])
+      await git.raw(['push', '--force', '--tags'])
       console.log('updated git tag %j', distTag)
     }
-    await git.raw(['push', '--tags'])
   }
 
   // Push the git commits
