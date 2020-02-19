@@ -97,7 +97,7 @@ type DripipRunnerOptions = proc.RunOptions & {
 }
 
 function createDripipRunString(pathToProject: string) {
-  return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main`
+  return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/cli/main`
 }
 
 function createDripipRunner(cwd: string, pathToProject: string) {

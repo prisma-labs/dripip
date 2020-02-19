@@ -2,7 +2,7 @@
   "name": "dripip",
   "version": "0.0.0-see-git-tags",
   "description": "Opinionated CLI for continuous delivery of npm packages",
-  "main": "dist/main",
+  "main": "dist/cli/main",
   "bin": {
     "dripip": "dist/cli/main.js"
   },
@@ -16,10 +16,10 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "release:stable": "node dist/main stable",
-    "release:preview": "node dist/main preview",
+    "release:stable": "node dist/cli/main stable",
+    "release:preview": "node dist/cli/main preview",
     "format": "prettier --write '*/**/*.ts'",
-    "dripip": "ts-node src/main",
+    "dripip": "ts-node src/cli/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
     "build": "yarn -s build:oclif && tsc",
