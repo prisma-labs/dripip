@@ -42,9 +42,9 @@ type PullRequest = {
 
 export async function scan(opts?: scanOoptions): Promise<Context> {
   // Build up instances
-  const octoOps = {} as Octokit.Options
-  if (process.env.GITHUB_TOKEN) octoOps.auth = process.env.GITHUB_TOKEN
-  const octokit = new Octokit(octoOps)
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+  })
   const git = createGit()
   // Generally required information
   const githubRepoAddress = await Git.parseGithubRepoInfoFromGitConfig()

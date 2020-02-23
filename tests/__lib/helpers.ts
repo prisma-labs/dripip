@@ -46,7 +46,8 @@ export function createContext(command: 'preview' | 'stable') {
   return ws
 }
 
-export function addOctokitToworkspace<T>(ws: T): T & { octokit: Octokit } {
+// any https://github.com/octokit/rest.js/issues/1624
+export function addOctokitToworkspace<T>(ws: T): T & { octokit: any } {
   beforeAll(() => {
     // @ts-ignore
     ws.octokit = new Octokit({
