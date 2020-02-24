@@ -1,11 +1,10 @@
 // TODO test that context honours the base branch setting of the repo
-import { createWorkspace } from '../__lib/helpers'
 import { gitCreateEmptyCommit } from '../../src/lib/git'
 
-const ws = createWorkspace('stable')
+const ctx = createContext('stable')
 
 async function setupPackageJson() {
-  await ws.fs.writeAsync('package.json', {
+  await ctx.fs.writeAsync('package.json', {
     name: 'foo',
     version: '0.0.0-ignoreme',
   })
@@ -13,8 +12,8 @@ async function setupPackageJson() {
 
 describe('preflight requirements include that', () => {
   it('the branch is trunk', async () => {
-    await ws.git.checkoutLocalBranch('foobar')
-    const result: any = await ws.dripip('stable')
+    await ctx.git.checkoutLocalBranch('foobar')
+    const result: any = await ctx.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -35,8 +34,8 @@ describe('preflight requirements include that', () => {
   // potentially not the latest commit of trunk. Think of a CI situation with
   // race-condition PR merges.
   it('the branch is synced with remote (needs push)', async () => {
-    await gitCreateEmptyCommit(ws.git, 'some work')
-    const result: any = await ws.dripip('stable')
+    await gitCreateEmptyCommit(ctx.git, 'some work')
+    const result: any = await ctx.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -54,9 +53,9 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (needs pull)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~2']) // package.json + something on remote
+    await ctx.git.raw(['reset', '--hard', 'head~2']) // package.json + something on remote
     await setupPackageJson()
-    const result: any = await ws.dripip('stable')
+    const result: any = await ctx.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -74,10 +73,10 @@ describe('preflight requirements include that', () => {
   })
 
   it('the branch is synced with remote (diverged)', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~2']) // remove package.json + something on remote
+    await ctx.git.raw(['reset', '--hard', 'head~2']) // remove package.json + something on remote
     await setupPackageJson()
-    await gitCreateEmptyCommit(ws.git, 'some work')
-    const result: any = await ws.dripip('stable')
+    await gitCreateEmptyCommit(ctx.git, 'some work')
+    const result: any = await ctx.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -95,10 +94,10 @@ describe('preflight requirements include that', () => {
   })
 
   it('check that the commit does not already have a stable release present', async () => {
-    await ws.git.raw(['reset', '--hard', 'head~1']) // package.json
+    await ctx.git.raw(['reset', '--hard', 'head~1']) // package.json
     await setupPackageJson()
-    await ws.git.addTag('1.0.0')
-    const result: any = await ws.dripip('stable')
+    await ctx.git.addTag('1.0.0')
+    const result: any = await ctx.dripip('stable')
     result.data.context.sha = '__sha__'
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -118,30 +117,54 @@ describe('preflight requirements include that', () => {
 
 describe('increments upon the previous stable release based on conventional commit analysis of commits since latter', () => {
   beforeEach(async () => {
-    await ws.git
+    await ctx.git
       .raw(['push', '-f', 'origin', '--delete', 'foobar'])
       .catch(() => null)
-    await ws.git.checkoutLocalBranch('foobar')
-    await ws.git.raw(['push', '-u', 'origin', 'foobar'])
+    await ctx.git.checkoutLocalBranch('foobar')
+    await ctx.git.raw(['push', '-u', 'origin', 'foobar'])
   })
 
   afterEach(async () => {
-    await ws.git.raw(['push', '-f', 'origin', '--delete', 'foobar'])
+    await ctx.git.raw(['push', '-f', 'origin', '--delete', 'foobar'])
   })
 
   it('unless all commits in release are chore-like', async () => {
-    await ws.git.addAnnotatedTag('0.1.0', '0.1.0')
-    await gitCreateEmptyCommit(ws.git, 'chore: 1')
-    await gitCreateEmptyCommit(ws.git, 'chore: 2')
-    await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
+    await ctx.git.addAnnotatedTag('0.1.0', '0.1.0')
+    await gitCreateEmptyCommit(ctx.git, 'chore: 1')
+    await gitCreateEmptyCommit(ctx.git, 'chore: 2')
+    await ctx.git.push()
+    const result: any = await ctx.dripip('stable --dry-run --trunk foobar')
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
           "context": Object {
             "commits": Array [
-              "chore: 2",
-              "chore: 1",
+              Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: 2",
+              },
+              Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: 1",
+              },
             ],
           },
           "summary": "The release you attempting only contains chore commits which means no release is needed.",
@@ -153,20 +176,33 @@ describe('increments upon the previous stable release based on conventional comm
   })
 
   it('fix commits since last release', async () => {
-    await ws.git.addAnnotatedTag('0.1.0', '0.1.0')
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'fix: 2')
-    await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
+    await ctx.git.addAnnotatedTag('0.1.0', '0.1.0')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 2')
+    await ctx.git.push()
+    const result: any = await ctx.dripip('stable --dry-run --trunk foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
+          "bumpType": "patch",
           "commits": Array [
             Object {
-              "message": "fix: 2",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                  "typeKind": "fix",
+                },
+                "raw": "fix: 2",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -175,7 +211,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "fix: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                  "typeKind": "fix",
+                },
+                "raw": "fix: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -184,7 +232,13 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "newVer": "0.1.1",
+          "version": Object {
+            "major": 0,
+            "minor": 1,
+            "patch": 1,
+            "version": "0.1.1",
+            "vprefix": false,
+          },
         },
         "kind": "ok",
         "type": "dry_run",
@@ -193,21 +247,34 @@ describe('increments upon the previous stable release based on conventional comm
   })
 
   it('commit mix including chore feat fix', async () => {
-    await gitCreateEmptyCommit(ws.git, 'feat: 1')
-    await gitCreateEmptyCommit(ws.git, 'fix: 1')
-    await gitCreateEmptyCommit(ws.git, 'chore: 1')
-    await gitCreateEmptyCommit(ws.git, 'feat: 2')
-    await ws.git.push()
-    const result: any = await ws.dripip('stable --dry-run --trunk foobar')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 1')
+    await gitCreateEmptyCommit(ctx.git, 'fix: 1')
+    await gitCreateEmptyCommit(ctx.git, 'chore: 1')
+    await gitCreateEmptyCommit(ctx.git, 'feat: 2')
+    await ctx.git.push()
+    const result: any = await ctx.dripip('stable --dry-run --trunk foobar')
     result.data.commits.forEach((c: any) => {
       c.sha = '__sha__'
     })
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
+          "bumpType": "minor",
           "commits": Array [
             Object {
-              "message": "feat: 2",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "feat",
+                  "typeKind": "feat",
+                },
+                "raw": "feat: 2",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -216,7 +283,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -225,7 +304,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "fix: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "fix",
+                  "typeKind": "fix",
+                },
+                "raw": "fix: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -234,7 +325,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "feat: 1",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "feat",
+                  "typeKind": "feat",
+                },
+                "raw": "feat: 1",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -243,7 +346,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: add package.json",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "add package.json",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: add package.json",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -252,7 +367,19 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "chore: who knows",
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "who knows",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: who knows",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -261,7 +388,10 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
             Object {
-              "message": "Initial commit",
+              "message": Object {
+                "parsed": null,
+                "raw": "Initial commit",
+              },
               "nonReleaseTags": Array [],
               "releases": Object {
                 "preview": null,
@@ -270,7 +400,13 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "newVer": "0.1.0",
+          "version": Object {
+            "major": 0,
+            "minor": 1,
+            "patch": 0,
+            "version": "0.1.0",
+            "vprefix": false,
+          },
         },
         "kind": "ok",
         "type": "dry_run",

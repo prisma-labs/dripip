@@ -1,5 +1,6 @@
-import * as Semver from '../lib/semver'
+import * as ConventionalCommit from '../lib/conventional-commit'
 import * as Git from '../lib/git'
+import * as Semver from '../lib/semver'
 
 export type Release = {
   bumpType: Semver.MajMinPat
@@ -12,6 +13,25 @@ export type Release = {
  */
 export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
   return getLog().then(buildSeries)
+}
+
+/**
+ * Like `getLog` but works on the given data. Useful for unit testing with mock
+ * log data.
+ */
+export function fromLogs(entries: Git.LogEntry[]): Series {
+  const commits: Git.LogEntry[] = []
+  let previousStableCommit: null | Git.LogEntry = null
+
+  for (const log of entries) {
+    if (log.tags.find(isStableTag)) {
+      previousStableCommit = log
+      break
+    }
+    commits.push(log)
+  }
+
+  return buildSeries([previousStableCommit, commits])
 }
 
 /**
@@ -35,50 +55,45 @@ async function getLog(): Promise<SeriesLog> {
   return [previousStableCommit, commits]
 }
 
-export type Commit = {
-  message: string
+// todo non-conforming aka. non-conventional commits
+type CommitBase = {
+  message: {
+    raw: string
+    parsed: ConventionalCommit.ConventionalCommit
+  }
   sha: string
   nonReleaseTags: string[]
+}
+
+export type Commit = CommitBase & {
   releases: {
     stable: null | Semver.StableVer
     preview: null | Semver.PreviewVer
   }
 }
 
-export type StableCommit = {
-  message: string
-  sha: string
-  nonReleaseTags: string[]
+export type StableCommit = CommitBase & {
   releases: {
     stable: Semver.StableVer
     preview: null
   }
 }
 
-export type PreviewCommit = {
-  message: string
-  sha: string
-  nonReleaseTags: string[]
+export type PreviewCommit = CommitBase & {
   releases: {
     stable: null
     preview: Semver.PreviewVer
   }
 }
 
-export type MaybePreviewCommit = {
-  message: string
-  sha: string
-  nonReleaseTags: string[]
+export type MaybePreviewCommit = CommitBase & {
   releases: {
     stable: null
     preview: null | Semver.PreviewVer
   }
 }
 
-export type UnreleasedCommit = {
-  message: string
-  sha: string
-  nonReleaseTags: string[]
+export type UnreleasedCommit = CommitBase & {
   releases: {
     stable: null
     preview: null
@@ -91,6 +106,8 @@ export type Series = {
   previousPreview: null | PreviewCommit
   commitsInNextPreview: UnreleasedCommit[]
   current: Commit
+  hasBreakingChange: boolean
+  isInitialDevelopment: boolean
 }
 
 export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
@@ -99,18 +116,27 @@ export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
  * Build structured series data from a raw series log.
  */
 export function buildSeries([
-  previousStable,
+  previousStableLogEntry,
   commitsSincePrevStable,
 ]: SeriesLog): Series {
-  if (previousStable === null && commitsSincePrevStable.length === 0) {
+  if (previousStableLogEntry === null && commitsSincePrevStable.length === 0) {
     throw new Error(
       `Cannot build release series with given data. There is no previous stable release and no commits since. This would indicate an unexpected error or working with a git repo that has zero commits. The latter should be guarded by upstream checks. Therefore this is bad. There must be a bug.`
     )
   }
 
+  let hasBreakingChange = false
+
   const commitsInNextStable = commitsSincePrevStable.map(c => {
+    const parsedMessage = ConventionalCommit.parse(c.message)
+    if (parsedMessage?.breakingChange) {
+      hasBreakingChange = true
+    }
     return {
-      message: c.message,
+      message: {
+        raw: c.message,
+        parsed: parsedMessage,
+      },
       sha: c.sha,
       nonReleaseTags: c.tags.filter(isUnknownTag),
       releases: {
@@ -137,30 +163,39 @@ export function buildSeries([
           previousPreviewIndex
         ) as UnreleasedCommit[])
 
-  const previousStable2 =
-    previousStable === null
+  const previousStable =
+    previousStableLogEntry === null
       ? null
       : ({
-          sha: previousStable.sha,
-          message: previousStable.message,
-          nonReleaseTags: previousStable.tags.filter(isUnknownTag),
+          sha: previousStableLogEntry.sha,
+          message: {
+            raw: previousStableLogEntry.message,
+            parsed: ConventionalCommit.parse(previousStableLogEntry.message),
+          },
+          nonReleaseTags: previousStableLogEntry.tags.filter(isUnknownTag),
           releases: {
-            stable: Semver.parse(previousStable.tags.find(isStableTag)!)!,
+            stable: Semver.parse(
+              previousStableLogEntry.tags.find(isStableTag)!
+            )!,
             preview: Semver.parsePreview(
-              previousStable.tags.find(isPreviewTag) ?? ''
+              previousStableLogEntry.tags.find(isPreviewTag) ?? ''
             ),
           },
         } as StableCommit)
 
+  const isInitialDevelopment = (previousStable?.releases.stable.major ?? 0) < 1
+
   return {
-    previousStable: previousStable2,
+    isInitialDevelopment,
+    hasBreakingChange,
+    previousStable: previousStable,
     previousPreview,
     commitsInNextStable,
     commitsInNextPreview,
     // If there are no commits since stable and no stable that means we're on a
     // repo with no commit. This edge-case is ignored. It is assumed that it
     // will be validated for before calling this function.
-    current: commitsInNextStable[0] ?? previousStable2!,
+    current: commitsInNextStable[0] ?? previousStable!,
   }
 }
 
@@ -201,8 +236,9 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
     return 'empty_series'
   }
 
-  const bumpType = Semver.calcIncType(
-    series.commitsInNextStable.map(c => c.message)
+  const bumpType = ConventionalCommit.calcBumpType(
+    series.isInitialDevelopment,
+    series.commitsInNextStable.map(c => c.message.raw)
   )
 
   if (bumpType === null) return 'no_meaningful_change'
@@ -222,8 +258,9 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
     return 'empty_series'
   }
 
-  const bumpType = Semver.calcIncType(
-    series.commitsInNextStable.map(c => c.message)
+  const bumpType = ConventionalCommit.calcBumpType(
+    series.isInitialDevelopment,
+    series.commitsInNextStable.map(c => c.message.raw)
   )
 
   if (bumpType === null) return 'no_meaningful_change'

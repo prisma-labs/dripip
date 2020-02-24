@@ -1,8 +1,7 @@
-import * as path from 'path'
+import { Octokit } from '@octokit/rest'
+import { format } from 'util'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
-import { format } from 'util'
-import Octokit from '@octokit/rest'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
@@ -18,7 +17,7 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createWorkspace(command: 'preview' | 'stable') {
+export function createContext(command: 'preview' | 'stable') {
   const ws = addOctokitToworkspace(
     addDripipToWorkspace(
       WS.createWorkspace({
@@ -47,7 +46,8 @@ export function createWorkspace(command: 'preview' | 'stable') {
   return ws
 }
 
-export function addOctokitToworkspace<T>(ws: T): T & { octokit: Octokit } {
+// any https://github.com/octokit/rest.js/issues/1624
+export function addOctokitToworkspace<T>(ws: T): T & { octokit: any } {
   beforeAll(() => {
     // @ts-ignore
     ws.octokit = new Octokit({
@@ -98,7 +98,7 @@ type DripipRunnerOptions = proc.RunOptions & {
 }
 
 function createDripipRunString(pathToProject: string) {
-  return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/main`
+  return `${pathToProject}/node_modules/.bin/ts-node --project ${pathToProject}/tsconfig.json ${pathToProject}/src/cli/main`
 }
 
 function createDripipRunner(cwd: string, pathToProject: string) {

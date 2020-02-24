@@ -1,8 +1,8 @@
+import { Octokit } from '@octokit/rest'
 import createGit from 'simple-git/promise'
-import Octokit from '@octokit/rest'
 import * as Git from '../lib/git'
-import * as Rel from './release'
 import * as PackageJson from '../lib/package-json'
+import * as Rel from './release'
 
 export type scanOoptions = {
   overrides?: {
@@ -42,9 +42,9 @@ type PullRequest = {
 
 export async function scan(opts?: scanOoptions): Promise<Context> {
   // Build up instances
-  const octoOps = {} as Octokit.Options
-  if (process.env.GITHUB_TOKEN) octoOps.auth = process.env.GITHUB_TOKEN
-  const octokit = new Octokit(octoOps)
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+  })
   const git = createGit()
   // Generally required information
   const githubRepoAddress = await Git.parseGithubRepoInfoFromGitConfig()

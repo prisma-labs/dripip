@@ -2,9 +2,9 @@
   "name": "dripip",
   "version": "0.0.0-see-git-tags",
   "description": "Opinionated CLI for continuous delivery of npm packages",
-  "main": "dist/main",
+  "main": "dist/cli/main",
   "bin": {
-    "dripip": "dist/main.js"
+    "dripip": "dist/cli/main.js"
   },
   "repository": "git@github.com:prisma-labs/dripip.git",
   "author": "Jason Kuhrt <jasonkuhrt@me.com>",
@@ -16,18 +16,18 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "release:stable": "node dist/main stable",
-    "release:preview": "node dist/main preview",
+    "release:stable": "node dist/cli/main stable",
+    "release:preview": "node dist/cli/main preview",
     "format": "prettier --write '*/**/*.ts'",
-    "dripip": "ts-node src/main",
+    "dripip": "ts-node src/cli/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
     "build": "yarn -s build:oclif && tsc",
-    "dev": "tsdx watch",
-    "dev:test:unit": "tsdx test --testPathPattern '.*/src/.*' --verbose",
-    "test:unit": "CI=true tsdx test --color --testPathPattern '.*/src/.*' --verbose",
-    "test:system": "CI=true tsdx test --color --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
-    "test": "CI=true tsdx test --color --testTimeout 15000 --verbose",
+    "dev": "tsc --watch",
+    "dev:test": "jest --watch --testPathPattern '.*/src/.*'",
+    "test:unit": "jest --testPathPattern '.*/src/.*'",
+    "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*'",
+    "test": "jest  --testTimeout 15000 --verbose",
     "build:doc:toc": "doctoc README.md",
     "build:doc:commands": "oclif-dev readme",
     "build:doc": "yarn -s build:doc:commands && yarn -s build:doc:toc",
@@ -38,9 +38,10 @@
     "@oclif/command": "^1.5.19",
     "@oclif/config": "^1.13.3",
     "@oclif/plugin-help": "^2.2.1",
-    "@octokit/rest": "^16.35.2",
+    "@octokit/rest": "^17.0.0",
     "@types/parse-git-config": "^3.0.0",
     "@types/parse-github-url": "^1.0.0",
+    "chalk": "^3.0.0",
     "common-tags": "^1.8.0",
     "fs-jetpack": "^2.2.3",
     "globby": "^10.0.1",
@@ -52,16 +53,18 @@
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.2",
     "@types/common-tags": "^1.8.0",
-    "@types/jest": "^24.0.21",
-    "@types/node": "^13.1.2",
+    "@types/jest": "^25.1.3",
+    "@types/node": "^13.7.4",
     "@types/tmp": "^0.1.0",
     "doctoc": "^1.4.0",
-    "jest": "^24.9.0",
+    "jest": "^25.1.0",
+    "jest-watch-suspend": "^1.1.2",
+    "jest-watch-toggle-config": "^1.0.2",
+    "jest-watch-typeahead": "^0.4.2",
     "prettier": "^1.19.1",
     "tmp": "^0.1.0",
-    "ts-jest": "^24.1.0",
-    "ts-node": "^8.4.1",
-    "tsdx": "^0.12.0",
+    "ts-jest": "^25.2.1",
+    "ts-node": "^8.6.2",
     "typescript": "^3.6.4"
   },
   "prettier": {
@@ -70,10 +73,40 @@
     "singleQuote": true
   },
   "oclif": {
-    "commands": "./dist/commands",
+    "commands": "./dist/cli/commands",
     "bin": "dripip",
     "plugins": [
       "@oclif/plugin-help"
     ]
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "watchPlugins": [
+      "jest-watch-suspend",
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname",
+      [
+        "jest-watch-toggle-config",
+        {
+          "setting": "verbose"
+        }
+      ]
+    ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ],
+    "setupFiles": [
+      "./tests/_setup.ts"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tests/tsconfig.json",
+        "diagnostics": {
+          "ignoreCodes": [
+            151001
+          ]
+        }
+      }
+    }
   }
 }

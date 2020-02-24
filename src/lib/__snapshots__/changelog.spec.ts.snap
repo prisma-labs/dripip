@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`.render() option markdown renders release notes for the current release series 1`] = `
+"#### BREAKING CHANGES
+
+- shasha# a
+
+#### Features
+
+- shasha# b
+- shasha# (breaking) a
+
+#### Fixes
+
+- shasha# b
+- shasha# a
+
+#### Improvements
+
+- shasha# refactor: a
+- shasha# perf: a
+
+#### Chores
+
+- shasha# b
+- shasha# a
+
+#### Unspecified Changes
+
+- shasha# non conforming commit b
+- shasha# non conforming commit a
+"
+`;
+
+exports[`.render() plain renders release notes for the current release series 1`] = `
+"[35mBREAKING CHANGES[39m
+
+  [90mshasha#[39m a
+
+[35mFeatures[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m[31m (breaking)[39m a
+
+[35mFixes[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m a
+
+[35mImprovements[39m
+
+  [90mshasha#[39m refactor: a
+  [90mshasha#[39m perf: a
+
+[35mChores[39m
+
+  [90mshasha#[39m b
+  [90mshasha#[39m a
+
+[35mUnspecified Changes[39m
+
+  [90mshasha#[39m non conforming commit b
+  [90mshasha#[39m non conforming commit a
+"
+`;

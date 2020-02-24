@@ -2,10 +2,10 @@
  * Generic extensions to the simple-git library.
  */
 
-import createGit from 'simple-git/promise'
-// import Octokit from '@octokit/rest'
+import * as CP from 'child_process'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
+import createGit from 'simple-git/promise'
 
 export type Simple = ReturnType<typeof createGit>
 
@@ -455,8 +455,6 @@ export function serializeLog(values: [string, string, string][]): string {
     logEntrySeparator
   )
 }
-
-import * as CP from 'child_process'
 
 export async function* streamLog(opts?: {
   cwd?: string
