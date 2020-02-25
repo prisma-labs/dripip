@@ -15,3 +15,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
       - run: yarn -s test:unit
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - continue-on-error: false
+      - run: yarn --frozen-lockfile
+      - run: yarn -s dripip pr
