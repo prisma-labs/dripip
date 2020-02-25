@@ -30,33 +30,24 @@ it('preflight check that user is on branch with open pr', async () => {
   `)
 })
 
-it.todo(
-  'makes a release for the current commit, updating pr dist tag, and version format'
-)
-
-// it('treats releases as a pr preview if on branch with open pr', async () => {
-//   try {
-//     await ctx.octokit.pulls.create({
-//       head: branchName,
-//       base: 'master',
-//       owner: 'prisma-labs',
-//       repo: 'dripip-system-tests',
-//       title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
-//     })
-//   } catch (e) {
-//     console.log(e)
-//   }
-
-//   const result = await ctx.dripip('pr')
-
-//   expect(result).toMatchInlineSnapshot(`
-//       Object {
-//         "data": Object {
-//           "reason": "git_branch_github_api",
-//           "type": "pr",
-//         },
-//         "kind": "ok",
-//         "type": "release_type",
-//       }
-//     `)
-// })
+it('makes a release for the current commit, updating pr dist tag, and version format', async () => {
+  await ctx.octokit.pulls.create({
+    head: branchName,
+    base: 'master',
+    owner: 'prisma-labs',
+    repo: 'dripip-system-tests',
+    title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
+  })
+  const result: any = await ctx.dripip('pr --json --dry-run')
+  expect(result.data.publishPlan).toMatchInlineSnapshot(`
+Object {
+  "options": Object {
+    "gitTag": "none",
+  },
+  "release": Object {
+    "distTag": "pr.129",
+    "version": "0.0.0-pr.129.7430143",
+  },
+}
+`)
+})
