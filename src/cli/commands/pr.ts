@@ -4,7 +4,6 @@ import * as Context from '../../utils/context'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
-import * as Rel from '../../utils/release'
 
 export class Preview extends Command {
   static flags = {
@@ -27,7 +26,6 @@ export class Preview extends Command {
 
     const report = check({ context })
       .must(branchHasOpenPR())
-      .must(commitNotAlreadyReleased())
       // todo only we if can figoure the commits since last pr release
       // .must(haveMeaningfulCommitsInTheSeries())
       .run()
@@ -59,42 +57,31 @@ export class Preview extends Command {
       },
     } as Semver.PullRequestVer
 
-    const release = {
-      distTag: `pr.${context.currentBranch.prs.open!.number}`,
-      version: version.version,
+    // todo show publish plan in dryrun for other commands too
+    const publishPlan: Publish.PublishPlan = {
+      release: {
+        distTag: `pr.${context.currentBranch.prs.open!.number}`,
+        version: version.version,
+      },
+      options: {
+        gitTag: 'none',
+      },
     }
 
     if (flags['dry-run']) {
       return Output.outputOk('dry_run', {
         report: report,
-        release: release,
+        publishPlan,
       })
     }
 
-    await Publish.publish({
-      release: release,
-      options: {
-        gitTagForDistTags: false,
-      },
-    })
+    await Publish.publish(publishPlan)
   }
 }
 
 //
 // Validators
 //
-
-function commitNotAlreadyReleased(): Validator {
-  return {
-    code: 'series_empty',
-    summary:
-      'A preview release must have at least one commit since the last preview',
-    run(ctx) {
-      const release = Rel.getNextPreview(ctx.series)
-      return release !== 'empty_series'
-    },
-  }
-}
 
 function branchHasOpenPR(): Validator {
   return {

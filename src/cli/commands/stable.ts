@@ -65,7 +65,6 @@ export class Stable extends Command {
       },
       options: {
         skipNPM: flags['skip-npm'],
-        gitTagForDistTags: true,
       },
     })
   }

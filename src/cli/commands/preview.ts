@@ -90,7 +90,6 @@ export class Preview extends Command {
       },
       options: {
         skipNPM: flags['skip-npm'],
-        gitTagForDistTags: true,
       },
     })
   }

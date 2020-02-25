@@ -14,13 +14,13 @@ type Options = {
   /**
    * Should each given dist tag have a corresponding git tag made?
    */
-  gitTagForDistTags?: boolean
+  gitTag?: 'all' | 'just_version' | 'just_dist_tags' | 'none'
 }
 
 const defaultOpts: Options = {
   gitTagVPrefix: false,
   skipNPM: false,
-  gitTagForDistTags: true,
+  gitTag: 'all',
 }
 
 type Release = {
@@ -35,6 +35,11 @@ type Release = {
   additiomalDistTags?: string[]
 }
 
+export interface PublishPlan {
+  release: Release
+  options?: Options
+}
+
 /**
  * Run the publishing process.
  *
@@ -46,7 +51,7 @@ type Release = {
  * 6. git push --tags.
  *
  */
-export async function publish(input: { release: Release; options?: Options }) {
+export async function publish(input: PublishPlan) {
   const release = input.release
   const opts = {
     ...defaultOpts,
@@ -93,12 +98,16 @@ export async function publish(input: { release: Release; options?: Options }) {
   const versionTag = opts.gitTagVPrefix
     ? 'v' + release.version
     : release.version
-  await git.addAnnotatedTag(versionTag, versionTag)
-  console.log(`tagged this commit with ${versionTag}`)
+
+  if (opts.gitTag === 'all' || opts.gitTag === 'just_version') {
+    await git.addAnnotatedTag(versionTag, versionTag)
+    await git.pushTags()
+    console.log(`tagged this commit with ${versionTag}`)
+  }
 
   // Tag the git commit with the given dist tag names
   //
-  if (opts.gitTagForDistTags) {
+  if (opts.gitTag === 'all' || opts.gitTag === 'just_dist_tags') {
     // todo parallel optimize?
     const distTags = [release.distTag, ...(release.additiomalDistTags ?? [])]
     for (const distTag of distTags) {
@@ -111,9 +120,4 @@ export async function publish(input: { release: Release; options?: Options }) {
       console.log('updated git tag %j', distTag)
     }
   }
-
-  // Push the git commits
-  //
-  await git.pushTags()
-  console.log(`pushed tag to remote`)
 }
