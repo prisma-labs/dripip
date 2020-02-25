@@ -39,15 +39,13 @@ it('makes a release for the current commit, updating pr dist tag, and version fo
     title: `${instanceId} treats releases as a pr preview if on branch with open pr`,
   })
   const result: any = await ctx.dripip('pr --json --dry-run')
-  expect(result.data.publishPlan).toMatchInlineSnapshot(`
-Object {
-  "options": Object {
-    "gitTag": "none",
-  },
-  "release": Object {
-    "distTag": "pr.129",
-    "version": "0.0.0-pr.129.7430143",
-  },
-}
-`)
+  expect(result.data.publishPlan).toMatchObject({
+    options: {
+      gitTag: 'none',
+    },
+    release: {
+      distTag: expect.stringMatching(/pr.\d+/),
+      version: expect.stringMatching(/0.0.0-pr.\d+.[a-z0-9]+/),
+    },
+  })
 })
