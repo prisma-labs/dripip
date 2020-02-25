@@ -38,7 +38,7 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
   }
 
   return {
-    runId: parseInt(process.env.GITHUB_RUN_ID, 10),
+    runId: parseInt(process.env.GITHUB_RUN_ID!, 10),
     eventName: process.env
       .GITHUB_EVENT_NAME! as GithubCIEnvironment['eventName'],
     ref: process.env.GITHUB_REF ?? null,
