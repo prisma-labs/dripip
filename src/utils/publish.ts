@@ -67,7 +67,11 @@ export async function publish(input: PublishPlan) {
     // publish` failing due to an authentication error.
     const pacman = await Pacman.create({ defualt: 'npm' })
     await pacman.publish({ version: release.version, tag: release.distTag })
-    console.log('published package to the npm registry')
+    console.log(
+      'published package@%s to the npm registry with dist tag %s',
+      release.version,
+      release.distTag
+    )
 
     // When publishing it is sometimes desirable to update other dist tags to
     // point at the new version. For example "next" should never fall behind stable,
