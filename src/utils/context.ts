@@ -68,6 +68,12 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
 
   const branchesSummary = await git.branch({})
 
+  if (!githubCIEnvironment && branchesSummary.detached) {
+    throw new Error(
+      'Not in a known CI environment and git status is a detached head state. Not enough information to build a release context.'
+    )
+  }
+
   // Get the pr and current branch
   // How this is done various considerably depending on the environment
 
@@ -93,12 +99,6 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
       })
       currentBranchName = prResponse.data.head.ref
     }
-  }
-
-  if (branchesSummary.detached) {
-    throw new Error(
-      'Not in a known CI environment and head is detached. Not enough information to build a release context.'
-    )
   }
 
   if (currentBranchName! === undefined) {
