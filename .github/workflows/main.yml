@@ -1,6 +1,8 @@
 name: main
+
 on:
   - pull_request
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,9 +17,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
       - run: yarn -s test:unit
+
   publish:
     runs-on: ubuntu-latest
     steps:
-      - continue-on-error: false
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
       - run: yarn --frozen-lockfile
       - run: yarn -s dripip pr
