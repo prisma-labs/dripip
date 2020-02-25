@@ -1,3 +1,8 @@
+import { inspect } from 'util'
+
+export function dump(arg: unknown): void {
+  console.error(inspect(arg, { depth: 30 }))
+}
 /**
  * Indent a string that spans multiple lines.
  */

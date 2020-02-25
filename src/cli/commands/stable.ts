@@ -1,6 +1,7 @@
 import Command, { flags } from '@oclif/command'
-import createGit from 'simple-git/promise'
 import * as Context from '../../utils/context'
+import { branchSynced, isTrunk } from '../../utils/context-checkers'
+import { check, enforce as guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import { publish } from '../../utils/publish'
 import * as Rel from '../../utils/release'
@@ -30,28 +31,32 @@ export class Stable extends Command {
   }
   async run() {
     const { flags } = this.parse(Stable)
-    const git = createGit()
-    const show = createShowers({ json: flags.json })
-    const check = createValidators({ json: flags.json })
-    const ctx = await Context.scan({
+
+    const context = await Context.scan({
       overrides: {
         trunk: flags.trunk || null,
       },
     })
 
-    if (!check.isTrunk(ctx)) return
-    if (!check.branchSynced(ctx)) return
-    if (!check.notAlreadyStableReleased(ctx)) return
+    const report = check({ context })
+      .must(isTrunk())
+      .must(branchSynced())
+      .must(notAlreadyStableRelease())
+      .must(haveMeaningfulCommitsInTheSeries())
+      .run()
 
-    const release = Rel.getNextStable(ctx.series)
-
-    if (Rel.isNoReleaseReason(release)) {
-      return show.noReleaseNeeded(ctx, release)
-    }
+    const maybeRelease = Rel.getNextStable(context.series)
 
     if (flags['dry-run']) {
-      return show.dryRun(ctx, release)
+      return Output.outputOk('dry_run', {
+        report,
+        release: maybeRelease,
+        commits: context.series.commitsInNextStable,
+      })
     }
+
+    guard({ context, report, json: flags.json })
+    const release = maybeRelease as Rel.Release // now validated
 
     await publish(
       {
@@ -67,110 +72,30 @@ export class Stable extends Command {
   }
 }
 
-type OutputterOptions = {
-  json: boolean
-}
+//
+// Validators
+//
 
-function createShowers(opts: OutputterOptions) {
-  function noReleaseNeeded(
-    ctx: Context.Context,
-    reason: Rel.NoReleaseReason
-  ): void {
-    if (reason === 'no_meaningful_change') {
-      Output.outputException(
-        'only_chore_like_changes', // todo replace this with reason forward
-        'The release you attempting only contains chore commits which means no release is needed.',
-        {
-          json: opts.json,
-          context: {
-            commits: ctx.series.commitsInNextStable.map(c => c.message),
-          },
-        }
-      )
-    } else if (reason === 'empty_series') {
-      Output.outputException(
-        reason,
-        'There are no commits to release since the last stable.',
-        {
-          json: opts.json,
-          context: {
-            commits: ctx.series.commitsInNextStable.map(c => c.message),
-          },
-        }
-      )
-    }
-  }
-
-  function dryRun(ctx: Context.Context, release: Rel.Release): void {
-    Output.outputOk('dry_run', {
-      ...release,
-      commits: ctx.series.commitsInNextStable,
-    })
-  }
-
+function haveMeaningfulCommitsInTheSeries(): Validator {
   return {
-    noReleaseNeeded,
-    dryRun,
+    code: 'series_only_has_meaningless_commits',
+    summary: 'A stable release must have at least one semantic commit',
+    run(ctx) {
+      const release = Rel.getNextStable(ctx.series)
+      return release !== 'no_meaningful_change'
+      // todo
+      // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
+    },
   }
 }
 
-function createValidators(opts: OutputterOptions) {
-  function branchSynced(ctx: Context.Context): boolean {
-    if (ctx.currentBranch.syncStatus !== 'synced') {
-      Output.outputException(
-        'branch_not_synced_with_remote',
-        'You are attempting a stable release but your trunk (aka. master/base branch) is not synced with the remote.',
-        {
-          json: opts.json,
-          context: {
-            syncStatus: ctx.currentBranch.syncStatus,
-            sha: ctx.series.current.sha,
-          },
-        }
-      )
-      return false
-    }
-    return true
-  }
-  function isTrunk(ctx: Context.Context): boolean {
-    if (!ctx.currentBranch.isTrunk) {
-      Output.outputException(
-        'must_be_on_trunk',
-        'You are attempting a stable release but you are not on trunk (aka. master/base branch)',
-        {
-          json: opts.json,
-          context: {
-            branch: ctx.currentBranch.name,
-            sha: ctx.series.current.sha,
-          },
-        }
-      )
-      return false
-    }
-    return true
-  }
-
-  function notAlreadyStableReleased(ctx: Context.Context): boolean {
-    if (ctx.series.current.releases.stable) {
-      Output.outputException(
-        'commit_already_has_stable_release',
-        'You are attempting a stable release on a commit that already has a stable release.',
-        {
-          json: opts.json,
-          context: {
-            version: ctx.series.current.releases.stable!.version,
-            sha: ctx.series.current.sha,
-          },
-        }
-      )
-      return false
-    }
-    return true
-  }
-
+function notAlreadyStableRelease(): Validator {
   return {
-    branchSynced,
-    isTrunk,
-    notAlreadyStableReleased,
+    code: 'commit_already_has_stable_release',
+    summary:
+      'A stable release requires the commit to have no existing stable release',
+    run(ctx) {
+      return ctx.series.current.releases.stable === null
+    },
   }
 }
