@@ -694,7 +694,7 @@ it('pre-releases increment from previous pre-release build number', async () => 
   `)
 })
 
-describe.only('preflight checks', () => {
+describe('preflight checks', () => {
   it('must be on trunk', async () => {
     await ctx.git.checkoutLocalBranch('feat/foo')
     const result: any = await ctx.dripip('preview --dry-run')
