@@ -37,6 +37,7 @@
   "dependencies": {
     "@oclif/command": "^1.5.19",
     "@oclif/config": "^1.13.3",
+    "@oclif/errors": "^1.2.2",
     "@oclif/plugin-help": "^2.2.1",
     "@octokit/rest": "^17.0.0",
     "@types/parse-git-config": "^3.0.0",

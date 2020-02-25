@@ -1,5 +1,4 @@
 import Command, { flags } from '@oclif/command'
-import createGit from 'simple-git/promise'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
 import { isTrunk } from '../../utils/context-checkers'
@@ -10,11 +9,6 @@ import * as Rel from '../../utils/release'
 
 export class Preview extends Command {
   static flags = {
-    trunk: flags.string({
-      default: '',
-      description:
-        'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
-    }),
     ['build-num']: flags.integer({
       description:
         'Force a build number. Should not be needed generally. For exceptional cases.',
@@ -39,25 +33,8 @@ export class Preview extends Command {
 
   async run() {
     const { flags } = this.parse(Preview)
-    const git = createGit()
-    // TODO validate for missing or faulty package.json
-    // TODO validate for dirty git status
-    // TODO validate for found releases that fall outside the subset we support.
-    // For example #.#.#-foobar.1 is something we would not know what to do
-    // with. A good default is probably to hard-error when these are
-    // encountered. But offer a flag/config option called e.g. "ignore_unsupport_pre_release_identifiers"
-    // TODO handle edge case: not a git repo
-    // TODO handle edge case: a git repo with no commits
-    // TODO nicer tag rendering:
-    //    1. for annotated tags should the messge
-    //    2. show the tag author name
-    //    3. show the the date the tag was made
 
-    const context = await Context.scan({
-      overrides: {
-        trunk: flags.trunk || null,
-      },
-    })
+    const context = await Context.scan({})
 
     const report = check({ context })
       .must(isTrunk())
@@ -75,6 +52,24 @@ export class Preview extends Command {
       )
     }
 
+    guard({ report, context: context, json: flags.json })
+    // const release = maybeRelease as Rel.Release // now validated
+
+    const version = {
+      major: 0,
+      minor: 0,
+      patch: 0,
+      version: `0.0.0-pr.${
+        context.currentBranch.prs.open!.number
+      }.${context.series.current.sha.slice(0, 7)}`,
+      vprefix: false,
+      preRelease: {
+        identifier: 'pr',
+        prNum: context.currentBranch.prs.open!.number,
+        shortSha: context.series.current.sha.slice(0, 7),
+      },
+    } as Semver.PullRequestVer
+
     if (flags['dry-run']) {
       return Output.outputOk('dry_run', {
         report: report,
@@ -83,17 +78,14 @@ export class Preview extends Command {
       })
     }
 
-    guard({ report, context, json: flags.json })
-    const release = maybeRelease as Rel.Release // now validated
-
     await Publish.publish(
       {
-        distTag: 'next',
-        version: release.version.version,
+        distTag: `pr.${context.currentBranch.prs.open!.number}`,
+        version: version.version,
       },
       {
         skipNPM: flags['skip-npm'],
-        gitTagForDistTags: true,
+        gitTagForDistTags: false,
       }
     )
   }
@@ -153,3 +145,16 @@ function notAlreadyStableOrPreviewReleased(): Validator {
     },
   }
 }
+
+// /**
+//  * Output that current conditions do not permit a preview release.
+//  */
+// function invalidBranchForPreRelease(): void {
+//   Output.output(
+//     Output.createException('invalid_branch_for_pre_release', {
+//       summary:
+//         'Preview releases are only supported on trunk (master) branch or branches with _open_ pull-requests. If you want to make a preview release for this branch then open a pull-request for it.',
+//     }),
+//     { json: opts.json }
+//   )
+// }

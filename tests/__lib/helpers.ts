@@ -94,7 +94,16 @@ export type RunDripipResult = Omit<proc.SuccessfulRunResult, 'command'> & {
 }
 
 type DripipRunnerOptions = proc.RunOptions & {
+  /**
+   * Return the raw proc result
+   *
+   * @default false
+   */
   raw?: boolean
+  /**
+   * Work with stderr instead of stdout.
+   */
+  error?: boolean
 }
 
 function createDripipRunString(pathToProject: string) {
@@ -102,21 +111,15 @@ function createDripipRunString(pathToProject: string) {
 }
 
 function createDripipRunner(cwd: string, pathToProject: string) {
-  return (
-    command: string,
-    optsLocal?: DripipRunnerOptions
-  ): Promise<Record<string, any> | RunDripipResult> => {
-    const opts = {
-      ...optsLocal,
-      cwd,
-    }
+  // prettier-ignore
+  return (command: string, optsLocal?: DripipRunnerOptions): Promise<Record<string, any> | RunDripipResult> => {
+    const opts:any = { ...optsLocal, cwd }
 
     //@ts-ignore
-    const runString = `${createDripipRunString(
-      pathToProject
-    )} ${command} --json`
+    // prettier-ignore
+    const runString = `${createDripipRunString(pathToProject)} ${command} --json`
     return proc.run(runString, opts).then(result => {
-      if ((opts as any).raw === true) {
+      if (opts.raw === true) {
         // TODO remove given new json parse approach?
         delete result.command
         // TODO not used/helpful...?
@@ -124,16 +127,19 @@ function createDripipRunner(cwd: string, pathToProject: string) {
         return result as RunDripipResult // force TS to ignore the stderr: null possibility
       }
 
-      // Avoid silent confusion
-      if (result.stderr) {
-        console.log(
-          `WARNING dripip command sent output to stderr:\n\n${result.stderr}`
-        )
-      }
+      // // Avoid silent confusion
+      // if (result.stderr) {
+      //   console.log(
+      //     `WARNING dripip command sent output to stderr:\n\n${result.stderr}`
+      //   )
+      // }
+
+      const content = opts.error === true ? result.stderr ?? '' : result.stdout ?? ''
+      const contentSanitized = content.replace(/"sha": *"[^"]+"/g, '"sha": "__dynamic_content__"')
 
       try {
         // TODO typed response...
-        return JSON.parse(result.stdout!) as Record<string, any>
+        return JSON.parse(contentSanitized) as Record<string, any>
       } catch (e) {
         throw new Error(
           `Something went wrong while trying to JSON parse the dripip cli stdout:\n\n${

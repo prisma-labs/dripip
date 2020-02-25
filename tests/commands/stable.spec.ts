@@ -13,20 +13,27 @@ async function setupPackageJson() {
 describe('preflight requirements include that', () => {
   it('the branch is trunk', async () => {
     await ctx.git.checkoutLocalBranch('foobar')
-    const result: any = await ctx.dripip('stable')
-    result.data.context.sha = '__sha__'
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {
-            "branch": "foobar",
-            "sha": "__sha__",
-          },
-          "summary": "You are attempting a stable release but you are not on trunk (aka. master/base branch)",
+    const result: any = await ctx.dripip('stable', { error: true })
+    expect(result.failures).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "must_be_on_trunk",
+          "details": Object {},
+          "summary": "You must be on the trunk branch",
         },
-        "kind": "exception",
-        "type": "must_be_on_trunk",
-      }
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {
+            "syncStatus": "remote_needs_branch",
+          },
+          "summary": "Your branch must be synced with the remote",
+        },
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ]
     `)
   })
 
@@ -35,40 +42,44 @@ describe('preflight requirements include that', () => {
   // race-condition PR merges.
   it('the branch is synced with remote (needs push)', async () => {
     await gitCreateEmptyCommit(ctx.git, 'some work')
-    const result: any = await ctx.dripip('stable')
-    result.data.context.sha = '__sha__'
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {
-            "sha": "__sha__",
+    const result: any = await ctx.dripip('stable', { error: true })
+    expect(result.failures).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {
             "syncStatus": "needs_push",
           },
-          "summary": "You are attempting a stable release but your trunk (aka. master/base branch) is not synced with the remote.",
+          "summary": "Your branch must be synced with the remote",
         },
-        "kind": "exception",
-        "type": "branch_not_synced_with_remote",
-      }
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ]
     `)
   })
 
   it('the branch is synced with remote (needs pull)', async () => {
     await ctx.git.raw(['reset', '--hard', 'head~2']) // package.json + something on remote
     await setupPackageJson()
-    const result: any = await ctx.dripip('stable')
-    result.data.context.sha = '__sha__'
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {
-            "sha": "__sha__",
+    const result: any = await ctx.dripip('stable', { error: true })
+    expect(result.failures).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {
             "syncStatus": "needs_pull",
           },
-          "summary": "You are attempting a stable release but your trunk (aka. master/base branch) is not synced with the remote.",
+          "summary": "Your branch must be synced with the remote",
         },
-        "kind": "exception",
-        "type": "branch_not_synced_with_remote",
-      }
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ]
     `)
   })
 
@@ -76,20 +87,22 @@ describe('preflight requirements include that', () => {
     await ctx.git.raw(['reset', '--hard', 'head~2']) // remove package.json + something on remote
     await setupPackageJson()
     await gitCreateEmptyCommit(ctx.git, 'some work')
-    const result: any = await ctx.dripip('stable')
-    result.data.context.sha = '__sha__'
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {
-            "sha": "__sha__",
+    const result: any = await ctx.dripip('stable', { error: true })
+    expect(result.failures).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {
             "syncStatus": "diverged",
           },
-          "summary": "You are attempting a stable release but your trunk (aka. master/base branch) is not synced with the remote.",
+          "summary": "Your branch must be synced with the remote",
         },
-        "kind": "exception",
-        "type": "branch_not_synced_with_remote",
-      }
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ]
     `)
   })
 
@@ -97,20 +110,15 @@ describe('preflight requirements include that', () => {
     await ctx.git.raw(['reset', '--hard', 'head~1']) // package.json
     await setupPackageJson()
     await ctx.git.addTag('1.0.0')
-    const result: any = await ctx.dripip('stable')
-    result.data.context.sha = '__sha__'
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "context": Object {
-            "sha": "__sha__",
-            "version": "1.0.0",
-          },
-          "summary": "You are attempting a stable release on a commit that already has a stable release.",
+    const result: any = await ctx.dripip('stable', { error: true })
+    expect(result.failures).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "commit_already_has_stable_release",
+          "details": Object {},
+          "summary": "A stable release requires the commit to have no existing stable release",
         },
-        "kind": "exception",
-        "type": "commit_already_has_stable_release",
-      }
+      ]
     `)
   })
 })
@@ -137,9 +145,9 @@ describe('increments upon the previous stable release based on conventional comm
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
-          "context": Object {
-            "commits": Array [
-              Object {
+          "commits": Array [
+            Object {
+              "message": Object {
                 "parsed": Object {
                   "body": null,
                   "breakingChange": null,
@@ -152,7 +160,15 @@ describe('increments upon the previous stable release based on conventional comm
                 },
                 "raw": "chore: 2",
               },
-              Object {
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__dynamic_content__",
+            },
+            Object {
+              "message": Object {
                 "parsed": Object {
                   "body": null,
                   "breakingChange": null,
@@ -165,12 +181,45 @@ describe('increments upon the previous stable release based on conventional comm
                 },
                 "raw": "chore: 1",
               },
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__dynamic_content__",
+            },
+          ],
+          "release": "no_meaningful_change",
+          "report": Object {
+            "mustFailures": Array [
+              Object {
+                "code": "series_only_has_meaningless_commits",
+                "details": Object {},
+                "summary": "A stable release must have at least one semantic commit",
+              },
             ],
+            "passes": Array [
+              Object {
+                "code": "must_be_on_trunk",
+                "details": Object {},
+                "summary": "You must be on the trunk branch",
+              },
+              Object {
+                "code": "branch_not_synced_with_remote",
+                "details": Object {},
+                "summary": "Your branch must be synced with the remote",
+              },
+              Object {
+                "code": "commit_already_has_stable_release",
+                "details": Object {},
+                "summary": "A stable release requires the commit to have no existing stable release",
+              },
+            ],
+            "preferFailures": Array [],
           },
-          "summary": "The release you attempting only contains chore commits which means no release is needed.",
         },
-        "kind": "exception",
-        "type": "only_chore_like_changes",
+        "kind": "ok",
+        "type": "dry_run",
       }
     `)
   })
@@ -187,7 +236,6 @@ describe('increments upon the previous stable release based on conventional comm
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
-          "bumpType": "patch",
           "commits": Array [
             Object {
               "message": Object {
@@ -232,12 +280,41 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "version": Object {
-            "major": 0,
-            "minor": 1,
-            "patch": 1,
-            "version": "0.1.1",
-            "vprefix": false,
+          "release": Object {
+            "bumpType": "patch",
+            "version": Object {
+              "major": 0,
+              "minor": 1,
+              "patch": 1,
+              "version": "0.1.1",
+              "vprefix": false,
+            },
+          },
+          "report": Object {
+            "mustFailures": Array [],
+            "passes": Array [
+              Object {
+                "code": "must_be_on_trunk",
+                "details": Object {},
+                "summary": "You must be on the trunk branch",
+              },
+              Object {
+                "code": "branch_not_synced_with_remote",
+                "details": Object {},
+                "summary": "Your branch must be synced with the remote",
+              },
+              Object {
+                "code": "commit_already_has_stable_release",
+                "details": Object {},
+                "summary": "A stable release requires the commit to have no existing stable release",
+              },
+              Object {
+                "code": "series_only_has_meaningless_commits",
+                "details": Object {},
+                "summary": "A stable release must have at least one semantic commit",
+              },
+            ],
+            "preferFailures": Array [],
           },
         },
         "kind": "ok",
@@ -259,7 +336,6 @@ describe('increments upon the previous stable release based on conventional comm
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {
-          "bumpType": "minor",
           "commits": Array [
             Object {
               "message": Object {
@@ -400,12 +476,41 @@ describe('increments upon the previous stable release based on conventional comm
               "sha": "__sha__",
             },
           ],
-          "version": Object {
-            "major": 0,
-            "minor": 1,
-            "patch": 0,
-            "version": "0.1.0",
-            "vprefix": false,
+          "release": Object {
+            "bumpType": "minor",
+            "version": Object {
+              "major": 0,
+              "minor": 1,
+              "patch": 0,
+              "version": "0.1.0",
+              "vprefix": false,
+            },
+          },
+          "report": Object {
+            "mustFailures": Array [],
+            "passes": Array [
+              Object {
+                "code": "must_be_on_trunk",
+                "details": Object {},
+                "summary": "You must be on the trunk branch",
+              },
+              Object {
+                "code": "branch_not_synced_with_remote",
+                "details": Object {},
+                "summary": "Your branch must be synced with the remote",
+              },
+              Object {
+                "code": "commit_already_has_stable_release",
+                "details": Object {},
+                "summary": "A stable release requires the commit to have no existing stable release",
+              },
+              Object {
+                "code": "series_only_has_meaningless_commits",
+                "details": Object {},
+                "summary": "A stable release must have at least one semantic commit",
+              },
+            ],
+            "preferFailures": Array [],
           },
         },
         "kind": "ok",
