@@ -46,10 +46,11 @@ type Release = {
  * 6. git push --tags.
  *
  */
-export async function publish(release: Release, givenOpts?: Options) {
+export async function publish(input: { release: Release; options?: Options }) {
+  const release = input.release
   const opts = {
     ...defaultOpts,
-    ...givenOpts,
+    ...input.options,
   }
 
   if (!opts.skipNPM) {

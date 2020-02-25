@@ -1,9 +1,8 @@
 import Command, { flags } from '@oclif/command'
-import createGit from 'simple-git/promise'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
 import { isTrunk } from '../../utils/context-checkers'
-import { check, enforce, Validator } from '../../utils/contrext-guard'
+import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
 import * as Rel from '../../utils/release'
@@ -39,7 +38,6 @@ export class Preview extends Command {
 
   async run() {
     const { flags } = this.parse(Preview)
-    const git = createGit()
     // TODO validate for missing or faulty package.json
     // TODO validate for dirty git status
     // TODO validate for found releases that fall outside the subset we support.
@@ -83,19 +81,19 @@ export class Preview extends Command {
       })
     }
 
-    enforce({ report, context, json: flags.json })
+    guard({ report, context, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
-    await Publish.publish(
-      {
+    await Publish.publish({
+      release: {
         distTag: 'next',
         version: release.version.version,
       },
-      {
+      options: {
         skipNPM: flags['skip-npm'],
         gitTagForDistTags: true,
-      }
-    )
+      },
+    })
   }
 }
 

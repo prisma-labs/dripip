@@ -87,7 +87,7 @@ interface EnforceInput {
 /**
  *
  */
-export function enforce(input: EnforceInput): void {
+export function guard(input: EnforceInput): void {
   if (input.json) {
     // todo how to report warnings in json mode?
 
