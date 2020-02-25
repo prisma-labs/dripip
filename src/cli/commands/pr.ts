@@ -1,4 +1,5 @@
 import Command, { flags } from '@oclif/command'
+import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
 import { check, guard, Validator } from '../../utils/contrext-guard'
@@ -75,6 +76,7 @@ export class Preview extends Command {
       })
     }
 
+    setupNPMAuthfileOnCI()
     await Publish.publish(publishPlan)
   }
 }

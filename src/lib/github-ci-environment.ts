@@ -1,3 +1,7 @@
+export function isGithubCIEnvironment() {
+  return process.env.GITHUB_RUN_ID !== undefined
+}
+
 export interface GithubCIEnvironment {
   runId: number
   eventName: 'pull_request'
@@ -21,7 +25,7 @@ export interface GithubCIEnvironment {
  * Github docs: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
  */
 export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
-  if (process.env.GITHUB_RUN_ID === undefined) return null
+  if (!isGithubCIEnvironment()) return null
 
   const repoPath = process.env.GITHUB_REPOSITORY!.split('/')
 

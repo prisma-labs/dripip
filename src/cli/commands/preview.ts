@@ -1,4 +1,5 @@
 import Command, { flags } from '@oclif/command'
+import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
 import { isTrunk } from '../../utils/context-checkers'
@@ -83,6 +84,7 @@ export class Preview extends Command {
     guard({ report, context, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
+    setupNPMAuthfileOnCI()
     await Publish.publish({
       release: {
         distTag: 'next',

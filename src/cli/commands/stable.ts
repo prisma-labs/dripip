@@ -1,4 +1,5 @@
 import Command, { flags } from '@oclif/command'
+import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Context from '../../utils/context'
 import { branchSynced, isTrunk } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
@@ -57,6 +58,7 @@ export class Stable extends Command {
     guard({ context, report, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
+    setupNPMAuthfileOnCI()
     await publish({
       release: {
         version: release.version.version,

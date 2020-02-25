@@ -155,7 +155,7 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
   }
 
   return {
-    series,
+    series: series,
     package: {
       name: packageJson.name,
     },
