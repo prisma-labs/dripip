@@ -245,14 +245,18 @@ export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
     : 'diverged'
 }
 
+export interface BasicGithubRepoInfo {
+  name: string
+  owner: string
+}
+
 /**
  * Extract the github repo name and owner from the git config. If anything goes
  * wrong during extraction a specific error about it will be thrown.
  */
-export async function parseGithubRepoInfoFromGitConfig(): Promise<{
-  name: string
-  owner: string
-}> {
+export async function parseGithubRepoInfoFromGitConfig(): Promise<
+  BasicGithubRepoInfo
+> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 

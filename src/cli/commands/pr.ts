@@ -48,11 +48,11 @@ export class Preview extends Command {
       minor: 0,
       patch: 0,
       // prettier-ignore
-      version: `0.0.0-pr.${context.currentBranch.prs.open!.number}.${context.series.current.sha.slice(0, 7)}`,
+      version: `0.0.0-pr.${context.currentBranch.pr!.number}.${context.series.current.sha.slice(0, 7)}`,
       vprefix: false,
       preRelease: {
         identifier: 'pr',
-        prNum: context.currentBranch.prs.open!.number,
+        prNum: context.currentBranch.pr!.number,
         shortSha: context.series.current.sha.slice(0, 7),
       },
     } as Semver.PullRequestVer
@@ -60,7 +60,7 @@ export class Preview extends Command {
     // todo show publish plan in dryrun for other commands too
     const publishPlan: Publish.PublishPlan = {
       release: {
-        distTag: `pr.${context.currentBranch.prs.open!.number}`,
+        distTag: `pr.${context.currentBranch.pr!.number}`,
         version: version.version,
       },
       options: {
@@ -89,7 +89,7 @@ function branchHasOpenPR(): Validator {
     summary:
       'Pull-Request releases are only supported on branches with _open_ pull-requests',
     run(ctx) {
-      return ctx.currentBranch.prs.open !== null
+      return ctx.currentBranch.pr !== null
     },
   }
 }
