@@ -18,6 +18,7 @@
   "scripts": {
     "release:stable": "node dist/cli/main stable",
     "release:preview": "node dist/cli/main preview",
+    "release:pr": "node dist/cli/main pr",
     "format": "prettier --write '*/**/*.ts'",
     "dripip": "ts-node src/cli/main",
     "clean": "rm -rf dist oclif.manifest.json",
