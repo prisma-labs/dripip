@@ -58,17 +58,17 @@ export class Stable extends Command {
     guard({ context, report, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
-    await publish(
-      {
+    await publish({
+      release: {
         version: release.version.version,
         distTag: 'latest',
         additiomalDistTags: ['next'],
       },
-      {
+      options: {
         skipNPM: flags['skip-npm'],
         gitTagForDistTags: true,
-      }
-    )
+      },
+    })
   }
 }
 
