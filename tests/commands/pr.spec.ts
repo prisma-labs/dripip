@@ -1,3 +1,7 @@
+import { gitCreateEmptyCommit } from '../../src/lib/git'
+
+const ctx = createContext('pr')
+
 describe('pr preview releases', () => {
   let instanceId: string
   let branchName: string
@@ -27,7 +31,9 @@ describe('pr preview releases', () => {
     } catch (e) {
       console.log(e)
     }
-    const result = await ctx.dripip('preview --show-type')
+
+    const result = await ctx.dripip('pr')
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Object {

@@ -24,7 +24,6 @@ export class Preview extends Command {
       description: 'output what the next version would be if released now',
       char: 'd',
     }),
-    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',

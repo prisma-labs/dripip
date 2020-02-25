@@ -17,11 +17,11 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createContext(command: 'preview' | 'stable') {
+export function createContext(name: string) {
   const ws = addOctokitToworkspace(
     addDripipToWorkspace(
       WS.createWorkspace({
-        name: command,
+        name: name,
         repo: 'git@github.com:prisma-labs/dripip-system-tests.git',
         cache: {
           version: '8',

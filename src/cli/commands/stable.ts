@@ -23,7 +23,6 @@ export class Stable extends Command {
       description: 'format output as JSON',
       char: 'j',
     }),
-    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',
