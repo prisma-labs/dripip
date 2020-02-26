@@ -8,9 +8,9 @@ export class PreviewOrPR extends Command {
     const context = await Context.scan()
 
     if (context.currentBranch.pr) {
-      PR.run(process.argv.slice(3))
+      await PR.run(process.argv.slice(3))
     } else {
-      Preview.run(process.argv.slice(3))
+      await Preview.run(process.argv.slice(3))
     }
   }
 }
