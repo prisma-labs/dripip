@@ -17,12 +17,17 @@ type Options = {
    * Should each given dist tag have a corresponding git tag made?
    */
   gitTag?: 'all' | 'just_version' | 'just_dist_tags' | 'none'
+  /**
+   * Should the publishing process be logged as it progressive?
+   */
+  showProgress?: boolean
 }
 
 const defaultOpts: Options = {
   gitTagVPrefix: false,
   skipNPM: false,
   gitTag: 'all',
+  showProgress: true,
 }
 
 type Release = {
@@ -69,11 +74,13 @@ export async function publish(input: PublishPlan) {
     // publish` failing due to an authentication error.
     const pacman = await Pacman.create({ defualt: 'npm' })
     await pacman.publish({ version: release.version, tag: release.distTag })
-    console.log(
-      'published package@%s to the npm registry with dist tag %s',
-      release.version,
-      release.distTag
-    )
+    if (opts.showProgress) {
+      console.log(
+        'published package@%s to the npm registry with dist tag %s',
+        release.version,
+        release.distTag
+      )
+    }
 
     // When publishing it is sometimes desirable to update other dist tags to
     // point at the new version. For example "next" should never fall behind stable,
@@ -83,7 +90,9 @@ export async function publish(input: PublishPlan) {
     if (release.additiomalDistTags) {
       for (const distTag of release.additiomalDistTags) {
         await pacman.tag({ packageVersion: release.version, tagName: distTag })
-        console.log(`updated dist-tag "${distTag}" to point at this version`)
+        if (opts.showProgress) {
+          console.log(`updated dist-tag "${distTag}" to point at this version`)
+        }
       }
     }
   }
@@ -98,7 +107,9 @@ export async function publish(input: PublishPlan) {
   const git = createGit()
   await setupGitUsernameAndEmailOnCI(git)
   await git.checkout('package.json')
-  console.log('reverted package.json changes now that publishing is done')
+  if (opts.showProgress) {
+    console.log('reverted package.json changes now that publishing is done')
+  }
 
   // Tag the git commit
   //
@@ -109,7 +120,9 @@ export async function publish(input: PublishPlan) {
   if (opts.gitTag === 'all' || opts.gitTag === 'just_version') {
     await git.addAnnotatedTag(versionTag, versionTag)
     await git.pushTags()
-    console.log(`tagged this commit with ${versionTag}`)
+    if (opts.showProgress) {
+      console.log(`tagged this commit with ${versionTag}`)
+    }
   }
 
   // Tag the git commit with the given dist tag names
@@ -124,7 +137,9 @@ export async function publish(input: PublishPlan) {
       // todo provide nice semantic descriptions for each dist tag
       await git.raw(['tag', '--force', '--message', distTag, distTag])
       await git.raw(['push', '--force', '--tags'])
-      console.log('updated git tag %j', distTag)
+      if (opts.showProgress) {
+        console.log('updated git tag %j', distTag)
+      }
     }
   }
 }

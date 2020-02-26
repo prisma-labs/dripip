@@ -80,6 +80,7 @@ export class PR extends Command {
       },
       options: {
         gitTag: 'none',
+        showProgress: !flags.json,
       },
     }
 
@@ -91,7 +92,12 @@ export class PR extends Command {
     }
 
     setupNPMAuthfileOnCI()
+
     await Publish.publish(publishPlan)
+
+    if (flags.json) {
+      Output.outputJson(publishPlan.release)
+    }
   }
 }
 
