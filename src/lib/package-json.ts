@@ -19,6 +19,16 @@ type PackageJson = {
   version: string
 }
 
+export async function getPackageJson(): Promise<PackageJson> {
+  const pj = await read(process.cwd())
+
+  if (!pj) {
+    throw new Error('Could not find pacakge.json')
+  }
+
+  return pj
+}
+
 /**
  * Read the package.json file.
  */

@@ -1,7 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Semver from '../../lib/semver'
-import * as Context from '../../utils/context'
+import { getContext } from '../../utils/context'
 import { isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
@@ -51,7 +51,7 @@ export class Preview extends Command {
     //    2. show the tag author name
     //    3. show the the date the tag was made
 
-    const context = await Context.scan({
+    const context = await getContext({
       overrides: {
         trunk: flags.trunk || null,
       },

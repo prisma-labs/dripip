@@ -55,11 +55,28 @@ async function getLog(): Promise<SeriesLog> {
   return [previousStableCommit, commits]
 }
 
+/**
+ * Get the current commit.
+ */
+export async function getCurrentCommit(): Promise<Commit> {
+  let currLog: undefined | Git.LogEntry
+  for await (const log of Git.streamLog()) {
+    currLog = log
+    break
+  }
+
+  if (!currLog) {
+    throw new Error('There are no commits in this repo')
+  }
+
+  return logEntryToCommit(currLog)
+}
+
 // todo non-conforming aka. non-conventional commits
 type CommitBase = {
   message: {
     raw: string
-    parsed: ConventionalCommit.ConventionalCommit
+    parsed: null | ConventionalCommit.ConventionalCommit
   }
   sha: string
   nonReleaseTags: string[]
@@ -111,6 +128,29 @@ export type Series = {
 }
 
 export type SeriesLog = [null | Git.LogEntry, Git.LogEntry[]]
+
+/**
+ * Transform a log entry into a commit.
+ */
+function logEntryToCommit(log: Git.LogEntry): Commit {
+  const parsedMessage = ConventionalCommit.parse(log.message)
+  const previewTag = log.tags.find(isPreviewTag) ?? null
+  const stableTag = log.tags.find(isStableTag) ?? null
+  const otherTags = log.tags.filter(isUnknownTag)
+
+  return {
+    sha: log.sha,
+    message: {
+      parsed: parsedMessage,
+      raw: log.message,
+    },
+    releases: {
+      stable: stableTag ? Semver.parse(stableTag) : null,
+      preview: previewTag ? Semver.parsePreview(previewTag) : null,
+    },
+    nonReleaseTags: otherTags,
+  }
+}
 
 /**
  * Build structured series data from a raw series log.

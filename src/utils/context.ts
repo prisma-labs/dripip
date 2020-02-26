@@ -5,17 +5,20 @@ import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import * as Rel from './release'
 
-export interface scanOoptions {
+export interface PullRequestContext {
+  number: number
+}
+
+export interface Options {
   overrides?: {
     trunk?: null | string
   }
 }
 
-export interface Context {
+export interface LocationContext {
   package: {
     name: string
   }
-  series: Rel.Series
   // nextReleasesNowWouldBe: {
   //   stable: null | SemVer.SemVer
   //   preview: null | SemVer.SemVer
@@ -29,30 +32,47 @@ export interface Context {
     name: string
     isTrunk: boolean
     syncStatus: Git.SyncStatus
-    pr: null | {
-      number: number
-    }
+    pr: null | PullRequestContext
   }
 }
 
-export async function scan(opts?: scanOoptions): Promise<Context> {
-  const githubCIEnvironment = parseGithubCIEnvironment()
+export interface Context extends LocationContext {
+  series: Rel.Series
+}
 
-  // Build up instances
+export async function getContext(opts?: Options): Promise<Context> {
+  const git = createGit()
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })
+  const locationContext = await getLocationContext({ git, octokit, opts })
+  const series = await Rel.getCurrentSeries(git)
 
-  const git = createGit()
+  return { series, ...locationContext }
+}
 
-  // Generally required information
+/**
+ * Get location-oriented contextual information. Does not consider the release
+ * series but things like current branch, repo, pr etc.
+ */
+export async function getLocationContext({
+  git,
+  octokit,
+  opts,
+}: {
+  git: Git.Simple
+  octokit: any
+  opts?: Options
+}): Promise<LocationContext> {
+  const githubCIEnvironment = parseGithubCIEnvironment()
+
+  // Get repo info
 
   const repoInfo =
     githubCIEnvironment?.parsed.repo ??
     (await Git.parseGithubRepoInfoFromGitConfig())
 
-  // Get the trunk branch either from a given override or by default from the
-  // GitHub repo settings.
+  // Get which branch is trunk, overridable
 
   let trunkBranch: string
 
@@ -66,51 +86,36 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
     trunkBranch = githubRepo.data.default_branch
   }
 
+  // Get the branch
+
   const branchesSummary = await git.branch({})
 
-  if (!githubCIEnvironment && branchesSummary.detached) {
-    throw new Error(
-      'Not in a known CI environment and git status is a detached head state. Not enough information to build a release context.'
-    )
-  }
+  let currentBranchName: undefined | string
 
-  // Get the pr and current branch
-  // How this is done various considerably depending on the environment
-
-  let pr: Context['currentBranch']['pr'] = null
-  let currentBranchName: string
-
-  if (githubCIEnvironment) {
-    if (githubCIEnvironment.parsed.prNum) {
-      pr = {
-        number: githubCIEnvironment.parsed.prNum,
-      }
-    }
-    if (
-      githubCIEnvironment.parsed.prNum &&
-      branchesSummary.detached &&
-      githubCIEnvironment.eventName === 'pull_request'
-    ) {
-      // Try to get branch info from the Github API
-      const prResponse = await octokit.pulls.get({
-        owner: repoInfo.owner,
-        repo: repoInfo.name,
-        pull_number: githubCIEnvironment.parsed.prNum,
-      })
-      currentBranchName = prResponse.data.head.ref
-    }
-  }
-
-  if (currentBranchName! === undefined) {
+  if (!branchesSummary.detached) {
     currentBranchName = branchesSummary.current
+  } else if (githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
+    currentBranchName = githubCIEnvironment.parsed.branchName
   }
 
-  if (!pr) {
+  if (!currentBranchName) {
+    throw new Error('Could not get current branch name')
+  }
+
+  // Get the pr
+
+  let pr: LocationContext['currentBranch']['pr'] = null
+
+  if (githubCIEnvironment && githubCIEnvironment.parsed.prNum) {
+    pr = {
+      number: githubCIEnvironment.parsed.prNum,
+    }
+  } else {
     const maybePR = (
       await octokit.pulls.list({
         owner: repoInfo.owner,
         repo: repoInfo.name,
-        head: `${repoInfo.owner}:${branchesSummary.current}`,
+        head: `${repoInfo.owner}:${currentBranchName}`,
         state: 'open',
       })
     ).data[0]
@@ -122,40 +127,15 @@ export async function scan(opts?: scanOoptions): Promise<Context> {
     }
   }
 
-  // // Github only permits one open PR per branch name. If there is an open one
-  // // then we can discard any others as inconsequential. If none are open, and
-  // // there are multiple, we should not discard them, as they may be of interest
-  // // to the user to debug an exception, e.g. attempting a pr release without a
-  // // pr open: then we can say "Hey, you have no pr open, but oddly we did find
-  // // these past PRs...?"
-  // const prsByState: Context['currentBranch']['prs'] = {
-  //   open: null,
-  //   closed: [],
-  // }
-  // for (const pr of prs) {
-  //   if (pr.state === 'open') {
-  //     prsByState.open = { number: pr.number, title: pr.title }
-  //   } else {
-  //     prsByState.closed.push({ number: pr.number, title: pr.title })
-  //   }
-  // }
-
   // get the branch sync status
+
   const syncStatus = await Git.checkSyncStatus(git)
 
-  // get the latest releases and commits since
-  const series = await Rel.getCurrentSeries(git)
-
   // get package info
-  const packageJson = await PackageJson.read(process.cwd())
 
-  if (packageJson === undefined) {
-    // todo exception system
-    throw new Error('could not find a package.json')
-  }
+  const packageJson = await PackageJson.getPackageJson()
 
   return {
-    series: series,
     package: {
       name: packageJson.name,
     },

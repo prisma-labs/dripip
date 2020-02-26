@@ -1,6 +1,6 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
-import * as Context from '../../utils/context'
+import { getContext } from '../../utils/context'
 import {
   branchSynced,
   isTrunk,
@@ -36,7 +36,7 @@ export class Stable extends Command {
   async run() {
     const { flags } = this.parse(Stable)
 
-    const context = await Context.scan({
+    const context = await getContext({
       overrides: {
         trunk: flags.trunk || null,
       },

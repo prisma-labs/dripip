@@ -1,7 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import { inspect } from 'util'
 import * as ChangeLog from '../../lib/changelog'
-import * as Context from '../../utils/context'
+import { getContext } from '../../utils/context'
 
 export class Log extends Command {
   static flags = {
@@ -18,7 +18,7 @@ export class Log extends Command {
   }
   async run() {
     const { flags } = this.parse(Log)
-    const ctx = await Context.scan()
+    const ctx = await getContext()
 
     if (flags.json) {
       this.log(inspect(ctx.series, { depth: 20 }))
