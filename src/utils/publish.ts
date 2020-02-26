@@ -131,7 +131,7 @@ export async function publish(input: PublishPlan) {
 
 // todo turn this into a check
 async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
-  if (isGithubCIEnvironment()) return
+  if (!isGithubCIEnvironment()) return
 
   const [email, name] = await Promise.all([
     git.raw(['config', '--get', 'user.email']),
