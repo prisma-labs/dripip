@@ -7,7 +7,6 @@ import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
 import * as Rel from '../../utils/release'
-import * as PRCommand from './pr'
 
 export class Preview extends Command {
   static flags = {
@@ -25,11 +24,6 @@ export class Preview extends Command {
       default: false,
       description: 'output what the next version would be if released now',
       char: 'd',
-    }),
-    'no-pull-request-releases': flags.boolean({
-      default: false,
-      description: 'Do not allow pull-request releases to be made',
-      char: 'p',
     }),
     'skip-npm': flags.boolean({
       default: false,
@@ -62,11 +56,6 @@ export class Preview extends Command {
         trunk: flags.trunk || null,
       },
     })
-
-    if (context.currentBranch.pr && !flags['no-pull-request-releases']) {
-      await PRCommand.PR.run(process.argv.slice(3))
-      return
-    }
 
     const report = check({ context })
       .must(npmAuthSetup())
