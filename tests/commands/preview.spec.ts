@@ -44,7 +44,7 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -72,7 +72,7 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -147,7 +147,7 @@ it('if no stable release exists then pre-releases with just patch-affecting comm
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -175,7 +175,7 @@ it('if no stable release exists then pre-releases with just patch-affecting comm
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -250,7 +250,7 @@ it('if no stable release exists then pre-releases with at least one minor-affect
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -278,7 +278,7 @@ it('if no stable release exists then pre-releases with at least one minor-affect
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -367,7 +367,7 @@ it('if patch-affecting and minor-affecting commits in release bump type is minor
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -395,7 +395,7 @@ it('if patch-affecting and minor-affecting commits in release bump type is minor
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -504,7 +504,7 @@ it('if patch-affecting and minor-affecting and breaking change commits in releas
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -532,7 +532,7 @@ it('if patch-affecting and minor-affecting and breaking change commits in releas
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -596,7 +596,7 @@ it('pre-releases only consider commits since last stable', async () => {
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -624,7 +624,7 @@ it('pre-releases only consider commits since last stable', async () => {
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -685,7 +685,7 @@ it('pre-releases increment from previous pre-release build number', async () => 
           },
         },
         "report": Object {
-          "mustFailures": Array [],
+          "errors": Array [],
           "passes": Array [
             Object {
               "code": "npm_auth_not_setup",
@@ -713,7 +713,7 @@ it('pre-releases increment from previous pre-release build number', async () => 
               "summary": "A preview release must have at least one semantic commit",
             },
           ],
-          "preferFailures": Array [],
+          "stops": Array [],
         },
       },
       "kind": "ok",
@@ -728,16 +728,11 @@ describe('preflight checks', () => {
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
-        "mustFailures": Array [
+        "errors": Array [
           Object {
             "code": "must_be_on_trunk",
             "details": Object {},
             "summary": "You must be on the trunk branch",
-          },
-          Object {
-            "code": "series_only_has_meaningless_commits",
-            "details": Object {},
-            "summary": "A preview release must have at least one semantic commit",
           },
         ],
         "passes": Array [
@@ -757,7 +752,13 @@ describe('preflight checks', () => {
             "summary": "A preview release must have at least one commit since the last preview",
           },
         ],
-        "preferFailures": Array [],
+        "stops": Array [
+          Object {
+            "code": "series_only_has_meaningless_commits",
+            "details": Object {},
+            "summary": "A preview release must have at least one semantic commit",
+          },
+        ],
       }
     `)
   })
@@ -768,7 +769,7 @@ describe('preflight checks', () => {
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
-        "mustFailures": Array [
+        "errors": Array [
           Object {
             "code": "preview_on_commit_with_preview_and_or_stable",
             "details": Object {
@@ -793,13 +794,14 @@ describe('preflight checks', () => {
             "details": Object {},
             "summary": "A preview release must have at least one commit since the last preview",
           },
+        ],
+        "stops": Array [
           Object {
             "code": "series_only_has_meaningless_commits",
             "details": Object {},
             "summary": "A preview release must have at least one semantic commit",
           },
         ],
-        "preferFailures": Array [],
       }
     `)
   })
@@ -810,18 +812,13 @@ describe('preflight checks', () => {
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
-        "mustFailures": Array [
+        "errors": Array [
           Object {
             "code": "preview_on_commit_with_preview_and_or_stable",
             "details": Object {
               "subCode": "stable",
             },
             "summary": "A preview release requires the commit to have no existing stable or preview release.",
-          },
-          Object {
-            "code": "series_empty",
-            "details": Object {},
-            "summary": "A preview release must have at least one commit since the last preview",
           },
         ],
         "passes": Array [
@@ -841,7 +838,13 @@ describe('preflight checks', () => {
             "summary": "A preview release must have at least one semantic commit",
           },
         ],
-        "preferFailures": Array [],
+        "stops": Array [
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+        ],
       }
     `)
   })
@@ -852,18 +855,13 @@ describe('preflight checks', () => {
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
-        "mustFailures": Array [
+        "errors": Array [
           Object {
             "code": "preview_on_commit_with_preview_and_or_stable",
             "details": Object {
               "subCode": "preview_and_stable",
             },
             "summary": "A preview release requires the commit to have no existing stable or preview release.",
-          },
-          Object {
-            "code": "series_empty",
-            "details": Object {},
-            "summary": "A preview release must have at least one commit since the last preview",
           },
         ],
         "passes": Array [
@@ -883,7 +881,13 @@ describe('preflight checks', () => {
             "summary": "A preview release must have at least one semantic commit",
           },
         ],
-        "preferFailures": Array [],
+        "stops": Array [
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+        ],
       }
     `)
   })

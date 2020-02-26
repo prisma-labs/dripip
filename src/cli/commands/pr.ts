@@ -28,8 +28,8 @@ export class PR extends Command {
     const context = await getContext()
 
     const report = check({ context })
-      .must(npmAuthSetup())
-      .must(branchHasOpenPR())
+      .errorUnless(npmAuthSetup())
+      .errorUnless(branchHasOpenPR())
       // todo only we if can figoure the commits since last pr release
       // .must(haveMeaningfulCommitsInTheSeries())
       .run()
@@ -38,7 +38,7 @@ export class PR extends Command {
     // release info. But if doing a dry-run we want to be consistent with
     // other commands that embed report into returned data rather than
     // throwing an error.
-    if (report.mustFailures.length && flags['dry-run']) {
+    if (report.errors.length && flags['dry-run']) {
       return Output.outputOk('dry_run', {
         report: report,
         release: null, // cannot compute without PR info

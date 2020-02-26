@@ -58,11 +58,11 @@ export class Preview extends Command {
     })
 
     const report = check({ context })
-      .must(npmAuthSetup())
-      .must(isTrunk())
-      .must(notAlreadyStableOrPreviewReleased())
-      .must(haveCommitsInTheSeries())
-      .must(haveMeaningfulCommitsInTheSeries())
+      .errorUnless(npmAuthSetup())
+      .errorUnless(isTrunk())
+      .errorUnless(notAlreadyStableOrPreviewReleased())
+      .stopUnless(haveCommitsInTheSeries())
+      .stopUnless(haveMeaningfulCommitsInTheSeries())
       .run()
 
     const maybeRelease = Rel.getNextPreview(context.series)

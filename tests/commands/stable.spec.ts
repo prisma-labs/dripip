@@ -28,11 +28,6 @@ describe('preflight requirements include that', () => {
           },
           "summary": "Your branch must be synced with the remote",
         },
-        Object {
-          "code": "series_only_has_meaningless_commits",
-          "details": Object {},
-          "summary": "A stable release must have at least one semantic commit",
-        },
       ]
     `)
   })
@@ -52,11 +47,6 @@ describe('preflight requirements include that', () => {
           },
           "summary": "Your branch must be synced with the remote",
         },
-        Object {
-          "code": "series_only_has_meaningless_commits",
-          "details": Object {},
-          "summary": "A stable release must have at least one semantic commit",
-        },
       ]
     `)
   })
@@ -73,11 +63,6 @@ describe('preflight requirements include that', () => {
             "syncStatus": "needs_pull",
           },
           "summary": "Your branch must be synced with the remote",
-        },
-        Object {
-          "code": "series_only_has_meaningless_commits",
-          "details": Object {},
-          "summary": "A stable release must have at least one semantic commit",
         },
       ]
     `)
@@ -97,11 +82,6 @@ describe('preflight requirements include that', () => {
           },
           "summary": "Your branch must be synced with the remote",
         },
-        Object {
-          "code": "series_only_has_meaningless_commits",
-          "details": Object {},
-          "summary": "A stable release must have at least one semantic commit",
-        },
       ]
     `)
   })
@@ -111,15 +91,7 @@ describe('preflight requirements include that', () => {
     await setupPackageJson()
     await ctx.git.addTag('1.0.0')
     const result: any = await ctx.dripip('stable', { error: true })
-    expect(result.failures).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "code": "commit_already_has_stable_release",
-          "details": Object {},
-          "summary": "A stable release requires the commit to have no existing stable release",
-        },
-      ]
-    `)
+    expect(result.failures).toMatchInlineSnapshot(`undefined`)
   })
 })
 
@@ -143,90 +115,90 @@ describe('increments upon the previous stable release based on conventional comm
     await ctx.git.push()
     const result: any = await ctx.dripip('stable --dry-run --trunk foobar')
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "commits": Array [
       Object {
-        "message": Object {
-          "parsed": Object {
-            "body": null,
-            "breakingChange": null,
-            "completesInitialDevelopment": false,
-            "description": "2",
-            "footers": Array [],
-            "scope": null,
-            "type": "chore",
-            "typeKind": "chore",
+        "data": Object {
+          "commits": Array [
+            Object {
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "2",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: 2",
+              },
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__dynamic_content__",
+            },
+            Object {
+              "message": Object {
+                "parsed": Object {
+                  "body": null,
+                  "breakingChange": null,
+                  "completesInitialDevelopment": false,
+                  "description": "1",
+                  "footers": Array [],
+                  "scope": null,
+                  "type": "chore",
+                  "typeKind": "chore",
+                },
+                "raw": "chore: 1",
+              },
+              "nonReleaseTags": Array [],
+              "releases": Object {
+                "preview": null,
+                "stable": null,
+              },
+              "sha": "__dynamic_content__",
+            },
+          ],
+          "release": "no_meaningful_change",
+          "report": Object {
+            "errors": Array [],
+            "passes": Array [
+              Object {
+                "code": "npm_auth_not_setup",
+                "details": Object {},
+                "summary": "You must have npm auth setup to publish to the registrty",
+              },
+              Object {
+                "code": "must_be_on_trunk",
+                "details": Object {},
+                "summary": "You must be on the trunk branch",
+              },
+              Object {
+                "code": "branch_not_synced_with_remote",
+                "details": Object {},
+                "summary": "Your branch must be synced with the remote",
+              },
+              Object {
+                "code": "commit_already_has_stable_release",
+                "details": Object {},
+                "summary": "A stable release requires the commit to have no existing stable release",
+              },
+            ],
+            "stops": Array [
+              Object {
+                "code": "series_only_has_meaningless_commits",
+                "details": Object {},
+                "summary": "A stable release must have at least one semantic commit",
+              },
+            ],
           },
-          "raw": "chore: 2",
         },
-        "nonReleaseTags": Array [],
-        "releases": Object {
-          "preview": null,
-          "stable": null,
-        },
-        "sha": "__dynamic_content__",
-      },
-      Object {
-        "message": Object {
-          "parsed": Object {
-            "body": null,
-            "breakingChange": null,
-            "completesInitialDevelopment": false,
-            "description": "1",
-            "footers": Array [],
-            "scope": null,
-            "type": "chore",
-            "typeKind": "chore",
-          },
-          "raw": "chore: 1",
-        },
-        "nonReleaseTags": Array [],
-        "releases": Object {
-          "preview": null,
-          "stable": null,
-        },
-        "sha": "__dynamic_content__",
-      },
-    ],
-    "release": "no_meaningful_change",
-    "report": Object {
-      "mustFailures": Array [
-        Object {
-          "code": "series_only_has_meaningless_commits",
-          "details": Object {},
-          "summary": "A stable release must have at least one semantic commit",
-        },
-      ],
-      "passes": Array [
-        Object {
-          "code": "npm_auth_not_setup",
-          "details": Object {},
-          "summary": "You must have npm auth setup to publish to the registrty",
-        },
-        Object {
-          "code": "must_be_on_trunk",
-          "details": Object {},
-          "summary": "You must be on the trunk branch",
-        },
-        Object {
-          "code": "branch_not_synced_with_remote",
-          "details": Object {},
-          "summary": "Your branch must be synced with the remote",
-        },
-        Object {
-          "code": "commit_already_has_stable_release",
-          "details": Object {},
-          "summary": "A stable release requires the commit to have no existing stable release",
-        },
-      ],
-      "preferFailures": Array [],
-    },
-  },
-  "kind": "ok",
-  "type": "dry_run",
-}
-`)
+        "kind": "ok",
+        "type": "dry_run",
+      }
+    `)
   })
 
   it('fix commits since last release', async () => {
@@ -296,7 +268,7 @@ Object {
       },
     },
     "report": Object {
-      "mustFailures": Array [],
+      "errors": Array [],
       "passes": Array [
         Object {
           "code": "npm_auth_not_setup",
@@ -324,7 +296,7 @@ Object {
           "summary": "A stable release must have at least one semantic commit",
         },
       ],
-      "preferFailures": Array [],
+      "stops": Array [],
     },
   },
   "kind": "ok",
@@ -497,7 +469,7 @@ Object {
       },
     },
     "report": Object {
-      "mustFailures": Array [],
+      "errors": Array [],
       "passes": Array [
         Object {
           "code": "npm_auth_not_setup",
@@ -525,7 +497,7 @@ Object {
           "summary": "A stable release must have at least one semantic commit",
         },
       ],
-      "preferFailures": Array [],
+      "stops": Array [],
     },
   },
   "kind": "ok",

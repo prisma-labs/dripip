@@ -29,10 +29,10 @@ export function check(options: Options) {
       contextualizedCheckers.push({ level, validator })
       return api
     },
-    prefer(checker: Validator) {
+    stopUnless(checker: Validator) {
       return api.check('prefer', checker)
     },
-    must(checker: Validator) {
+    errorUnless(checker: Validator) {
       return api.check('must', checker)
     },
     run() {
@@ -47,8 +47,8 @@ export function check(options: Options) {
           result.kind === 'pass'
             ? results.passes
             : requirement.level === 'must'
-            ? results.mustFailures
-            : results.preferFailures
+            ? results.errors
+            : results.stops
 
         group.push({
           details: result.details,
@@ -57,7 +57,7 @@ export function check(options: Options) {
         })
 
         return results
-      }, createDiagnostics())
+      }, createReport())
     },
   }
 
@@ -67,10 +67,10 @@ export function check(options: Options) {
 /**
  *
  */
-function createDiagnostics(): Report {
+function createReport(): Report {
   return {
-    preferFailures: [],
-    mustFailures: [],
+    stops: [],
+    errors: [],
     passes: [],
   }
 }
@@ -85,40 +85,31 @@ interface EnforceInput {
 }
 
 /**
- *
+ * Enforce the result of a report. Throws errors/stop-signal that will halt the
+ * CLI if needed.
  */
 export function guard(input: EnforceInput): void {
-  if (input.json) {
-    // todo how to report warnings in json mode?
-
-    // results.preferFailures
-    //   .map(failure => {
-    //     return failure.checker.summary
-    //   })
-    //   .forEach(console.warn)
-
-    if (input.report.mustFailures.length) {
-      throw new JSONCLIError({
-        context: input.context,
-        failures: input.report.mustFailures,
-      })
-    }
-  } else {
-    input.report.preferFailures
-      .map(failure => {
-        return failure.summary
-      })
-      .forEach(console.warn)
-
-    if (input.report.mustFailures.length) {
+  if (input.report.errors.length) {
+    if (input.json) {
+      if (input.report.errors.length) {
+        throw new JSONCLIError({
+          context: input.context,
+          failures: input.report.errors,
+        })
+      }
+    } else {
       throw new PassthroughCLIError(
-        input.report.mustFailures
+        input.report.errors
           .map(failure => {
             return failure.summary
           })
           .join('\n - ')
       )
     }
+  }
+
+  if (input.report.stops.length) {
+    throw new CLIStop({ reasons: input.report.stops, json: input.json })
   }
 }
 
@@ -134,8 +125,8 @@ interface ValidationResult {
 }
 
 interface Report {
-  mustFailures: ValidationResult[]
-  preferFailures: ValidationResult[]
+  errors: ValidationResult[]
+  stops: ValidationResult[]
   passes: ValidationResult[]
 }
 
@@ -158,7 +149,7 @@ export class JSONCLIError extends CLIError {
 
 export class PassthroughCLIError extends CLIError {
   oclif!: { exit: number }
-  code = 'JSONError'
+  code = 'PassthroughError'
 
   constructor(private errorString: string) {
     super('...todo...', { exit: 1 })
@@ -166,6 +157,26 @@ export class PassthroughCLIError extends CLIError {
 
   render(): string {
     return this.errorString
+  }
+}
+
+export class CLIStop extends CLIError {
+  oclif!: { exit: number }
+  code = 'Stop'
+
+  constructor(private input: { reasons: ValidationResult[]; json?: boolean }) {
+    super('...todo...', { exit: 0 })
+  }
+
+  render(): string {
+    if (this.input.json) {
+      return JSON.stringify({ reasons: this.input.reasons })
+    } else {
+      return (
+        'Nothing to do:\n\n' +
+        this.input.reasons.map(r => r.summary).join('\n -')
+      )
+    }
   }
 }
 

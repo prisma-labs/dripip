@@ -43,11 +43,11 @@ export class Stable extends Command {
     })
 
     const report = check({ context })
-      .must(npmAuthSetup())
-      .must(isTrunk())
-      .must(branchSynced())
-      .must(notAlreadyStableRelease())
-      .must(haveMeaningfulCommitsInTheSeries())
+      .errorUnless(npmAuthSetup())
+      .errorUnless(isTrunk())
+      .errorUnless(branchSynced())
+      .stopUnless(notAlreadyStableRelease())
+      .stopUnless(haveMeaningfulCommitsInTheSeries())
       .run()
 
     const maybeRelease = Rel.getNextStable(context.series)
