@@ -1,5 +1,5 @@
-import { casesHandled } from '../lib/utils'
 import { format } from 'util'
+import { casesHandled } from '../lib/utils'
 
 type Ok<D = Record<string, any>> = {
   kind: 'ok'
@@ -39,7 +39,7 @@ type OutputOptions = {
  * Output Ok data to stdout. Use this to handle general output.
  */
 export function outputOk(type: string, data: Record<string, any>): void {
-  outputJson(createOk(type, data))
+  outputMessage(createOk(type, data))
 }
 
 /**
@@ -67,7 +67,7 @@ export function outputException(
 
 export function output(message: Message, opts: OutputOptions): void {
   if (opts.json) {
-    outputJson(message)
+    outputMessage(message)
   } else {
     if (message.kind === 'exception') {
       let s = ''
@@ -126,8 +126,15 @@ export function createException(
 }
 
 /**
+ * Output Message to stdout.
+ */
+export function outputMessage(msg: Message): void {
+  outputJson(msg)
+}
+
+/**
  * Output JSON to stdout.
  */
-function outputJson(msg: Message): void {
-  console.log(JSON.stringify(msg))
+export function outputJson(msg: object): void {
+  process.stdout.write(JSON.stringify(msg))
 }

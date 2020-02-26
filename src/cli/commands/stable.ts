@@ -8,7 +8,7 @@ import {
 } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
-import { publish } from '../../utils/publish'
+import { publish, PublishPlan } from '../../utils/publish'
 import * as Rel from '../../utils/release'
 
 export class Stable extends Command {
@@ -63,17 +63,25 @@ export class Stable extends Command {
     guard({ context, report, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
-    setupNPMAuthfileOnCI()
-    await publish({
+    const publishPlan: PublishPlan = {
       release: {
         version: release.version.version,
         distTag: 'latest',
         additiomalDistTags: ['next'],
       },
       options: {
+        showProgress: !flags.json,
         skipNPM: flags['skip-npm'],
       },
-    })
+    }
+
+    setupNPMAuthfileOnCI()
+
+    await publish(publishPlan)
+
+    if (flags.json) {
+      Output.outputJson(publishPlan.release)
+    }
   }
 }
 

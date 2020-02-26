@@ -85,16 +85,24 @@ export class Preview extends Command {
     guard({ report, context, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
-    setupNPMAuthfileOnCI()
-    await Publish.publish({
+    const publishPlan: Publish.PublishPlan = {
       release: {
         distTag: 'next',
         version: release.version.version,
       },
       options: {
         skipNPM: flags['skip-npm'],
+        showProgress: !flags.json,
       },
-    })
+    }
+
+    setupNPMAuthfileOnCI()
+
+    await Publish.publish(publishPlan)
+
+    if (flags.json) {
+      Output.outputJson(publishPlan.release)
+    }
   }
 }
 
