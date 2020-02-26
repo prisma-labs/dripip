@@ -1,3 +1,7 @@
+// Disable colour from test output
+// https://github.com/chalk/chalk#chalklevel
+process.env.FORCE_COLOR = '0'
+
 import * as Release from '../utils/release'
 import * as Changelog from './changelog'
 

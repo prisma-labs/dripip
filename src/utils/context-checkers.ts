@@ -1,3 +1,4 @@
+import { validateNPMAuthSetup } from '../lib/npm-auth'
 import { Validator } from './contrext-guard'
 
 export function isTrunk(): Validator {
@@ -24,6 +25,22 @@ export function branchSynced(): Validator {
             syncStatus: ctx.currentBranch.syncStatus,
           },
         }
+      }
+    },
+  }
+}
+
+export function npmAuthSetup(): Validator {
+  return {
+    code: 'npm_auth_not_setup',
+    summary: 'You must have npm auth setup to publish to the registrty',
+    run() {
+      const result = validateNPMAuthSetup()
+
+      if (result.kind === 'pass') {
+        return true
+      } else {
+        return { kind: 'fail', details: { reasons: result.reasons } }
       }
     },
   }

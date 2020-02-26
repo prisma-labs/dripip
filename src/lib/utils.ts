@@ -122,3 +122,9 @@ export function last<T>(xs: T[]): null | T {
   if (xs.length === 0) return null
   return xs[xs.length - 1]
 }
+
+export function numericAscending(n1: number, n2: number): -1 | 0 | 1 {
+  if (n1 < n2) return -1
+  if (n1 > n2) return 1
+  return 0
+}

@@ -17,11 +17,11 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createContext(command: 'preview' | 'stable') {
+export function createContext(name: string) {
   const ws = addOctokitToworkspace(
     addDripipToWorkspace(
       WS.createWorkspace({
-        name: command,
+        name: name,
         repo: 'git@github.com:prisma-labs/dripip-system-tests.git',
         cache: {
           version: '8',
@@ -104,6 +104,7 @@ type DripipRunnerOptions = proc.RunOptions & {
    * Work with stderr instead of stdout.
    */
   error?: boolean
+  replacements?: [RegExp, string][]
 }
 
 function createDripipRunString(pathToProject: string) {
@@ -127,15 +128,12 @@ function createDripipRunner(cwd: string, pathToProject: string) {
         return result as RunDripipResult // force TS to ignore the stderr: null possibility
       }
 
-      // // Avoid silent confusion
-      // if (result.stderr) {
-      //   console.log(
-      //     `WARNING dripip command sent output to stderr:\n\n${result.stderr}`
-      //   )
-      // }
-
       const content = opts.error === true ? result.stderr ?? '' : result.stdout ?? ''
-      const contentSanitized = content.replace(/"sha": *"[^"]+"/g, '"sha": "__dynamic_content__"')
+      let contentSanitized = content.replace(/"sha": *"[^"]+"/g, '"sha": "__dynamic_content__"')
+      
+      opts.replacements?.forEach(([pattern, replacement]:any) => {
+        contentSanitized = content.replace(pattern, replacement)
+      })
 
       try {
         // TODO typed response...

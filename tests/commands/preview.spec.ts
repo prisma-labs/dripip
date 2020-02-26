@@ -44,18 +44,22 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -143,18 +147,22 @@ it('if no stable release exists then pre-releases with just patch-affecting comm
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -242,18 +250,22 @@ it('if no stable release exists then pre-releases with at least one minor-affect
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -355,18 +367,22 @@ it('if patch-affecting and minor-affecting commits in release bump type is minor
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -488,18 +504,22 @@ it('if patch-affecting and minor-affecting and breaking change commits in releas
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -576,18 +596,22 @@ it('pre-releases only consider commits since last stable', async () => {
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -661,18 +685,22 @@ it('pre-releases increment from previous pre-release build number', async () => 
           },
         },
         "report": Object {
-          "mustFailures": Array [
-            Object {
-              "code": "preview_on_commit_with_preview_and_or_stable",
-              "details": Object {},
-              "summary": "A preview release requires the commit to have no existing stable or preview release.",
-            },
-          ],
+          "mustFailures": Array [],
           "passes": Array [
+            Object {
+              "code": "npm_auth_not_setup",
+              "details": Object {},
+              "summary": "You must have npm auth setup to publish to the registrty",
+            },
             Object {
               "code": "must_be_on_trunk",
               "details": Object {},
               "summary": "You must be on the trunk branch",
+            },
+            Object {
+              "code": "preview_on_commit_with_preview_and_or_stable",
+              "details": Object {},
+              "summary": "A preview release requires the commit to have no existing stable or preview release.",
             },
             Object {
               "code": "series_empty",
@@ -694,39 +722,44 @@ it('pre-releases increment from previous pre-release build number', async () => 
   `)
 })
 
-describe.only('preflight checks', () => {
+describe('preflight checks', () => {
   it('must be on trunk', async () => {
     await ctx.git.checkoutLocalBranch('feat/foo')
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
-Object {
-  "mustFailures": Array [
-    Object {
-      "code": "must_be_on_trunk",
-      "details": Object {},
-      "summary": "You must be on the trunk branch",
-    },
-    Object {
-      "code": "series_only_has_meaningless_commits",
-      "details": Object {},
-      "summary": "A preview release must have at least one semantic commit",
-    },
-  ],
-  "passes": Array [
-    Object {
-      "code": "preview_on_commit_with_preview_and_or_stable",
-      "details": Object {},
-      "summary": "A preview release requires the commit to have no existing stable or preview release.",
-    },
-    Object {
-      "code": "series_empty",
-      "details": Object {},
-      "summary": "A preview release must have at least one commit since the last preview",
-    },
-  ],
-  "preferFailures": Array [],
-}
-`)
+      Object {
+        "mustFailures": Array [
+          Object {
+            "code": "must_be_on_trunk",
+            "details": Object {},
+            "summary": "You must be on the trunk branch",
+          },
+          Object {
+            "code": "series_only_has_meaningless_commits",
+            "details": Object {},
+            "summary": "A preview release must have at least one semantic commit",
+          },
+        ],
+        "passes": Array [
+          Object {
+            "code": "npm_auth_not_setup",
+            "details": Object {},
+            "summary": "You must have npm auth setup to publish to the registrty",
+          },
+          Object {
+            "code": "preview_on_commit_with_preview_and_or_stable",
+            "details": Object {},
+            "summary": "A preview release requires the commit to have no existing stable or preview release.",
+          },
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+        ],
+        "preferFailures": Array [],
+      }
+    `)
   })
 
   it('no preview release already present', async () => {
@@ -734,36 +767,41 @@ Object {
     await ctx.git.addTag('v1.2.3-next.1')
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
-Object {
-  "mustFailures": Array [
-    Object {
-      "code": "preview_on_commit_with_preview_and_or_stable",
-      "details": Object {
-        "subCode": "preview",
-      },
-      "summary": "A preview release requires the commit to have no existing stable or preview release.",
-    },
-  ],
-  "passes": Array [
-    Object {
-      "code": "must_be_on_trunk",
-      "details": Object {},
-      "summary": "You must be on the trunk branch",
-    },
-    Object {
-      "code": "series_empty",
-      "details": Object {},
-      "summary": "A preview release must have at least one commit since the last preview",
-    },
-    Object {
-      "code": "series_only_has_meaningless_commits",
-      "details": Object {},
-      "summary": "A preview release must have at least one semantic commit",
-    },
-  ],
-  "preferFailures": Array [],
-}
-`)
+      Object {
+        "mustFailures": Array [
+          Object {
+            "code": "preview_on_commit_with_preview_and_or_stable",
+            "details": Object {
+              "subCode": "preview",
+            },
+            "summary": "A preview release requires the commit to have no existing stable or preview release.",
+          },
+        ],
+        "passes": Array [
+          Object {
+            "code": "npm_auth_not_setup",
+            "details": Object {},
+            "summary": "You must have npm auth setup to publish to the registrty",
+          },
+          Object {
+            "code": "must_be_on_trunk",
+            "details": Object {},
+            "summary": "You must be on the trunk branch",
+          },
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+          Object {
+            "code": "series_only_has_meaningless_commits",
+            "details": Object {},
+            "summary": "A preview release must have at least one semantic commit",
+          },
+        ],
+        "preferFailures": Array [],
+      }
+    `)
   })
 
   it('no stable release already present', async () => {
@@ -771,36 +809,41 @@ Object {
     await ctx.git.addTag('v1.2.3')
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
-Object {
-  "mustFailures": Array [
-    Object {
-      "code": "preview_on_commit_with_preview_and_or_stable",
-      "details": Object {
-        "subCode": "stable",
-      },
-      "summary": "A preview release requires the commit to have no existing stable or preview release.",
-    },
-    Object {
-      "code": "series_empty",
-      "details": Object {},
-      "summary": "A preview release must have at least one commit since the last preview",
-    },
-  ],
-  "passes": Array [
-    Object {
-      "code": "must_be_on_trunk",
-      "details": Object {},
-      "summary": "You must be on the trunk branch",
-    },
-    Object {
-      "code": "series_only_has_meaningless_commits",
-      "details": Object {},
-      "summary": "A preview release must have at least one semantic commit",
-    },
-  ],
-  "preferFailures": Array [],
-}
-`)
+      Object {
+        "mustFailures": Array [
+          Object {
+            "code": "preview_on_commit_with_preview_and_or_stable",
+            "details": Object {
+              "subCode": "stable",
+            },
+            "summary": "A preview release requires the commit to have no existing stable or preview release.",
+          },
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+        ],
+        "passes": Array [
+          Object {
+            "code": "npm_auth_not_setup",
+            "details": Object {},
+            "summary": "You must have npm auth setup to publish to the registrty",
+          },
+          Object {
+            "code": "must_be_on_trunk",
+            "details": Object {},
+            "summary": "You must be on the trunk branch",
+          },
+          Object {
+            "code": "series_only_has_meaningless_commits",
+            "details": Object {},
+            "summary": "A preview release must have at least one semantic commit",
+          },
+        ],
+        "preferFailures": Array [],
+      }
+    `)
   })
 
   it('no stable AND preview release already present (shows graceful aggregate reporting of the cases)', async () => {
@@ -808,36 +851,41 @@ Object {
     await ctx.git.addTag('v1.2.3-next.1')
     const result: any = await ctx.dripip('preview --dry-run')
     expect(result.data.report).toMatchInlineSnapshot(`
-Object {
-  "mustFailures": Array [
-    Object {
-      "code": "preview_on_commit_with_preview_and_or_stable",
-      "details": Object {
-        "subCode": "preview_and_stable",
-      },
-      "summary": "A preview release requires the commit to have no existing stable or preview release.",
-    },
-    Object {
-      "code": "series_empty",
-      "details": Object {},
-      "summary": "A preview release must have at least one commit since the last preview",
-    },
-  ],
-  "passes": Array [
-    Object {
-      "code": "must_be_on_trunk",
-      "details": Object {},
-      "summary": "You must be on the trunk branch",
-    },
-    Object {
-      "code": "series_only_has_meaningless_commits",
-      "details": Object {},
-      "summary": "A preview release must have at least one semantic commit",
-    },
-  ],
-  "preferFailures": Array [],
-}
-`)
+      Object {
+        "mustFailures": Array [
+          Object {
+            "code": "preview_on_commit_with_preview_and_or_stable",
+            "details": Object {
+              "subCode": "preview_and_stable",
+            },
+            "summary": "A preview release requires the commit to have no existing stable or preview release.",
+          },
+          Object {
+            "code": "series_empty",
+            "details": Object {},
+            "summary": "A preview release must have at least one commit since the last preview",
+          },
+        ],
+        "passes": Array [
+          Object {
+            "code": "npm_auth_not_setup",
+            "details": Object {},
+            "summary": "You must have npm auth setup to publish to the registrty",
+          },
+          Object {
+            "code": "must_be_on_trunk",
+            "details": Object {},
+            "summary": "You must be on the trunk branch",
+          },
+          Object {
+            "code": "series_only_has_meaningless_commits",
+            "details": Object {},
+            "summary": "A preview release must have at least one semantic commit",
+          },
+        ],
+        "preferFailures": Array [],
+      }
+    `)
   })
 
   // TODO maybe... this is quite the edge-case and would charge all users a

@@ -1,6 +1,11 @@
 import Command, { flags } from '@oclif/command'
+import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Context from '../../utils/context'
-import { branchSynced, isTrunk } from '../../utils/context-checkers'
+import {
+  branchSynced,
+  isTrunk,
+  npmAuthSetup,
+} from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import { publish } from '../../utils/publish'
@@ -23,7 +28,6 @@ export class Stable extends Command {
       description: 'format output as JSON',
       char: 'j',
     }),
-    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',
@@ -39,6 +43,7 @@ export class Stable extends Command {
     })
 
     const report = check({ context })
+      .must(npmAuthSetup())
       .must(isTrunk())
       .must(branchSynced())
       .must(notAlreadyStableRelease())
@@ -58,6 +63,7 @@ export class Stable extends Command {
     guard({ context, report, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
+    setupNPMAuthfileOnCI()
     await publish({
       release: {
         version: release.version.version,
@@ -66,7 +72,6 @@ export class Stable extends Command {
       },
       options: {
         skipNPM: flags['skip-npm'],
-        gitTagForDistTags: true,
       },
     })
   }

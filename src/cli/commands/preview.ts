@@ -1,7 +1,8 @@
 import Command, { flags } from '@oclif/command'
+import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
-import { isTrunk } from '../../utils/context-checkers'
+import { isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
@@ -24,7 +25,6 @@ export class Preview extends Command {
       description: 'output what the next version would be if released now',
       char: 'd',
     }),
-    // todo test skip-npm
     'skip-npm': flags.boolean({
       default: false,
       description: 'skip the step of publishing the package to npm',
@@ -58,6 +58,7 @@ export class Preview extends Command {
     })
 
     const report = check({ context })
+      .must(npmAuthSetup())
       .must(isTrunk())
       .must(notAlreadyStableOrPreviewReleased())
       .must(haveCommitsInTheSeries())
@@ -84,6 +85,7 @@ export class Preview extends Command {
     guard({ report, context, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
+    setupNPMAuthfileOnCI()
     await Publish.publish({
       release: {
         distTag: 'next',
@@ -91,7 +93,6 @@ export class Preview extends Command {
       },
       options: {
         skipNPM: flags['skip-npm'],
-        gitTagForDistTags: true,
       },
     })
   }

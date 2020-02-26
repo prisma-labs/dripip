@@ -33,33 +33,33 @@ exports[`.render() option markdown renders release notes for the current release
 `;
 
 exports[`.render() plain renders release notes for the current release series 1`] = `
-"[35mBREAKING CHANGES[39m
+"BREAKING CHANGES
 
-  [90mshasha#[39m a
+  shasha# a
 
-[35mFeatures[39m
+Features
 
-  [90mshasha#[39m b
-  [90mshasha#[39m[31m (breaking)[39m a
+  shasha# b
+  shasha# (breaking) a
 
-[35mFixes[39m
+Fixes
 
-  [90mshasha#[39m b
-  [90mshasha#[39m a
+  shasha# b
+  shasha# a
 
-[35mImprovements[39m
+Improvements
 
-  [90mshasha#[39m refactor: a
-  [90mshasha#[39m perf: a
+  shasha# refactor: a
+  shasha# perf: a
 
-[35mChores[39m
+Chores
 
-  [90mshasha#[39m b
-  [90mshasha#[39m a
+  shasha# b
+  shasha# a
 
-[35mUnspecified Changes[39m
+Unspecified Changes
 
-  [90mshasha#[39m non conforming commit b
-  [90mshasha#[39m non conforming commit a
+  shasha# non conforming commit b
+  shasha# non conforming commit a
 "
 `;
