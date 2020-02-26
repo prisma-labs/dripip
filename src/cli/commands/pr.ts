@@ -110,6 +110,26 @@ function branchHasOpenPR(): Validator {
   }
 }
 
+//
+// Helpers
+//
+
+/**
+ * Get the next build num for a pre-release series.
+ *
+ * The pre-release series is the group versions published matching the given prefix.
+ *
+ * The buld num is assumed to be digits immediately following the prefix up to
+ * the end of the version or up to the next `.`.
+ *
+ * If a version matches prefix but then not the pattern described above then it
+ * is discarded.
+ *
+ * If no versions are found with given prefix then 1 is returned.
+ *
+ * If versions are found, then the greatest build number is incremented by 1 and
+ * then returned.
+ */
 function getNextPreReleaseBuildNum(
   packageName: string,
   prefix: string
@@ -128,6 +148,9 @@ function getNextPreReleaseBuildNum(
   return nextBuildNum
 }
 
+/**
+ * Pure helper for getting next build num of a pre-release series.
+ */
 function getNextPreReleaseBuildNumFromVersions(
   prefix: string,
   versions: string[]
@@ -141,7 +164,7 @@ function getNextPreReleaseBuildNumFromVersions(
       if (match[2] !== undefined) return match[2]
       // never
     })
-    .filter(v => v !== undefined)
+    .filter(v => v !== null)
     .map(v => Number(v))
     .sort(numericAscending)
 
