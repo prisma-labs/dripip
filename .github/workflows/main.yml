@@ -19,11 +19,10 @@ jobs:
       - run: yarn -s test
 
   publish:
-    # needs: test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # - uses: mxschmitt/action-tmate@v1
       - uses: actions/setup-node@v1
         with:
           node-version: 10.x
