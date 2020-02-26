@@ -1,9 +1,7 @@
 import { debug } from './debug'
 
 export function isGithubCIEnvironment() {
-  const is = process.env.GITHUB_RUN_ID !== undefined
-  debug('is a github environment? %s', is)
-  return is
+  return process.env.GITHUB_RUN_ID !== undefined
 }
 
 export interface GithubCIEnvironment {
