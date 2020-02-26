@@ -30,6 +30,6 @@ jobs:
         with:
           node-version: 10.x
       - run: yarn --frozen-lockfile
-      - run: yarn -s dripip preview-or-pr
+      - run: yarn -s dripip preview-or-pr --dry-run
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
