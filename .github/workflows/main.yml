@@ -31,4 +31,3 @@ jobs:
       - run: yarn -s dripip pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-          DEBUG: "dripip*"

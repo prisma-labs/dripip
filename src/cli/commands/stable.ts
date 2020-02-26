@@ -1,7 +1,11 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Context from '../../utils/context'
-import { branchSynced, isTrunk } from '../../utils/context-checkers'
+import {
+  branchSynced,
+  isTrunk,
+  npmAuthSetup,
+} from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import { publish } from '../../utils/publish'
@@ -39,6 +43,7 @@ export class Stable extends Command {
     })
 
     const report = check({ context })
+      .must(npmAuthSetup())
       .must(isTrunk())
       .must(branchSynced())
       .must(notAlreadyStableRelease())

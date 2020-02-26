@@ -2,7 +2,7 @@ import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Semver from '../../lib/semver'
 import * as Context from '../../utils/context'
-import { isTrunk } from '../../utils/context-checkers'
+import { isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
@@ -58,6 +58,7 @@ export class Preview extends Command {
     })
 
     const report = check({ context })
+      .must(npmAuthSetup())
       .must(isTrunk())
       .must(notAlreadyStableOrPreviewReleased())
       .must(haveCommitsInTheSeries())

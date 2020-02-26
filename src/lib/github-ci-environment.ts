@@ -1,9 +1,5 @@
 import { debug } from './debug'
 
-export function isGithubCIEnvironment() {
-  return process.env.GITHUB_RUN_ID !== undefined
-}
-
 export interface GithubCIEnvironment {
   runId: number
   eventName: 'pull_request'
@@ -58,4 +54,11 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
       repo: repo,
     },
   }
+}
+
+/**
+ * Check if the current process appers to be running in a Github CI environment.
+ */
+export function isGithubCIEnvironment() {
+  return process.env.GITHUB_RUN_ID !== undefined
 }
