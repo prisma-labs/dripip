@@ -3,6 +3,8 @@
  * git tagging, pushing to the git origin, the package registry, etc.
  */
 import createGit from 'simple-git/promise'
+import * as Git from '../lib/git'
+import { isGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as Pacman from '../lib/pacman'
 
 type Options = {
@@ -94,6 +96,7 @@ export async function publish(input: PublishPlan) {
   // before beginning the publishing process. In other words we may be losing
   // user work here. This check should be in strict mode.
   const git = createGit()
+  await setupGitUsernameAndEmailOnCI(git)
   await git.checkout('package.json')
   console.log('reverted package.json changes now that publishing is done')
 
@@ -124,4 +127,25 @@ export async function publish(input: PublishPlan) {
       console.log('updated git tag %j', distTag)
     }
   }
+}
+
+// todo turn this into a check
+async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
+  if (isGithubCIEnvironment()) return
+
+  const [email, name] = await Promise.all([
+    git.raw(['config', '--get', 'user.email']),
+    git.raw(['config', '--get', 'user.name']),
+  ])
+
+  const promises = []
+
+  if (!email) {
+    promises.push(git.addConfig('user.name', 'dripip'))
+  }
+  if (!name) {
+    promises.push(git.addConfig('user.email', 'dripip@prisma.io'))
+  }
+
+  await Promise.all(promises)
 }

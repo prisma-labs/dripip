@@ -32,7 +32,6 @@ jobs:
         with:
           node-version: 10.x
       - run: yarn --frozen-lockfile
-      # - uses: mxschmitt/action-tmate@v1
-      - run: yarn -s dripip preview-or-pr --dry-run
+      - run: yarn -s dripip preview-or-pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
