@@ -1,5 +1,7 @@
 import Command, { flags } from '@oclif/command'
-import * as Context from '../../utils/context'
+import { Octokit } from '@octokit/rest'
+import { createGit } from '../../lib/git'
+import { getLocationContext } from '../../utils/context'
 
 export class GetCurrentPRNum extends Command {
   static flags = {
@@ -13,7 +15,12 @@ export class GetCurrentPRNum extends Command {
   async run() {
     const { flags } = this.parse(GetCurrentPRNum)
 
-    const context = await Context.scan()
+    const context = await getLocationContext({
+      git: createGit(),
+      octokit: new Octokit({
+        auth: process.env.GITHUB_TOKEN,
+      }),
+    })
 
     const prNum = context.currentBranch.pr?.number ?? null
 

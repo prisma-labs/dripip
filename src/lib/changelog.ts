@@ -171,12 +171,12 @@ namespace Plain {
 
   function sectionCommit(c: Commit, opts?: CommitRenderOpts): string {
     const sha = Chalk.gray(shortSha(c))
-    const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
-    const description = ' ' + c.message.parsed.description
+    const type = opts?.type === true ? ' ' + c.message.parsed!.type + ':' : ''
+    const description = ' ' + c.message.parsed!.description
     const breaking =
       opts?.breaking === false
         ? ''
-        : c.message.parsed.breakingChange
+        : c.message.parsed!.breakingChange
         ? Chalk.red(' (breaking)')
         : ''
     return `  ${sha}${breaking}${type}${description}`
@@ -258,12 +258,12 @@ namespace Markdown {
     opts?: { type?: boolean; breaking?: boolean }
   ): string {
     const sha = shortSha(c)
-    const type = opts?.type === true ? ' ' + c.message.parsed.type + ':' : ''
-    const description = ' ' + c.message.parsed.description
+    const type = opts?.type === true ? ' ' + c.message.parsed!.type + ':' : ''
+    const description = ' ' + c.message.parsed!.description
     const breaking =
       opts?.breaking === false
         ? ''
-        : c.message.parsed.breakingChange
+        : c.message.parsed!.breakingChange
         ? ' (breaking)'
         : ''
     return `- ${sha}${breaking}${type}${description}`

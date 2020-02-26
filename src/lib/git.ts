@@ -5,9 +5,13 @@
 import * as CP from 'child_process'
 import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
-import createGit from 'simple-git/promise'
+import doCreateGit from 'simple-git/promise'
 
-export type Simple = ReturnType<typeof createGit>
+export type Simple = ReturnType<typeof doCreateGit>
+
+export function createGit(): Simple {
+  return doCreateGit()
+}
 
 function parseGitTags(tagsString: null | string): string[] {
   if (tagsString === null) return []
