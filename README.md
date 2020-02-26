@@ -9,10 +9,12 @@ Opinionated CLI for continuous delivery of npm packages.
   - [Installation](#installation)
   - [Introduction](#introduction)
 - [Reference](#reference)
+  - [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
   - [`dripip help [COMMAND]`](#dripip-help-command)
   - [`dripip log`](#dripip-log)
   - [`dripip pr`](#dripip-pr)
   - [`dripip preview`](#dripip-preview)
+  - [`dripip preview-or-pr`](#dripip-preview-or-pr)
   - [`dripip stable`](#dripip-stable)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -34,11 +36,22 @@ For now you can refer to the original issue that specified the overall vision fo
 # Reference
 
 <!-- commands -->
+* [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
 * [`dripip help [COMMAND]`](#dripip-help-command)
 * [`dripip log`](#dripip-log)
 * [`dripip pr`](#dripip-pr)
 * [`dripip preview`](#dripip-preview)
+* [`dripip preview-or-pr`](#dripip-preview-or-pr)
 * [`dripip stable`](#dripip-stable)
+
+## `dripip get-current-pr-num`
+
+```
+USAGE
+  $ dripip get-current-pr-num
+```
+
+_See code: [dist/cli/commands/get-current-pr-num.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-see-git-tags/dist/cli/commands/get-current-pr-num.ts)_
 
 ## `dripip help [COMMAND]`
 
@@ -90,17 +103,25 @@ USAGE
   $ dripip preview
 
 OPTIONS
-  -d, --dry-run                   output what the next version would be if released now
-  -j, --json                      format output as JSON
-  -n, --build-num=build-num       Force a build number. Should not be needed generally. For exceptional cases.
-  -p, --no-pull-request-releases  Do not allow pull-request releases to be made
-  --skip-npm                      skip the step of publishing the package to npm
+  -d, --dry-run              output what the next version would be if released now
+  -j, --json                 format output as JSON
+  -n, --build-num=build-num  Force a build number. Should not be needed generally. For exceptional cases.
+  --skip-npm                 skip the step of publishing the package to npm
 
-  --trunk=trunk                   State which branch is trunk. Defaults to honuring the "base" branch setting in the
-                                  GitHub repo settings.
+  --trunk=trunk              State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub
+                             repo settings.
 ```
 
 _See code: [dist/cli/commands/preview.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-see-git-tags/dist/cli/commands/preview.ts)_
+
+## `dripip preview-or-pr`
+
+```
+USAGE
+  $ dripip preview-or-pr
+```
+
+_See code: [dist/cli/commands/preview-or-pr.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-see-git-tags/dist/cli/commands/preview-or-pr.ts)_
 
 ## `dripip stable`
 
