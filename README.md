@@ -1,3 +1,5 @@
+![ci/cd](https://github.com/prisma-labs/dripip/workflows/ci/cd/badge.svg)
+
 # dripip
 
 Opinionated CLI for continuous delivery of npm packages.
