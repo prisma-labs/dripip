@@ -130,6 +130,16 @@ export async function publish(input: PublishPlan) {
 }
 
 // todo turn this into a check
+/**
+ * On CI set the local Git config user email and name if not already set on the
+ * machine. If not CI this function is a no-op.
+ *
+ * @remarks
+ *
+ * It can happen that no user name or email is setup on a machine for git.
+ * Certain git commands fail in that case like creating annotated tags. Ref:
+ * https://stackoverflow.com/questions/11656761/git-please-tell-me-who-you-are-error.
+ */
 async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
   if (!isGithubCIEnvironment()) return
 
