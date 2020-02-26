@@ -29,9 +29,9 @@
     "test:unit": "jest --testPathPattern '.*/src/.*' --verbose",
     "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
     "test": "jest  --testTimeout 15000 --verbose",
-    "build:doc:toc": "doctoc README.md",
-    "build:doc:commands": "oclif-dev readme",
-    "build:doc": "yarn -s build:doc:commands && yarn -s build:doc:toc",
+    "build:docs:toc": "doctoc README.md",
+    "build:docs:commands": "oclif-dev readme",
+    "build:docs": "yarn -s build:docs:commands && yarn -s build:docs:toc",
     "postpublish": "yarn -s run clean",
     "prepublishOnly": "yarn -s run build"
   },
