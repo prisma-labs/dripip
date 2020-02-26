@@ -119,7 +119,12 @@ export async function publish(input: PublishPlan) {
 
   if (opts.gitTag === 'all' || opts.gitTag === 'just_version') {
     await git.addAnnotatedTag(versionTag, versionTag)
-    await git.pushTags()
+    // Avoid general git push tags otherwise we could run into trying to push e.g.
+    // old `next` tag (dist-tags, forced later) that was since updated on remote
+    // by CI––assuming user is doing a publish from their machine (maybe stable
+    // for example).
+    // Ref: https://stackoverflow.com/questions/23212452/how-to-only-push-a-specific-tag-to-remote
+    await git.raw(['push', 'origin', `refs/tags/${versionTag}`])
     if (opts.showProgress) {
       console.log(`tagged this commit with ${versionTag}`)
     }
