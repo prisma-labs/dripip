@@ -301,6 +301,7 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
     return 'empty_series'
   }
 
+  // todo test this case, it was fixed without regression test being added
   const bumpTypeContributionFromCommitsInNextPreview = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
     series.commitsInNextPreview.map(c => c.message.raw)
