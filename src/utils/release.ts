@@ -293,17 +293,34 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
   return { bumpType, version }
 }
 
+/**
+ * Calculate the preview release for the given series.
+ */
 export function getNextPreview(series: Series): NoReleaseReason | Release {
   if (series.commitsInNextStable.length === 0) {
     return 'empty_series'
   }
+
+  const bumpTypeContributionFromCommitsInNextPreview = ConventionalCommit.calcBumpType(
+    series.isInitialDevelopment,
+    series.commitsInNextPreview.map(c => c.message.raw)
+  )
+
+  if (bumpTypeContributionFromCommitsInNextPreview === null)
+    return 'no_meaningful_change'
 
   const bumpType = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
     series.commitsInNextStable.map(c => c.message.raw)
   )
 
-  if (bumpType === null) return 'no_meaningful_change'
+  // Stable is superset of preview so based on guard above there MUST be a
+  // bumpType here.
+  if (!bumpType) {
+    throw new Error(
+      'next preview in series has bump type but not series as a whole. You should not be seeing this. This should be impossible.'
+    )
+  }
 
   const nextStable = Semver.incStable(
     bumpType,
