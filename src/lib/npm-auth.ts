@@ -1,6 +1,7 @@
 import * as fs from 'fs-jetpack'
 import * as os from 'os'
 import * as path from 'path'
+import { debug } from './debug'
 import { isGithubCIEnvironment } from './github-ci-environment'
 
 const npmrcFilePath = path.join(os.homedir(), '.npmrc')
@@ -14,10 +15,13 @@ export function setupNPMAuthfileOnCI(): void {
   if (isGithubCIEnvironment() && !npmAuthFileExists()) {
     const token = process.env.NPM_TOKEN
     const npmrcFileContent = `//registry.npmjs.org/:_authToken=${token}`
+    debug('writing npm token to %s', npmrcFilePath)
     fs.write(npmrcFilePath, npmrcFileContent)
   }
 }
 
 export function npmAuthFileExists(): boolean {
-  return fs.exists(npmrcFilePath) === false
+  const is = fs.exists(npmrcFilePath) === false
+  debug('npm file exists? %s', is)
+  return is
 }

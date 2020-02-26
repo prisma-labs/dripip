@@ -1,5 +1,9 @@
+import { debug } from './debug'
+
 export function isGithubCIEnvironment() {
-  return process.env.GITHUB_RUN_ID !== undefined
+  const is = process.env.GITHUB_RUN_ID !== undefined
+  debug('is a github environment? %s', is)
+  return is
 }
 
 export interface GithubCIEnvironment {
@@ -27,14 +31,22 @@ export interface GithubCIEnvironment {
 export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
   if (!isGithubCIEnvironment()) return null
 
+  let prNum: GithubCIEnvironment['parsed']['prNum']
+
+  if (process.env.GITHUB_REF) {
+    const match = process.env.GITHUB_REF.match(/refs\/pull\/(\d+)\/merge/)
+
+    if (match) {
+      debug('found a pr number from github ci environment %s', match[1])
+      prNum = parseInt(match[1], 10)
+    }
+  }
+
   const repoPath = process.env.GITHUB_REPOSITORY!.split('/')
 
-  let prNum: GithubCIEnvironment['parsed']['prNum']
-  if (process.env.GITHUB_REF) {
-    const result = process.env.GITHUB_REF.match(/refs\/pull\/(\d+)\/merge/)
-    if (result) {
-      prNum = parseInt(result[1], 10)
-    }
+  const repo = {
+    owner: repoPath[0],
+    name: repoPath[1],
   }
 
   return {
@@ -45,10 +57,7 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
     repository: process.env.GITHUB_REPOSITORY!,
     parsed: {
       prNum: prNum,
-      repo: {
-        owner: repoPath[0],
-        name: repoPath[1],
-      },
+      repo: repo,
     },
   }
 }
