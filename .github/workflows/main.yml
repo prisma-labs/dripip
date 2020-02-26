@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
-      - run: yarn -s test
+      - run: yarn -s test:unit # todo system tests on ci
 
   publish:
     needs: test
