@@ -143,85 +143,90 @@ describe('increments upon the previous stable release based on conventional comm
     await ctx.git.push()
     const result: any = await ctx.dripip('stable --dry-run --trunk foobar')
     expect(result).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    "commits": Array [
       Object {
-        "data": Object {
-          "commits": Array [
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "2",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "chore",
-                  "typeKind": "chore",
-                },
-                "raw": "chore: 2",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__dynamic_content__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "1",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "chore",
-                  "typeKind": "chore",
-                },
-                "raw": "chore: 1",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__dynamic_content__",
-            },
-          ],
-          "release": "no_meaningful_change",
-          "report": Object {
-            "mustFailures": Array [
-              Object {
-                "code": "series_only_has_meaningless_commits",
-                "details": Object {},
-                "summary": "A stable release must have at least one semantic commit",
-              },
-            ],
-            "passes": Array [
-              Object {
-                "code": "must_be_on_trunk",
-                "details": Object {},
-                "summary": "You must be on the trunk branch",
-              },
-              Object {
-                "code": "branch_not_synced_with_remote",
-                "details": Object {},
-                "summary": "Your branch must be synced with the remote",
-              },
-              Object {
-                "code": "commit_already_has_stable_release",
-                "details": Object {},
-                "summary": "A stable release requires the commit to have no existing stable release",
-              },
-            ],
-            "preferFailures": Array [],
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "2",
+            "footers": Array [],
+            "scope": null,
+            "type": "chore",
+            "typeKind": "chore",
           },
+          "raw": "chore: 2",
         },
-        "kind": "ok",
-        "type": "dry_run",
-      }
-    `)
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__dynamic_content__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "1",
+            "footers": Array [],
+            "scope": null,
+            "type": "chore",
+            "typeKind": "chore",
+          },
+          "raw": "chore: 1",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__dynamic_content__",
+      },
+    ],
+    "release": "no_meaningful_change",
+    "report": Object {
+      "mustFailures": Array [
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ],
+      "passes": Array [
+        Object {
+          "code": "npm_auth_not_setup",
+          "details": Object {},
+          "summary": "You must have npm auth setup to publish to the registrty",
+        },
+        Object {
+          "code": "must_be_on_trunk",
+          "details": Object {},
+          "summary": "You must be on the trunk branch",
+        },
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {},
+          "summary": "Your branch must be synced with the remote",
+        },
+        Object {
+          "code": "commit_already_has_stable_release",
+          "details": Object {},
+          "summary": "A stable release requires the commit to have no existing stable release",
+        },
+      ],
+      "preferFailures": Array [],
+    },
+  },
+  "kind": "ok",
+  "type": "dry_run",
+}
+`)
   })
 
   it('fix commits since last release', async () => {
@@ -234,93 +239,98 @@ describe('increments upon the previous stable release based on conventional comm
       c.sha = '__sha__'
     })
     expect(result).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    "commits": Array [
       Object {
-        "data": Object {
-          "commits": Array [
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "2",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "fix",
-                  "typeKind": "fix",
-                },
-                "raw": "fix: 2",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "1",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "fix",
-                  "typeKind": "fix",
-                },
-                "raw": "fix: 1",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-          ],
-          "release": Object {
-            "bumpType": "patch",
-            "version": Object {
-              "major": 0,
-              "minor": 1,
-              "patch": 1,
-              "version": "0.1.1",
-              "vprefix": false,
-            },
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "2",
+            "footers": Array [],
+            "scope": null,
+            "type": "fix",
+            "typeKind": "fix",
           },
-          "report": Object {
-            "mustFailures": Array [],
-            "passes": Array [
-              Object {
-                "code": "must_be_on_trunk",
-                "details": Object {},
-                "summary": "You must be on the trunk branch",
-              },
-              Object {
-                "code": "branch_not_synced_with_remote",
-                "details": Object {},
-                "summary": "Your branch must be synced with the remote",
-              },
-              Object {
-                "code": "commit_already_has_stable_release",
-                "details": Object {},
-                "summary": "A stable release requires the commit to have no existing stable release",
-              },
-              Object {
-                "code": "series_only_has_meaningless_commits",
-                "details": Object {},
-                "summary": "A stable release must have at least one semantic commit",
-              },
-            ],
-            "preferFailures": Array [],
-          },
+          "raw": "fix: 2",
         },
-        "kind": "ok",
-        "type": "dry_run",
-      }
-    `)
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "1",
+            "footers": Array [],
+            "scope": null,
+            "type": "fix",
+            "typeKind": "fix",
+          },
+          "raw": "fix: 1",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+    ],
+    "release": Object {
+      "bumpType": "patch",
+      "version": Object {
+        "major": 0,
+        "minor": 1,
+        "patch": 1,
+        "version": "0.1.1",
+        "vprefix": false,
+      },
+    },
+    "report": Object {
+      "mustFailures": Array [],
+      "passes": Array [
+        Object {
+          "code": "npm_auth_not_setup",
+          "details": Object {},
+          "summary": "You must have npm auth setup to publish to the registrty",
+        },
+        Object {
+          "code": "must_be_on_trunk",
+          "details": Object {},
+          "summary": "You must be on the trunk branch",
+        },
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {},
+          "summary": "Your branch must be synced with the remote",
+        },
+        Object {
+          "code": "commit_already_has_stable_release",
+          "details": Object {},
+          "summary": "A stable release requires the commit to have no existing stable release",
+        },
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ],
+      "preferFailures": Array [],
+    },
+  },
+  "kind": "ok",
+  "type": "dry_run",
+}
+`)
   })
 
   it('commit mix including chore feat fix', async () => {
@@ -334,188 +344,193 @@ describe('increments upon the previous stable release based on conventional comm
       c.sha = '__sha__'
     })
     expect(result).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    "commits": Array [
       Object {
-        "data": Object {
-          "commits": Array [
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "2",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "feat",
-                  "typeKind": "feat",
-                },
-                "raw": "feat: 2",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "1",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "chore",
-                  "typeKind": "chore",
-                },
-                "raw": "chore: 1",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "1",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "fix",
-                  "typeKind": "fix",
-                },
-                "raw": "fix: 1",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "1",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "feat",
-                  "typeKind": "feat",
-                },
-                "raw": "feat: 1",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "add package.json",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "chore",
-                  "typeKind": "chore",
-                },
-                "raw": "chore: add package.json",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": Object {
-                  "body": null,
-                  "breakingChange": null,
-                  "completesInitialDevelopment": false,
-                  "description": "who knows",
-                  "footers": Array [],
-                  "scope": null,
-                  "type": "chore",
-                  "typeKind": "chore",
-                },
-                "raw": "chore: who knows",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-            Object {
-              "message": Object {
-                "parsed": null,
-                "raw": "Initial commit",
-              },
-              "nonReleaseTags": Array [],
-              "releases": Object {
-                "preview": null,
-                "stable": null,
-              },
-              "sha": "__sha__",
-            },
-          ],
-          "release": Object {
-            "bumpType": "minor",
-            "version": Object {
-              "major": 0,
-              "minor": 1,
-              "patch": 0,
-              "version": "0.1.0",
-              "vprefix": false,
-            },
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "2",
+            "footers": Array [],
+            "scope": null,
+            "type": "feat",
+            "typeKind": "feat",
           },
-          "report": Object {
-            "mustFailures": Array [],
-            "passes": Array [
-              Object {
-                "code": "must_be_on_trunk",
-                "details": Object {},
-                "summary": "You must be on the trunk branch",
-              },
-              Object {
-                "code": "branch_not_synced_with_remote",
-                "details": Object {},
-                "summary": "Your branch must be synced with the remote",
-              },
-              Object {
-                "code": "commit_already_has_stable_release",
-                "details": Object {},
-                "summary": "A stable release requires the commit to have no existing stable release",
-              },
-              Object {
-                "code": "series_only_has_meaningless_commits",
-                "details": Object {},
-                "summary": "A stable release must have at least one semantic commit",
-              },
-            ],
-            "preferFailures": Array [],
-          },
+          "raw": "feat: 2",
         },
-        "kind": "ok",
-        "type": "dry_run",
-      }
-    `)
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "1",
+            "footers": Array [],
+            "scope": null,
+            "type": "chore",
+            "typeKind": "chore",
+          },
+          "raw": "chore: 1",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "1",
+            "footers": Array [],
+            "scope": null,
+            "type": "fix",
+            "typeKind": "fix",
+          },
+          "raw": "fix: 1",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "1",
+            "footers": Array [],
+            "scope": null,
+            "type": "feat",
+            "typeKind": "feat",
+          },
+          "raw": "feat: 1",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "add package.json",
+            "footers": Array [],
+            "scope": null,
+            "type": "chore",
+            "typeKind": "chore",
+          },
+          "raw": "chore: add package.json",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": Object {
+            "body": null,
+            "breakingChange": null,
+            "completesInitialDevelopment": false,
+            "description": "who knows",
+            "footers": Array [],
+            "scope": null,
+            "type": "chore",
+            "typeKind": "chore",
+          },
+          "raw": "chore: who knows",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+      Object {
+        "message": Object {
+          "parsed": null,
+          "raw": "Initial commit",
+        },
+        "nonReleaseTags": Array [],
+        "releases": Object {
+          "preview": null,
+          "stable": null,
+        },
+        "sha": "__sha__",
+      },
+    ],
+    "release": Object {
+      "bumpType": "minor",
+      "version": Object {
+        "major": 0,
+        "minor": 1,
+        "patch": 0,
+        "version": "0.1.0",
+        "vprefix": false,
+      },
+    },
+    "report": Object {
+      "mustFailures": Array [],
+      "passes": Array [
+        Object {
+          "code": "npm_auth_not_setup",
+          "details": Object {},
+          "summary": "You must have npm auth setup to publish to the registrty",
+        },
+        Object {
+          "code": "must_be_on_trunk",
+          "details": Object {},
+          "summary": "You must be on the trunk branch",
+        },
+        Object {
+          "code": "branch_not_synced_with_remote",
+          "details": Object {},
+          "summary": "Your branch must be synced with the remote",
+        },
+        Object {
+          "code": "commit_already_has_stable_release",
+          "details": Object {},
+          "summary": "A stable release requires the commit to have no existing stable release",
+        },
+        Object {
+          "code": "series_only_has_meaningless_commits",
+          "details": Object {},
+          "summary": "A stable release must have at least one semantic commit",
+        },
+      ],
+      "preferFailures": Array [],
+    },
+  },
+  "kind": "ok",
+  "type": "dry_run",
+}
+`)
   })
 })
