@@ -9,7 +9,7 @@ import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import * as Publish from '../../utils/publish'
 
-export class Preview extends Command {
+export class PR extends Command {
   static flags = {
     'dry-run': flags.boolean({
       default: false,
@@ -24,7 +24,7 @@ export class Preview extends Command {
   }
 
   async run() {
-    const { flags } = this.parse(Preview)
+    const { flags } = this.parse(PR)
 
     const context = await Context.scan({})
 
