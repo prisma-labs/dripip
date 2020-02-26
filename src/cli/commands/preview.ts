@@ -64,7 +64,7 @@ export class Preview extends Command {
     })
 
     if (context.currentBranch.pr && !flags['no-pull-request-releases']) {
-      await PRCommand.PR.run(process.argv)
+      await PRCommand.PR.run(process.argv.slice(3))
       return
     }
 
