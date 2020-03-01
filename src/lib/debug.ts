@@ -1,4 +1,5 @@
 import createDebug from 'debug'
+import * as Path from 'path'
 
 const dripipDebug = createDebug('dripip')
 
@@ -7,5 +8,5 @@ export function debug(formatter: any, ...args: any[]): void {
 }
 
 export function rootDebug(componentName: string) {
-  return createDebug(`dripip:${componentName.replace(/\..*$/, '')}`)
+  return createDebug(`dripip:${Path.parse(componentName).name}`)
 }
