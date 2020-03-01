@@ -16,7 +16,9 @@ export function getPullRequestReleaseVersionForLocation(input: {
 }): null | string {
   const shortSHA = input.sha.slice(0, 7)
   const versions = getPackageVersions(input.packageName)
-  const pattern = new RegExp(`0\\.0\\.0-pr.${input.prNum}\\.\\d+\\.${shortSHA}`)
+  const pattern = new RegExp(
+    `0\\.0\\.0-pr\\.${input.prNum}\\.\\d+\\.${shortSHA}`
+  )
   debug('looking for version matching pattern %O', pattern)
   const version = versions.find(v => v.match(pattern) !== null) ?? null
   return version
