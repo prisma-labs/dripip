@@ -3,7 +3,7 @@ import { Octokit } from '@octokit/rest'
 import { rootDebug } from '../../lib/debug'
 import { createGit } from '../../lib/git'
 import { getLocationContext } from '../../utils/context'
-import { getPullRequestReleaseVersion as getPullRequestReleaseVersionForLocation } from '../../utils/pr-release'
+import { getPullRequestReleaseVersionForLocation } from '../../utils/pr-release'
 import { getCurrentCommit } from '../../utils/release'
 
 const debug = rootDebug(__filename)
