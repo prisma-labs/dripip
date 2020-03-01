@@ -1,19 +1,25 @@
 import { spawnSync } from 'child_process'
+import { rootDebug } from '../lib/debug'
 import { numericAscending } from '../lib/utils'
+
+const debug = rootDebug(__filename)
 
 /**
  * Get the pr release version for the given commit. A search is made through the
  * package's versions for this pr/commit combination. Returns `null` if no
  * release version can be found.
  */
-export function getPullRequestReleaseVersion(input: {
+export function getPullRequestReleaseVersionForLocation(input: {
   packageName: string
   prNum: number
   sha: string
 }): null | string {
   const shortSHA = input.sha.slice(0, 7)
   const versions = getPackageVersions(input.packageName)
-  const pattern = new RegExp(`0\\.0\\.0-pr.${input.prNum}\\.\\d+\\.${shortSHA}`)
+  const pattern = new RegExp(
+    `0\\.0\\.0-pr\\.${input.prNum}\\.\\d+\\.${shortSHA}`
+  )
+  debug('looking for version matching pattern %O', pattern)
   const version = versions.find(v => v.match(pattern) !== null) ?? null
   return version
 }

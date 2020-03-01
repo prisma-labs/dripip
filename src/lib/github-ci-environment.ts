@@ -1,4 +1,6 @@
-import { debug } from './debug'
+import { rootDebug } from './debug'
+
+const debug = rootDebug(__filename)
 
 export interface GithubCIEnvironment {
   runId: number
