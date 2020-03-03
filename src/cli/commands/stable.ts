@@ -60,12 +60,15 @@ export class Stable extends Command {
       })
     }
 
+    if (report.errors.length) {
+      guard({ context, report, json: flags.json })
+    }
+
     if (flags.json && report.stops.length) {
       Output.didNotPublish({ reasons: report.stops })
       return this.exit(0)
     }
 
-    guard({ context, report, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
     const publishPlan: PublishPlan = {

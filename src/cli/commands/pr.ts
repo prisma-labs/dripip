@@ -45,12 +45,14 @@ export class PR extends Command {
       })
     }
 
+    if (report.errors.length) {
+      guard({ context, report, json: flags.json })
+    }
+
     if (flags.json && report.stops.length) {
       Output.didNotPublish({ reasons: report.stops })
       return this.exit(0)
     }
-
-    guard({ report, context: context, json: flags.json })
 
     const versionPrefix = `0.0.0-pr.${context.currentBranch.pr!.number}.`
     const versionBuildNum = getNextPreReleaseBuildNum(
