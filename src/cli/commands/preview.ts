@@ -82,6 +82,11 @@ export class Preview extends Command {
       })
     }
 
+    if (flags.json && report.stops.length) {
+      Output.didNotPublish({ reasons: report.stops })
+      return this.exit(0)
+    }
+
     guard({ report, context, json: flags.json })
     const release = maybeRelease as Rel.Release // now validated
 
@@ -101,7 +106,7 @@ export class Preview extends Command {
     await Publish.publish(publishPlan)
 
     if (flags.json) {
-      Output.outputJson(publishPlan.release)
+      Output.didPublish({ release: publishPlan.release })
     }
   }
 }

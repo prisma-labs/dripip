@@ -30,7 +30,7 @@ const defaultOpts: Options = {
   showProgress: true,
 }
 
-type Release = {
+export interface Release {
   /**
    * The version to publish.
    */

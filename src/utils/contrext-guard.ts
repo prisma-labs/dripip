@@ -118,7 +118,7 @@ interface Requirement {
   level: 'prefer' | 'must'
 }
 
-interface ValidationResult {
+export interface ValidationResult {
   code: Validator['code']
   summary: string
   details: Record<string, unknown>
