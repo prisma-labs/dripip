@@ -1,5 +1,7 @@
 import { format } from 'util'
 import { casesHandled } from '../lib/utils'
+import { ValidationResult } from './contrext-guard'
+import { Release } from './publish'
 
 type Ok<D = Record<string, any>> = {
   kind: 'ok'
@@ -123,6 +125,20 @@ export function createException(
       context: context ?? {},
     },
   }
+}
+
+export function didNotPublish(input: { reasons: ValidationResult[] }): void {
+  outputJson({
+    kind: 'did_not_publish',
+    reasons: input.reasons,
+  })
+}
+
+export function didPublish(input: { release: Release }): void {
+  outputJson({
+    kind: 'did_publish',
+    ...input.release,
+  })
 }
 
 /**

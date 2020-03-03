@@ -45,7 +45,14 @@ export class PR extends Command {
       })
     }
 
-    guard({ report, context: context, json: flags.json })
+    if (report.errors.length) {
+      guard({ context, report, json: flags.json })
+    }
+
+    if (flags.json && report.stops.length) {
+      Output.didNotPublish({ reasons: report.stops })
+      return this.exit(0)
+    }
 
     const versionPrefix = `0.0.0-pr.${context.currentBranch.pr!.number}.`
     const versionBuildNum = getNextPreReleaseBuildNum(
@@ -86,7 +93,7 @@ export class PR extends Command {
     if (flags['dry-run']) {
       return Output.outputOk('dry_run', {
         report: report,
-        publishPlan,
+        publishPlan: publishPlan,
       })
     }
 
@@ -95,7 +102,7 @@ export class PR extends Command {
     await Publish.publish(publishPlan)
 
     if (flags.json) {
-      Output.outputJson(publishPlan.release)
+      Output.didPublish({ release: publishPlan.release })
     }
   }
 }
