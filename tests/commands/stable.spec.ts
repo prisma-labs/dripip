@@ -90,7 +90,7 @@ describe('preflight requirements include that', () => {
     await ctx.git.raw(['reset', '--hard', 'head~1']) // package.json
     await setupPackageJson()
     await ctx.git.addTag('1.0.0')
-    const result: any = await ctx.dripip('stable', { error: true })
+    const result: any = await ctx.dripip('stable')
     expect(result.failures).toMatchInlineSnapshot(`undefined`)
   })
 })
