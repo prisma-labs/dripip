@@ -4,6 +4,7 @@
   "semanticCommits": true,
   "labels": ["scope/deps"],
   "semanticCommitType": "deps",
+  "semanticCommitScope": "",
   "packageRules": [
     {
       "groupName": "renovate-meta",
