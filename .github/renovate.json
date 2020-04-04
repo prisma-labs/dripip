@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "schedule": ["sunday night every week"],
+      "schedule": ["after 12am on every monday"],
       "automerge": "true",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch"]
