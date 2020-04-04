@@ -2,14 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:js-lib"],
   "labels": ["scope/deps"],
+  "semanticCommits": true,
   "major": {
-    "semanticCommits": true,
     "semanticCommitType": "deps",
     "semanticCommitScope": ""
   },
-  "semanticCommits": true,
-  "semanticCommitType": "deps",
-  "semanticCommitScope": "",
   "packageRules": [
     {
       "groupName": "renovate-meta",
