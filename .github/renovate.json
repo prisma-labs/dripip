@@ -4,6 +4,12 @@
   "semanticCommits": true,
   "packageRules": [
     {
+      "groupName": "renovate-meta",
+      "updateTypes": ["lockFileMaintenance", "pin"],
+      "labels": "scope/chore",
+      "commitMessagePrefix": "chore:"
+    },
+    {
       "groupName": "dependencies (major)",
       "depTypeList": ["dependencies"],
       "updateTypes": ["major"],
