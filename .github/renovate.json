@@ -23,6 +23,12 @@
     },
     {
       "groupName": "devDependencies (non-major)",
+      "depTypeList": ["devDependencies"],
+      "updateTypes": ["patch", "minor"],
+      "commitMessagePrefix": "chore:"
+    },
+    {
+      "groupName": "devDependencies (non-major)",
       "schedule": ["after 1:00am and before 8:00am on monday"],
       "automerge": "true",
       "depTypeList": ["devDependencies"],
