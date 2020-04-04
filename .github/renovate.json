@@ -3,12 +3,13 @@
   "extends": ["config:js-lib"],
   "semanticCommits": true,
   "labels": ["scope/deps"],
+  "commitMessagePrefix": "deps",
   "packageRules": [
     {
       "groupName": "renovate-meta",
       "updateTypes": ["lockFileMaintenance", "pin"],
       "labels": ["scope/chore"],
-      "commitMessagePrefix": "chore:"
+      "commitMessagePrefix": "chore"
     },
     {
       "groupName": "dependencies (non-major)",
