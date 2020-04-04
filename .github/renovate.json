@@ -1,13 +1,33 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
+  "semanticCommits": true,
   "packageRules": [
+    {
+      "groupName": "dependencies (major)",
+      "depTypeList": ["dependencies"],
+      "updateTypes": ["major"],
+      "commitMessagePrefix": "deps:"
+    },
+    {
+      "groupName": "dependencies (non-major)",
+      "depTypeList": ["dependencies"],
+      "updateTypes": ["patch", "minor"],
+      "commitMessagePrefix": "deps:"
+    },
+    {
+      "groupName": "devDependencies (major)",
+      "depTypeList": ["devDependencies"],
+      "updateTypes": ["major"],
+      "commitMessagePrefix": "chore:"
+    },
     {
       "groupName": "devDependencies (non-major)",
       "schedule": ["after 1:00am and before 8:00am on monday"],
       "automerge": "true",
       "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"]
+      "updateTypes": ["patch", "minor"],
+      "commitMessagePrefix": "chore:"
     }
   ]
 }
