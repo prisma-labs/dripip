@@ -9,6 +9,7 @@
       "groupName": "renovate-meta",
       "updateTypes": ["lockFileMaintenance", "pin"],
       "labels": ["scope/chore"],
+      "semanticCommitScope": "deps",
       "commitMessagePrefix": "chore"
     },
     {
