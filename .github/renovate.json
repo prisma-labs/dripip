@@ -6,35 +6,35 @@
     {
       "groupName": "renovate-meta",
       "updateTypes": ["lockFileMaintenance", "pin"],
-      "labels": "scope/chore",
+      "labels": ["scope/chore"],
       "commitMessagePrefix": "chore:"
     },
     {
       "groupName": "dependencies (major)",
       "depTypeList": ["dependencies"],
       "updateTypes": ["major"],
-      "labels": "scope/deps",
+      "labels": ["scope/deps"],
       "semanticCommitType": "deps"
     },
     {
       "groupName": "dependencies (non-major)",
       "depTypeList": ["dependencies"],
       "updateTypes": ["patch", "minor"],
-      "labels": "scope/deps",
+      "labels": ["scope/deps"],
       "semanticCommitType": "deps"
     },
     {
       "groupName": "devDependencies (major)",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["major"],
-      "labels": "scope/chore",
+      "labels": ["scope/chore"],
       "semanticCommitType": "chore"
     },
     {
       "groupName": "devDependencies (non-major)",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
-      "labels": "scope/chore",
+      "labels": ["scope/chore"],
       "semanticCommitType": "chore"
     },
     {
@@ -43,7 +43,7 @@
       "automerge": "true",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
-      "labels": "scope/chore",
+      "labels": ["scope/chore"],
       "semanticCommitType": "chore"
     }
   ]
