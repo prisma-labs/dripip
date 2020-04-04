@@ -2,19 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:js-lib"],
   "semanticCommits": true,
+  "labels": ["scope/deps"],
   "packageRules": [
     {
       "groupName": "renovate-meta",
       "updateTypes": ["lockFileMaintenance", "pin"],
       "labels": ["scope/chore"],
       "commitMessagePrefix": "chore:"
-    },
-    {
-      "groupName": "dependencies (major)",
-      "depTypeList": ["dependencies"],
-      "updateTypes": ["major"],
-      "labels": ["scope/deps"],
-      "semanticCommitType": "deps"
     },
     {
       "groupName": "dependencies (non-major)",
