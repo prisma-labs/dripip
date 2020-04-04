@@ -25,6 +25,7 @@
       "depTypeList": ["devDependencies"],
       "updateTypes": ["major"],
       "labels": ["scope/chore"],
+      "semanticCommitScope": "deps",
       "semanticCommitType": "chore"
     },
     {
