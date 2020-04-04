@@ -25,15 +25,16 @@
       "depTypeList": ["devDependencies"],
       "updateTypes": ["major"],
       "labels": ["scope/chore"],
-      "semanticCommitScope": "deps",
-      "semanticCommitType": "chore"
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
     },
     {
       "groupName": "devDependencies (non-major)",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
       "labels": ["scope/chore"],
-      "semanticCommitType": "chore"
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
     },
     {
       "groupName": "devDependencies (non-major)",
@@ -42,7 +43,8 @@
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
       "labels": ["scope/chore"],
-      "semanticCommitType": "chore"
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
     }
   ]
 }
