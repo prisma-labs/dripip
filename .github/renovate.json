@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": ["config:js-lib"],
   "semanticCommits": true,
   "packageRules": [
     {
@@ -14,37 +14,37 @@
       "depTypeList": ["dependencies"],
       "updateTypes": ["major"],
       "labels": "scope/deps",
-      "commitMessagePrefix": "deps:"
+      "semanticCommitType": "deps"
     },
     {
       "groupName": "dependencies (non-major)",
       "depTypeList": ["dependencies"],
       "updateTypes": ["patch", "minor"],
       "labels": "scope/deps",
-      "commitMessagePrefix": "deps:"
+      "semanticCommitType": "deps"
     },
     {
       "groupName": "devDependencies (major)",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["major"],
       "labels": "scope/chore",
-      "commitMessagePrefix": "chore:"
+      "semanticCommitType": "chore"
     },
     {
       "groupName": "devDependencies (non-major)",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
       "labels": "scope/chore",
-      "commitMessagePrefix": "chore:"
+      "semanticCommitType": "chore"
     },
     {
       "groupName": "devDependencies (non-major)",
-      "schedule": ["after 1:00am and before 8:00am on monday"],
+      "schedule": ["before 8:00am on monday"],
       "automerge": "true",
       "depTypeList": ["devDependencies"],
       "updateTypes": ["patch", "minor"],
       "labels": "scope/chore",
-      "commitMessagePrefix": "chore:"
+      "semanticCommitType": "chore"
     }
   ]
 }
