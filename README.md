@@ -33,9 +33,7 @@ npm install --save-dev dripip
 
 ## Overview
 
-TODO This diagram is outdated
-
-![diagram](https://user-images.githubusercontent.com/284476/65810154-837d6580-e174-11e9-87e3-15ca31b66379.png)
+![diagram](https://dsc.cloud/661643/dripip.png)
 
 Dripip is a command line interface (CLI) for continuously releasing npm packages. It has support for three kinds of releases: pull-request releases, canary releases, stable releases. It builds on top of Git, Semver, Conventional Commit, and GitHub. Support for alterntive version control systems (e.g. Darcs) and platforms (e.g. GitLab) are not currently supported but they probably could be. The concepts of dripip are relatively general.
 
@@ -45,35 +43,60 @@ Continuous delivery means that every single meaningful commit to your library wi
 
 Pull-request releases occur on, surprise, pull-requests. You can have CI run them or do them ad-hoc from your machine, either workflow is fine (but choose one, as mixing will naturally lead to already-published errors). These kinds of releases are useful when link workflows are not good enough. For example your feature is a CLI that you want to make sure plays well with npx. Unlike other release types pull-request releases do not result in git tags. Instead, Dripip uses the npm registry to maintain its release state. The version pattern of a pull-request release is:
 
+```bash
+0.0.0-pr.${pr_num}.${pr_release_num}.${short_sha}
 ```
-0.0.0-pr-${pr-num}.${pr-release-num}.${short-sha}
+
+For example:
+
+```
+0.0.0-pr.45.4.9a3b2c1
 ```
 
 The `0.0.0` version is used because there is no meaningful semantic version to put here. It cannot be the version you're branching from since this version syntax would indicate it is a pre-release for that version, which it isn't, it's the opposite, a release _after_ it; It cannot be the version you're going towards because it cannot be generally known if a PR will result in a patch minor or major semver change; Even if Dripip tried to apply conventional commit analysis to the PR commits it wouldn't account for concurrent PRs and the generally async nature that PRs live in with regard to one another. So ultimately `0.0.0` is the most sensible general choice.
 
-The `pr-num` part is the pull-request number. The same one that you see on the GitHub UI, URL etc. of a pull-request.
+The `pr_num` part is the pull-request number. The same one that you see on the GitHub UI, URL etc. of a pull-request.
 
-The `pr-release-num` is a monotonically increasing 1-based (starts from 1, not 0) integer. It serves a few purposes. It provides orientation for humans at a glance, like how many releases has a PR had or where does a given release fall within the PR release set. Its functional purpose is to support correct lexical sorting. Without this little number it would be impossible to sort PR releases without some kind of additional metadata e.g. publish time. Thanks to this, when you run e.g. `npm versions`, you get an accurate ordering.
+The `pr_release_num` is a monotonically increasing 1-based (starts from 1, not 0) integer. It serves a few purposes. It provides orientation for humans at a glance, like how many releases has a PR had or where does a given release fall within the PR release set. Its functional purpose is to support correct lexical sorting. Without this little number it would be impossible to sort PR releases without some kind of additional metadata e.g. publish time. Thanks to this, when you run e.g. `npm versions`, you get an accurate ordering.
 
-The `short-sha` is what you see next to commits in much of the GitHub UI, including PR pages. Its primary purpose is to make it easy for you to tie a release back to something in your Git history. For example when looking at a PR page you can copy-paste the sha into search to find the exact commit for that release. Whatever the particular, this is just a convenient piece of information for you. Ultimately we develoeprs pratice many a crude workflow, habbits (console.log vs debugger anyone?).
+The `short_sha` is what you see next to commits in much of the GitHub UI, including PR pages. Its primary purpose is to make it easy for you to tie a release back to something in your Git history. For example when looking at a PR page you can copy-paste the sha into search to find the exact commit for that release. Whatever the particular, this is just a convenient piece of information for you. Ultimately we develoeprs pratice many a crude workflow, habbits (console.log vs debugger anyone?).
 
-When Dripip makes a pr release, it includes an upsert of a dist-tag of pattern `pr.${pr-num}`. This makes it very easy to install the latest published version for a given pull-request.
+When Dripip makes a pr release, it includes an upsert of a dist-tag of pattern `pr.${pr_num}`. This makes it very easy to install the latest published version for a given pull-request.
 
 ### Canary Releases
 
 Canary releases occur on trunk branches. These releases should be automated by your CI. They give your users access to what your stable version will become. The version pattern of a canary release is:
 
-```
-x.x.x-next.${series-num}
+```bash
+${next_stable}-next.${series_release_num}
 ```
 
-The `x.x.x` is whatever your upcoming stable version will be. The `series-num` is a monotonically increasing 1-based (starts from 1, not 0) integer. The first canary release after a stable release starts at `1`, increasing by 1 at each canary release, until a stable is cut at which point the numbering is reset upon the next canary release.
+For example:
+
+```
+1.2.0-next.4
+```
+
+The `next_stable` is whatever your upcoming stable version will be. The `series_release_num` is a monotonically increasing 1-based (starts from 1, not 0) integer. The first canary release after a stable release starts at `1`, increasing by 1 at each canary release, until a stable is cut at which point the numbering is reset upon the next canary release.
 
 When Dripip makes a canary release, it includes an upsert of a dist-tag called `next`. This makes it very easy to install the bleeding edge of your package. Additionally, a git tag called `next` is also maintained. Whatever commit the `next` tag is on is the same instance of your package that would be installed if a user did `npm install <your package>@next`.
 
 ### Stable Releases
 
-Stable releases occur on trunk branches. These releases should be managed however your team works, of course, but here are some general tips:
+Stable releases occur on trunk branches. The version pattern of a stable release
+is just a regular version, whatever the next stable is:
+
+```bash
+${next_stable}
+```
+
+For example:
+
+```
+1.2.0
+```
+
+These releases should be managed however your team works, of course, but here are some general tips:
 
 - Think very carefully before automating stable releases. You need to have very very high confidence in your/your team's git commit message practices to take this route. One wrong `BREAKING CHANGE` line can be all it takes to make an accidental major release that npm won't allow you to undo (unless you catch very quickly).
 - Releases on a cadence, such as every week or two, either manually or by automation, is often a good way to go.
