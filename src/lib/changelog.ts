@@ -1,5 +1,5 @@
 /**
- * This module deals with building changelogs from a serieses.
+ * This module deals with building changelogs from serieses.
  */
 import Chalk from 'chalk'
 import { stripIndents } from 'common-tags'

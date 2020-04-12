@@ -6,8 +6,7 @@ import { getLocationContext } from '../../utils/context'
 export class GetCurrentPRNum extends Command {
   static flags = {
     optional: flags.boolean({
-      description:
-        'Exit 0 if a pr number cannot be found for whatever reason (logical, error, ...)',
+      description: 'Exit 0 if a pr number cannot be found for whatever reason',
       default: false,
       char: 'r',
     }),
