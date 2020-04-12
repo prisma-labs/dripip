@@ -1,11 +1,7 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import { getContext } from '../../utils/context'
-import {
-  branchSynced,
-  isTrunk,
-  npmAuthSetup,
-} from '../../utils/context-checkers'
+import { branchSynced, isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import { publish, PublishPlan } from '../../utils/publish'
@@ -113,8 +109,7 @@ function haveMeaningfulCommitsInTheSeries(): Validator {
 function notAlreadyStableRelease(): Validator {
   return {
     code: 'commit_already_has_stable_release',
-    summary:
-      'A stable release requires the commit to have no existing stable release',
+    summary: 'A stable release requires the commit to have no existing stable release',
     run(ctx) {
       return ctx.series.current.releases.stable === null
     },

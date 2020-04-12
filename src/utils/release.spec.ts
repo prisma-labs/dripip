@@ -90,9 +90,7 @@ function n(): RawLogEntryValues {
 }
 
 function gitlog(...actions: (() => RawLogEntryValues)[]): Rel.Series {
-  const log = Git.parseRawLog(Git.serializeLog(actions.map(f => f()))).map(
-    Git.parseLogRefs
-  )
+  const log = Git.parseRawLog(Git.serializeLog(actions.map((f) => f()))).map(Git.parseLogRefs)
   const pstable = actions[0] === s ? (log.pop() as Git.LogEntry) : null
   return Rel.buildSeries([pstable, log])
 }

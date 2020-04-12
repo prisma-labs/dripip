@@ -94,10 +94,7 @@ function organize(series: Series): ChangeLog {
   return log
 }
 
-export function render(
-  series: Series,
-  opts: { type: 'plain' | 'markdown' }
-): string {
+export function render(series: Series, opts: { type: 'plain' | 'markdown' }): string {
   if (opts.type === 'markdown') return Markdown.render(organize(series))
   if (opts.type === 'plain') return Plain.render(organize(series))
   casesHandled(opts.type)
@@ -114,10 +111,10 @@ namespace Plain {
     ]
 
     const doc = order
-      .filter(sectionName => {
+      .filter((sectionName) => {
         return log[sectionName].commits.length > 0
       })
-      .map(sectionName => {
+      .map((sectionName) => {
         if (sectionName === 'breaking') {
           return (
             sectionTitle(log[sectionName].label) +
@@ -136,12 +133,7 @@ namespace Plain {
           )
         }
 
-        return (
-          sectionTitle(log[sectionName].label) +
-          '\n\n' +
-          sectionCommits(log[sectionName].commits) +
-          '\n'
-        )
+        return sectionTitle(log[sectionName].label) + '\n\n' + sectionCommits(log[sectionName].commits) + '\n'
       })
 
     if (log.unspecified.commits.length) {
@@ -149,9 +141,7 @@ namespace Plain {
         sectionTitle(log.unspecified.label) +
           '\n\n' +
           '  ' +
-          log.unspecified.commits
-            .map(c => `${Chalk.gray(shortSha(c))} ${c.message.raw}`)
-            .join('\n  ') +
+          log.unspecified.commits.map((c) => `${Chalk.gray(shortSha(c))} ${c.message.raw}`).join('\n  ') +
           '\n'
       )
     }
@@ -160,7 +150,7 @@ namespace Plain {
   }
 
   function sectionCommits(cs: Commit[], opts?: CommitRenderOpts): string {
-    return cs.map(c => sectionCommit(c, opts)).join('\n')
+    return cs.map((c) => sectionCommit(c, opts)).join('\n')
   }
 
   function sectionTitle(title: string): string {
@@ -174,11 +164,7 @@ namespace Plain {
     const type = opts?.type === true ? ' ' + c.message.parsed!.type + ':' : ''
     const description = ' ' + c.message.parsed!.description
     const breaking =
-      opts?.breaking === false
-        ? ''
-        : c.message.parsed!.breakingChange
-        ? Chalk.red(' (breaking)')
-        : ''
+      opts?.breaking === false ? '' : c.message.parsed!.breakingChange ? Chalk.red(' (breaking)') : ''
     return `  ${sha}${breaking}${type}${description}`
   }
 }
@@ -194,18 +180,16 @@ namespace Markdown {
     ]
 
     const doc = order
-      .filter(sectionName => {
+      .filter((sectionName) => {
         return log[sectionName].commits.length > 0
       })
-      .map(sectionName => {
+      .map((sectionName) => {
         if (sectionName === 'breaking') {
           return (
             stripIndents`
             ${sectionTitle(log[sectionName].label)}
   
-            ${log[sectionName].commits
-              .map(c => sectionCommit(c, { breaking: false }))
-              .join('\n')}
+            ${log[sectionName].commits.map((c) => sectionCommit(c, { breaking: false })).join('\n')}
           ` + '\n'
           )
         }
@@ -215,9 +199,7 @@ namespace Markdown {
             stripIndents`
             ${sectionTitle(log[sectionName].label)}
   
-            ${log[sectionName].commits
-              .map(c => sectionCommit(c, { type: true }))
-              .join('\n')}
+            ${log[sectionName].commits.map((c) => sectionCommit(c, { type: true })).join('\n')}
           ` + '\n'
           )
         }
@@ -236,9 +218,7 @@ namespace Markdown {
         stripIndents`
         ${sectionTitle(log.unspecified.label)}
 
-        - ${log.unspecified.commits
-          .map(c => `${shortSha(c)} ${c.message.raw}`)
-          .join('\n- ')}
+        - ${log.unspecified.commits.map((c) => `${shortSha(c)} ${c.message.raw}`).join('\n- ')}
       ` + '\n'
       )
     }
@@ -246,26 +226,18 @@ namespace Markdown {
     return doc.join('\n')
   }
   function sectionCommits(cs: Commit[]): string {
-    return cs.map(c => sectionCommit(c)).join('\n')
+    return cs.map((c) => sectionCommit(c)).join('\n')
   }
 
   function sectionTitle(title: string): string {
     return `#### ${title}`
   }
 
-  function sectionCommit(
-    c: Commit,
-    opts?: { type?: boolean; breaking?: boolean }
-  ): string {
+  function sectionCommit(c: Commit, opts?: { type?: boolean; breaking?: boolean }): string {
     const sha = shortSha(c)
     const type = opts?.type === true ? ' ' + c.message.parsed!.type + ':' : ''
     const description = ' ' + c.message.parsed!.description
-    const breaking =
-      opts?.breaking === false
-        ? ''
-        : c.message.parsed!.breakingChange
-        ? ' (breaking)'
-        : ''
+    const breaking = opts?.breaking === false ? '' : c.message.parsed!.breakingChange ? ' (breaking)' : ''
     return `- ${sha}${breaking}${type}${description}`
   }
 }

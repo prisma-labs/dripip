@@ -68,9 +68,7 @@ export async function getLocationContext({
 
   // Get repo info
 
-  const repoInfo =
-    githubCIEnvironment?.parsed.repo ??
-    (await Git.parseGithubRepoInfoFromGitConfig())
+  const repoInfo = githubCIEnvironment?.parsed.repo ?? (await Git.parseGithubRepoInfoFromGitConfig())
 
   // Get which branch is trunk, overridable
 

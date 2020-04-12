@@ -16,8 +16,7 @@ export class Preview extends Command {
         'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
     }),
     ['build-num']: flags.integer({
-      description:
-        'Force a build number. Should not be needed generally. For exceptional cases.',
+      description: 'Force a build number. Should not be needed generally. For exceptional cases.',
       char: 'n',
     }),
     'dry-run': flags.boolean({
@@ -68,17 +67,14 @@ export class Preview extends Command {
     const maybeRelease = Rel.getNextPreview(context.series)
 
     if (flags['build-num'] && !Rel.isNoReleaseReason(maybeRelease)) {
-      maybeRelease.version = Semver.setBuildNum(
-        maybeRelease.version as Semver.PreviewVer,
-        flags['build-num']
-      )
+      maybeRelease.version = Semver.setBuildNum(maybeRelease.version as Semver.PreviewVer, flags['build-num'])
     }
 
     if (flags['dry-run']) {
       return Output.outputOk('dry_run', {
         report: report,
         release: maybeRelease,
-        commits: context.series.commitsInNextPreview.map(c => c.message),
+        commits: context.series.commitsInNextPreview.map((c) => c.message),
       })
     }
 
@@ -121,8 +117,7 @@ export class Preview extends Command {
 function haveCommitsInTheSeries(): Validator {
   return {
     code: 'series_empty',
-    summary:
-      'A preview release must have at least one commit since the last preview',
+    summary: 'A preview release must have at least one commit since the last preview',
     run(ctx) {
       const release = Rel.getNextPreview(ctx.series)
       return release !== 'empty_series'
@@ -146,13 +141,9 @@ function haveMeaningfulCommitsInTheSeries(): Validator {
 function notAlreadyStableOrPreviewReleased(): Validator {
   return {
     code: 'preview_on_commit_with_preview_and_or_stable',
-    summary:
-      'A preview release requires the commit to have no existing stable or preview release.',
+    summary: 'A preview release requires the commit to have no existing stable or preview release.',
     run(ctx) {
-      if (
-        ctx.series.current.releases.stable &&
-        ctx.series.current.releases.preview
-      ) {
+      if (ctx.series.current.releases.stable && ctx.series.current.releases.preview) {
         return { kind: 'fail', details: { subCode: 'preview_and_stable' } }
       }
 

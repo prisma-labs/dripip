@@ -113,9 +113,7 @@ export async function publish(input: PublishPlan) {
 
   // Tag the git commit
   //
-  const versionTag = opts.gitTagVPrefix
-    ? 'v' + release.version
-    : release.version
+  const versionTag = opts.gitTagVPrefix ? 'v' + release.version : release.version
 
   if (opts.gitTag === 'all' || opts.gitTag === 'just_version') {
     await git.addAnnotatedTag(versionTag, versionTag)

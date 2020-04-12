@@ -16,11 +16,9 @@ export function getPullRequestReleaseVersionForLocation(input: {
 }): null | string {
   const shortSHA = input.sha.slice(0, 7)
   const versions = getPackageVersions(input.packageName)
-  const pattern = new RegExp(
-    `0\\.0\\.0-pr\\.${input.prNum}\\.\\d+\\.${shortSHA}`
-  )
+  const pattern = new RegExp(`0\\.0\\.0-pr\\.${input.prNum}\\.\\d+\\.${shortSHA}`)
   debug('looking for version matching pattern %O', pattern)
-  const version = versions.find(v => v.match(pattern) !== null) ?? null
+  const version = versions.find((v) => v.match(pattern) !== null) ?? null
   return version
 }
 
@@ -40,10 +38,7 @@ export function getPullRequestReleaseVersionForLocation(input: {
  * If versions are found, then the greatest build number is incremented by 1 and
  * then returned.
  */
-export function getNextPreReleaseBuildNum(
-  packageName: string,
-  prefix: string
-): number {
+export function getNextPreReleaseBuildNum(packageName: string, prefix: string): number {
   const versions = getPackageVersions(packageName)
   const nextBuildNum = getNextPreReleaseBuildNumFromVersions(prefix, versions)
   return nextBuildNum
@@ -52,21 +47,18 @@ export function getNextPreReleaseBuildNum(
 /**
  * Pure helper for getting next build num of a pre-release series.
  */
-function getNextPreReleaseBuildNumFromVersions(
-  prefix: string,
-  versions: string[]
-): number {
+function getNextPreReleaseBuildNumFromVersions(prefix: string, versions: string[]): number {
   const filteredSorted = versions
-    .filter(v => v.startsWith(prefix))
-    .map(v => {
+    .filter((v) => v.startsWith(prefix))
+    .map((v) => {
       const match = v.slice(prefix.length).match(/^(\d+)$|^(\d+)\./)
       if (match === null) return null
       if (match[1] !== undefined) return match[1]
       if (match[2] !== undefined) return match[2]
       // never
     })
-    .filter(v => v !== null)
-    .map(v => Number(v))
+    .filter((v) => v !== null)
+    .map((v) => Number(v))
     .sort(numericAscending)
 
   if (filteredSorted.length === 0) return 1

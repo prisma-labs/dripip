@@ -96,10 +96,7 @@ export function parse(message: string): null | ConventionalCommit {
         completesInitialDevelopment = true
       } else if (para.match(/^\s*BREAKING[-\s]CHANGE\s*:\s*.*/)) {
         currSection = 'breaking_change'
-        breakingChange =
-          (breakingChange ?? '') +
-          '\n\n' +
-          para.replace(/^BREAKING[-\s]CHANGE\s*:/, '')
+        breakingChange = (breakingChange ?? '') + '\n\n' + para.replace(/^BREAKING[-\s]CHANGE\s*:/, '')
       } else if (para.match(/^\s*[\w-]+\s*:.*/)) {
         currSection = 'footers'
         rawFooters.push(para)
@@ -113,7 +110,7 @@ export function parse(message: string): null | ConventionalCommit {
       }
     }
 
-    footers = rawFooters.map(f => {
+    footers = rawFooters.map((f) => {
       const [, type, body] = f.trim().split(/^\s*([\w-]+)\s*:/)
       return {
         type: type.trim(),

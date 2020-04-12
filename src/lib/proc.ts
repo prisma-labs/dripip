@@ -19,14 +19,9 @@ export type RunOptions = SpawnOptions & {
 /**
  * A wrapper around spawn, easier to use.
  */
-export async function run(
-  commandRaw: string,
-  options?: RunOptions
-): Promise<SuccessfulRunResult> {
+export async function run(commandRaw: string, options?: RunOptions): Promise<SuccessfulRunResult> {
   const command = parseCommandString(commandRaw)
-  const env = options?.envAdditions
-    ? { ...process.env, ...options.envAdditions }
-    : process.env
+  const env = options?.envAdditions ? { ...process.env, ...options.envAdditions } : process.env
 
   const child = spawn(command.name, command.args, {
     ...options,
@@ -63,7 +58,7 @@ export async function run(
       stdout += String(chunk)
     }
 
-    child.once('error', error => {
+    child.once('error', (error) => {
       const richError = createCommandError({
         command: commandRaw,
         underlyingError: error,
@@ -217,10 +212,7 @@ function isFailedExitCode(exitCode: null | number): boolean {
 export function isProcessFromProjectBin(packageJsonPath: string): boolean {
   const processBinPath = process.argv[1]
   const processBinDirPath = Path.dirname(processBinPath)
-  const projectBinDirPath = Path.join(
-    Path.dirname(packageJsonPath),
-    'node_modules/.bin'
-  )
+  const projectBinDirPath = Path.join(Path.dirname(packageJsonPath), 'node_modules/.bin')
   return processBinDirPath !== projectBinDirPath
 }
 

@@ -36,11 +36,7 @@ interface SetupPass {
   reason: PassReason
 }
 
-type FailReason =
-  | 'no_npmrc'
-  | 'npmrc_missing_auth'
-  | 'env_var_empty'
-  | 'no_env_var'
+type FailReason = 'no_npmrc' | 'npmrc_missing_auth' | 'env_var_empty' | 'no_env_var'
 
 interface SetupFail {
   kind: 'fail'

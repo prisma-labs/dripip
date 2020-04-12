@@ -33,10 +33,7 @@ function detectScriptRunner(): null | 'npm' | 'yarn' {
  *
  * Either way, it should not be noticable to the user of this function.
  */
-async function publish(
-  manType: PackageManagerType,
-  input: { version: string; tag: string }
-): Promise<void> {
+async function publish(manType: PackageManagerType, input: { version: string; tag: string }): Promise<void> {
   if (manType === 'yarn') {
     const runString = `yarn publish --tag ${input.tag} --no-git-tag-version --new-version ${input.version}`
     await proc.run(runString, { require: true })

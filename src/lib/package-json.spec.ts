@@ -54,7 +54,7 @@ describe('write', () => {
 describe('update', () => {
   it('reads, updates, then writes back', async () => {
     ws.fs.write('package.json', { name: 'foo', version: '0.0.0' })
-    await pj.update(p => Object.assign(p, { version: '1.0.0' }))
+    await pj.update((p) => Object.assign(p, { version: '1.0.0' }))
     expect(ws.fs.read('package.json', 'json')).toMatchInlineSnapshot(`
       Object {
         "name": "foo",

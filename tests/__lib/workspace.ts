@@ -75,22 +75,17 @@ async function doCreateWorkspace(optsGiven: Options): Promise<Workspace> {
         : 'off'
     const ver = '8'
     const testVer = opts.cache?.version ?? 'off'
-    const currentGitBranch = (
-      await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])
-    ).trim()
+    const currentGitBranch = (await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
     cacheKey = `v${ver}-yarnlock-${yarnLockHash}-gitbranch-${currentGitBranch}-testv${testVer}`
   } else {
-    cacheKey = Math.random()
-      .toString()
-      .slice(2)
+    cacheKey = Math.random().toString().slice(2)
   }
 
   const projectName = require('../../package.json').name
   const dir = {} as Workspace['dir']
   dir.path = `/tmp/${projectName}-integration-test-project-bases/${opts.name}-${cacheKey}`
 
-  dir.pathRelativeToSource =
-    '../' + Path.relative(dir.path, Path.join(__dirname, '../..'))
+  dir.pathRelativeToSource = '../' + Path.relative(dir.path, Path.join(__dirname, '../..'))
 
   if ((await jetpack.existsAsync(dir.path)) !== false) {
     dir.cacheHit = true

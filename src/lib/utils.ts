@@ -9,12 +9,7 @@ export function dump(arg: unknown): void {
 export function indentBlock(size: number, block: string): string {
   return block
     .split('\n')
-    .map(
-      line =>
-        range(size)
-          .map(constant(' '))
-          .join('') + line
-    )
+    .map((line) => range(size).map(constant(' ')).join('') + line)
     .join('\n')
 }
 
@@ -24,7 +19,7 @@ export const indentBlock4 = indentBlock.bind(null, 4)
  * Create a function that will only ever return the given value when called.
  */
 export const constant = <T>(x: T): (() => T) => {
-  return function() {
+  return function () {
     return x
   }
 }
@@ -100,7 +95,7 @@ export function isEmpty(x: {} | unknown[]): boolean {
  * Pause in time for given milliseconds.
  */
 export function delay(milliseconds: number): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, 1000)
   })
 }

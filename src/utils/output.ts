@@ -76,10 +76,7 @@ export function output(message: Message, opts: OutputOptions): void {
       s += `An exception occured: ${message.type}\n`
       s += `\n`
       s += message.data.summary
-      if (
-        message.data.context &&
-        Object.keys(message.data.context).length > 0
-      ) {
+      if (message.data.context && Object.keys(message.data.context).length > 0) {
         s += `\n`
         s += format('%j', message.data.context)
       }

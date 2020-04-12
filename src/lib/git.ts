@@ -18,17 +18,14 @@ function parseGitTags(tagsString: null | string): string[] {
   const tags = tagsString
     .trim()
     .split('\n')
-    .map(t => t.trim())
+    .map((t) => t.trim())
   return tags
 }
 
 /**
  * Get tags at the given commit or HEAD by default.
  */
-export async function gitGetTags(
-  git: Simple,
-  opts?: { ref?: string }
-): Promise<string[]> {
+export async function gitGetTags(git: Simple, opts?: { ref?: string }): Promise<string[]> {
   const ref = opts?.ref ?? 'HEAD'
   const tagsString: string | null = await git.tag({ '--points-at': ref })
   const tags = parseGitTags(tagsString)
@@ -44,7 +41,7 @@ export async function gitGetTagsInRepo(git: Simple): Promise<string[]> {
   const tags = tagsString
     .trim()
     .split('\n')
-    .map(t => t.trim())
+    .map((t) => t.trim())
   return tags
 }
 
@@ -67,11 +64,9 @@ export async function gitResetToInitialCommit(git: Simple): Promise<void> {
   await git.raw(['clean', '-d', '-x', '-f'])
   const trunkBranch = 'master'
   await git.raw(`checkout ${trunkBranch}`.split(' '))
-  await git
-    .raw('rev-list --max-parents=0 HEAD'.split(' '))
-    .then(initialCommitSHA => {
-      git.raw(['reset', '--hard', initialCommitSHA.trim()])
-    }),
+  await git.raw('rev-list --max-parents=0 HEAD'.split(' ')).then((initialCommitSHA) => {
+    git.raw(['reset', '--hard', initialCommitSHA.trim()])
+  }),
     gitDeleteAllTagsInRepo(git)
 }
 
@@ -79,10 +74,7 @@ export async function gitResetToInitialCommit(git: Simple): Promise<void> {
  * Get the SHA at the given commit or HEAD by default. By default returns the
  * full SHA.
  */
-export async function gitGetSha(
-  git: Simple,
-  opts?: { short?: boolean; ref?: string }
-): Promise<string> {
+export async function gitGetSha(git: Simple, opts?: { short?: boolean; ref?: string }): Promise<string> {
   const args = []
   if (opts?.short === true) args.push('--short')
   if (typeof opts?.ref === 'string') {
@@ -105,16 +97,8 @@ export async function gitInitRepo(git: Simple): Promise<void> {
 /**
  * Create an empty commit in the repo.
  */
-export async function gitCreateEmptyCommit(
-  git: Simple,
-  messge?: string
-): Promise<void> {
-  await git.raw([
-    'commit',
-    '--allow-empty',
-    '--message',
-    messge ?? 'Nothing to see here, move along',
-  ])
+export async function gitCreateEmptyCommit(git: Simple, messge?: string): Promise<void> {
+  await git.raw(['commit', '--allow-empty', '--message', messge ?? 'Nothing to see here, move along'])
 }
 
 export async function createFixCommit(git: Simple, msg?: string) {
@@ -210,12 +194,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //   return { isPR: false, inferredBy: 'branch_no_open_pr' }
 // }
 
-export type SyncStatus =
-  | 'needs_pull'
-  | 'needs_push'
-  | 'synced'
-  | 'diverged'
-  | 'remote_needs_branch'
+export type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged' | 'remote_needs_branch'
 
 /**
  * Check how the local branch is not in sync or is with the remote.
@@ -225,19 +204,16 @@ export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
   await git.remote(['update'])
   const remoteHeads = await git.raw(['ls-remote', '--heads'])
   const branchSumamry = await git.branch({})
-  const branchOnRemoteRE = new RegExp(
-    `.*refs/heads/${branchSumamry.current}$`,
-    'm'
-  )
+  const branchOnRemoteRE = new RegExp(`.*refs/heads/${branchSumamry.current}$`, 'm')
 
   if (remoteHeads.match(branchOnRemoteRE) === null) {
     return 'remote_needs_branch'
   }
 
   const [local, remote, base] = await Promise.all([
-    git.raw(['rev-parse', '@']).then(sha => sha.trim()),
-    git.raw(['rev-parse', '@{u}']).then(sha => sha.trim()),
-    git.raw(['merge-base', '@', '@{u}']).then(sha => sha.trim()),
+    git.raw(['rev-parse', '@']).then((sha) => sha.trim()),
+    git.raw(['rev-parse', '@{u}']).then((sha) => sha.trim()),
+    git.raw(['merge-base', '@', '@{u}']).then((sha) => sha.trim()),
   ])
 
   return local === remote
@@ -258,9 +234,7 @@ export interface BasicGithubRepoInfo {
  * Extract the github repo name and owner from the git config. If anything goes
  * wrong during extraction a specific error about it will be thrown.
  */
-export async function parseGithubRepoInfoFromGitConfig(): Promise<
-  BasicGithubRepoInfo
-> {
+export async function parseGithubRepoInfoFromGitConfig(): Promise<BasicGithubRepoInfo> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 
@@ -276,16 +250,12 @@ export async function parseGithubRepoInfoFromGitConfig(): Promise<
 
   const gitOriginURL: string = gitOrigin['url']
   if (gitOriginURL === undefined) {
-    throw new Error(
-      'Could not find a URL in your remote origin config in your git config'
-    )
+    throw new Error('Could not find a URL in your remote origin config in your git config')
   }
 
   const githubRepoURL = parseGitHubURL(gitOriginURL)
   if (githubRepoURL === null) {
-    throw new Error(
-      'Could not parse the URL in your remote origin config in your git config'
-    )
+    throw new Error('Could not parse the URL in your remote origin config in your git config')
   }
   if (githubRepoURL.owner === null) {
     throw new Error(
@@ -333,7 +303,7 @@ export async function findTag(
   let tagsByCommits: string[][]
   if (ops.since) {
     const logs = await log(git, { since: ops?.since ?? undefined })
-    tagsByCommits = logs.map(log => log.tags)
+    tagsByCommits = logs.map((log) => log.tags)
   } else {
     // TODO this method flattens tags on same commit to appear as adjacent tags
     // in the list. Seems incidentally technically ok for our current algorithm but dubious...
@@ -341,7 +311,7 @@ export async function findTag(
       // '--sort': 'taggerdate',
       '--merged': branchSummary.current,
     })
-    tagsByCommits = parseGitTags(tagsString).map(tag => [tag])
+    tagsByCommits = parseGitTags(tagsString).map((tag) => [tag])
   }
 
   let lastTag: null | string = null
@@ -374,10 +344,7 @@ export type LogEntry = {
  * Fetch commit log from given ref or else its entirety. The since commit is
  * inclusive. If given, it will be in your result set. Oldest commit comes first.
  */
-export async function log(
-  git: Simple,
-  ops?: { since?: null | string }
-): Promise<LogEntry[]> {
+export async function log(git: Simple, ops?: { since?: null | string }): Promise<LogEntry[]> {
   const gitArgs = ['log', `--format=${gitLogFormat(commitDatums)}`]
   // ~1 makes the range inclusive, since-commit will be in the result set
   if (ops?.since) gitArgs.push(`${ops.since}~1..head`)
@@ -397,13 +364,10 @@ export const commitDatums: CommitDatum[] = [
   // { name: 'subject', code: 's' },
   // { name: 'body', code: 'b' },
 ]
-const commitDatumNames = commitDatums.map(datum => datum.name)
+const commitDatumNames = commitDatums.map((datum) => datum.name)
 
 export function gitLogFormat(commitDatums: CommitDatum[]): string {
-  return (
-    commitDatums.map(part => '%' + part.code).join(logEntryValueSepartaor) +
-    logEntrySeparator
-  )
+  return commitDatums.map((part) => '%' + part.code).join(logEntryValueSepartaor) + logEntrySeparator
 }
 
 export function parseRawLog(rawLog: string): LogEntryWithRefs[] {
@@ -441,7 +405,7 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
     tags: refs
       .trim()
       .split(', ')
-      .map(ref => {
+      .map((ref) => {
         const result = ref.match(/tag: (.+)/)
         if (!result) return null
         return result[1]
@@ -458,20 +422,13 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
  */
 export function serializeLog(values: [string, string, string][]): string {
   if (values.length === 0) return ''
-  return (
-    values.map(v => v.join(logEntryValueSepartaor)).join(logEntrySeparator) +
-    logEntrySeparator
-  )
+  return values.map((v) => v.join(logEntryValueSepartaor)).join(logEntrySeparator) + logEntrySeparator
 }
 
-export async function* streamLog(opts?: {
-  cwd?: string
-}): AsyncGenerator<LogEntry> {
-  const logStream = CP.spawn(
-    'git',
-    ['log', `--format=${gitLogFormat(commitDatums)}`, '--no-merges'],
-    { cwd: opts?.cwd }
-  ).stdout
+export async function* streamLog(opts?: { cwd?: string }): AsyncGenerator<LogEntry> {
+  const logStream = CP.spawn('git', ['log', `--format=${gitLogFormat(commitDatums)}`, '--no-merges'], {
+    cwd: opts?.cwd,
+  }).stdout
 
   let buffer = ''
   for await (const rawLogChunk of logStream) {

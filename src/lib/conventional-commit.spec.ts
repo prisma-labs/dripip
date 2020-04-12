@@ -5,32 +5,22 @@ describe(calcBumpType.name, () => {
     expect(calcBumpType(false, ['unknown'])).toEqual(null)
     expect(calcBumpType(false, ['unknown', 'fix: 1'])).toEqual('patch')
     expect(calcBumpType(false, ['unknown', 'feat: 1'])).toEqual('minor')
-    expect(
-      calcBumpType(false, ['unknown\n\nBREAKING CHANGE: foo\nfoobar'])
-    ).toEqual(null)
-    expect(
-      calcBumpType(false, ['unknown', 'fix: 1\n\nBREAKING CHANGE: foo'])
-    ).toEqual('major')
+    expect(calcBumpType(false, ['unknown\n\nBREAKING CHANGE: foo\nfoobar'])).toEqual(null)
+    expect(calcBumpType(false, ['unknown', 'fix: 1\n\nBREAKING CHANGE: foo'])).toEqual('major')
   })
 
   describe('initial development', () => {
     it('BREAKING CHANGE bumps minor', () => {
-      expect(
-        calcBumpType(true, ['fix: 1', 'fix: 2\n\nBREAKING CHANGE: foobar'])
-      ).toEqual('minor')
+      expect(calcBumpType(true, ['fix: 1', 'fix: 2\n\nBREAKING CHANGE: foobar'])).toEqual('minor')
     })
     it('initial development is completed by COMPLETES INITIAL DEVELOPMENT', () => {
-      expect(
-        calcBumpType(true, ['fix: 1\n\nCOMPLETES INITIAL DEVELOPMENT'])
-      ).toEqual('major')
+      expect(calcBumpType(true, ['fix: 1\n\nCOMPLETES INITIAL DEVELOPMENT'])).toEqual('major')
     })
   })
 
   describe('post initial development', () => {
     it('COMPLETES INITIAL DEVELOPMENT is ignored', () => {
-      expect(
-        calcBumpType(false, ['fix: 1\n\nCOMPLETES INITIAL DEVELOPMENT'])
-      ).toEqual('patch')
+      expect(calcBumpType(false, ['fix: 1\n\nCOMPLETES INITIAL DEVELOPMENT'])).toEqual('patch')
     })
 
     it('"fix" bumps patch', () => {
@@ -46,9 +36,7 @@ describe(calcBumpType.name, () => {
     })
 
     it('presence of "BREAKING CHANGE:" bumps major', () => {
-      expect(
-        calcBumpType(false, ['anything: 1\n\nBREAKING CHANGE:\nfoobar'])
-      ).toEqual('major')
+      expect(calcBumpType(false, ['anything: 1\n\nBREAKING CHANGE:\nfoobar'])).toEqual('major')
     })
 
     it('an unknown change type bumps patch', () => {
@@ -61,24 +49,16 @@ describe(calcBumpType.name, () => {
     })
 
     it('feat-level changes ignored if already bumped past minor', () => {
-      expect(
-        calcBumpType(false, ['feat: 1', 'fix: 1\n\nBREAKING CHANGE: foo'])
-      ).toEqual('major')
-      expect(
-        calcBumpType(false, ['fix: 1\n\nBREAKING CHANGE: foo', 'feat: 1'])
-      ).toEqual('major')
+      expect(calcBumpType(false, ['feat: 1', 'fix: 1\n\nBREAKING CHANGE: foo'])).toEqual('major')
+      expect(calcBumpType(false, ['fix: 1\n\nBREAKING CHANGE: foo', 'feat: 1'])).toEqual('major')
     })
 
     it('chore-type commits are ignored', () => {
       expect(calcBumpType(false, ['chore: 1'])).toEqual(null)
       expect(calcBumpType(false, ['chore: 1', 'fix: 1'])).toEqual('patch')
       expect(calcBumpType(false, ['chore: 1', 'feat: 1'])).toEqual('minor')
-      expect(
-        calcBumpType(false, ['chore: 1\n\nBREAKING CHANGE: foo\nfoobar'])
-      ).toEqual(null)
-      expect(
-        calcBumpType(false, ['chore: 1', 'fix: 1\n\nBREAKING CHANGE: foo'])
-      ).toEqual('major')
+      expect(calcBumpType(false, ['chore: 1\n\nBREAKING CHANGE: foo\nfoobar'])).toEqual(null)
+      expect(calcBumpType(false, ['chore: 1', 'fix: 1\n\nBREAKING CHANGE: foo'])).toEqual('major')
     })
   })
 })

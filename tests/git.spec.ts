@@ -17,7 +17,7 @@ describe('streamLog', () => {
     for await (const entry of Git.streamLog({ cwd: ws.dir.path })) {
       entries.push(entry)
     }
-    entries.forEach(e => (e.sha = '__sha__'))
+    entries.forEach((e) => (e.sha = '__sha__'))
     expect(entries).toMatchInlineSnapshot(`
       Array [
         Object {

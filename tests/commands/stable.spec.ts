@@ -97,9 +97,7 @@ describe('preflight requirements include that', () => {
 
 describe('increments upon the previous stable release based on conventional commit analysis of commits since latter', () => {
   beforeEach(async () => {
-    await ctx.git
-      .raw(['push', '-f', 'origin', '--delete', 'foobar'])
-      .catch(() => null)
+    await ctx.git.raw(['push', '-f', 'origin', '--delete', 'foobar']).catch(() => null)
     await ctx.git.checkoutLocalBranch('foobar')
     await ctx.git.raw(['push', '-u', 'origin', 'foobar'])
   })

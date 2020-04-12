@@ -155,10 +155,7 @@ function logEntryToCommit(log: Git.LogEntry): Commit {
 /**
  * Build structured series data from a raw series log.
  */
-export function buildSeries([
-  previousStableLogEntry,
-  commitsSincePrevStable,
-]: SeriesLog): Series {
+export function buildSeries([previousStableLogEntry, commitsSincePrevStable]: SeriesLog): Series {
   if (previousStableLogEntry === null && commitsSincePrevStable.length === 0) {
     throw new Error(
       `Cannot build release series with given data. There is no previous stable release and no commits since. This would indicate an unexpected error or working with a git repo that has zero commits. The latter should be guarded by upstream checks. Therefore this is bad. There must be a bug.`
@@ -167,7 +164,7 @@ export function buildSeries([
 
   let hasBreakingChange = false
 
-  const commitsInNextStable = commitsSincePrevStable.map(c => {
+  const commitsInNextStable = commitsSincePrevStable.map((c) => {
     const parsedMessage = ConventionalCommit.parse(c.message)
     if (parsedMessage?.breakingChange) {
       hasBreakingChange = true
@@ -186,22 +183,15 @@ export function buildSeries([
     } as MaybePreviewCommit
   })
 
-  const previousPreviewIndex = commitsInNextStable.findIndex(
-    c => c.releases.preview !== null
-  )
+  const previousPreviewIndex = commitsInNextStable.findIndex((c) => c.releases.preview !== null)
 
   const previousPreview =
-    previousPreviewIndex === -1
-      ? null
-      : (commitsInNextStable[previousPreviewIndex]! as PreviewCommit)
+    previousPreviewIndex === -1 ? null : (commitsInNextStable[previousPreviewIndex]! as PreviewCommit)
 
   const commitsInNextPreview: UnreleasedCommit[] =
     previousPreviewIndex === -1
       ? (commitsInNextStable as UnreleasedCommit[])
-      : (commitsInNextStable.slice(
-          0,
-          previousPreviewIndex
-        ) as UnreleasedCommit[])
+      : (commitsInNextStable.slice(0, previousPreviewIndex) as UnreleasedCommit[])
 
   const previousStable =
     previousStableLogEntry === null
@@ -214,12 +204,8 @@ export function buildSeries([
           },
           nonReleaseTags: previousStableLogEntry.tags.filter(isUnknownTag),
           releases: {
-            stable: Semver.parse(
-              previousStableLogEntry.tags.find(isStableTag)!
-            )!,
-            preview: Semver.parsePreview(
-              previousStableLogEntry.tags.find(isPreviewTag) ?? ''
-            ),
+            stable: Semver.parse(previousStableLogEntry.tags.find(isStableTag)!)!,
+            preview: Semver.parsePreview(previousStableLogEntry.tags.find(isPreviewTag) ?? ''),
           },
         } as StableCommit)
 
@@ -278,16 +264,14 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
 
   const bumpType = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
-    series.commitsInNextStable.map(c => c.message.raw)
+    series.commitsInNextStable.map((c) => c.message.raw)
   )
 
   if (bumpType === null) return 'no_meaningful_change'
 
   const version = Semver.incStable(
     bumpType,
-    series.previousStable === null
-      ? Semver.zeroVer
-      : series.previousStable.releases.stable
+    series.previousStable === null ? Semver.zeroVer : series.previousStable.releases.stable
   )
 
   return { bumpType, version }
@@ -304,15 +288,14 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
   // todo test this case, it was fixed without regression test being added
   const bumpTypeContributionFromCommitsInNextPreview = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
-    series.commitsInNextPreview.map(c => c.message.raw)
+    series.commitsInNextPreview.map((c) => c.message.raw)
   )
 
-  if (bumpTypeContributionFromCommitsInNextPreview === null)
-    return 'no_meaningful_change'
+  if (bumpTypeContributionFromCommitsInNextPreview === null) return 'no_meaningful_change'
 
   const bumpType = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
-    series.commitsInNextStable.map(c => c.message.raw)
+    series.commitsInNextStable.map((c) => c.message.raw)
   )
 
   // Stable is superset of preview so based on guard above there MUST be a
@@ -323,16 +306,12 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
     )
   }
 
-  const nextStable = Semver.incStable(
-    bumpType,
-    series.previousStable?.releases.stable ?? Semver.zeroVer
-  )
+  const nextStable = Semver.incStable(bumpType, series.previousStable?.releases.stable ?? Semver.zeroVer)
 
   const version = Semver.stableToPreview(
     nextStable,
     'next',
-    (series.previousPreview?.releases.preview.preRelease.buildNum ??
-      Semver.zeroBuildNum) + 1
+    (series.previousPreview?.releases.preview.preRelease.buildNum ?? Semver.zeroBuildNum) + 1
   )
 
   return { bumpType, version }

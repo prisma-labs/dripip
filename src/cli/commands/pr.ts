@@ -55,14 +55,8 @@ export class PR extends Command {
     }
 
     const versionPrefix = `0.0.0-pr.${context.currentBranch.pr!.number}.`
-    const versionBuildNum = getNextPreReleaseBuildNum(
-      context.package.name,
-      versionPrefix
-    )
-    const version = `${versionPrefix}${versionBuildNum}.${context.series.current.sha.slice(
-      0,
-      7
-    )}`
+    const versionBuildNum = getNextPreReleaseBuildNum(context.package.name, versionPrefix)
+    const version = `${versionPrefix}${versionBuildNum}.${context.series.current.sha.slice(0, 7)}`
 
     const versionInfo = {
       major: 0,
@@ -114,8 +108,7 @@ export class PR extends Command {
 function branchHasOpenPR(): Validator {
   return {
     code: 'pr_release_without_open_pr',
-    summary:
-      'Pull-Request releases are only supported on branches with _open_ pull-requests',
+    summary: 'Pull-Request releases are only supported on branches with _open_ pull-requests',
     run(ctx) {
       return ctx.currentBranch.pr !== null
     },

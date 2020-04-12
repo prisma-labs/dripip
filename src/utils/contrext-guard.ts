@@ -38,10 +38,7 @@ export function check(options: Options) {
     run() {
       return contextualizedCheckers.reduce((results, requirement) => {
         const resultSugar = requirement.validator.run(options.context)
-        const result =
-          typeof resultSugar === 'boolean'
-            ? booleanResult(resultSugar)
-            : resultSugar
+        const result = typeof resultSugar === 'boolean' ? booleanResult(resultSugar) : resultSugar
 
         const group =
           result.kind === 'pass'
@@ -100,7 +97,7 @@ export function guard(input: EnforceInput): void {
     } else {
       throw new PassthroughCLIError(
         input.report.errors
-          .map(failure => {
+          .map((failure) => {
             return failure.summary
           })
           .join('\n - ')
@@ -172,10 +169,7 @@ export class CLIStop extends CLIError {
     if (this.input.json) {
       return JSON.stringify({ reasons: this.input.reasons })
     } else {
-      return (
-        'Nothing to do:\n\n' +
-        this.input.reasons.map(r => r.summary).join('\n -')
-      )
+      return 'Nothing to do:\n\n' + this.input.reasons.map((r) => r.summary).join('\n -')
     }
   }
 }

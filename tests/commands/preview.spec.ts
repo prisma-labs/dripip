@@ -1,8 +1,4 @@
-import {
-  createFeatCommit,
-  createFixCommit,
-  gitCreateEmptyCommit,
-} from '../../src/lib/git'
+import { createFeatCommit, createFixCommit, gitCreateEmptyCommit } from '../../src/lib/git'
 
 const ctx = createContext('preview')
 
@@ -407,10 +403,7 @@ it('if patch-affecting and minor-affecting commits in release bump type is minor
 it('if patch-affecting and minor-affecting and breaking change commits in release bump type is major', async () => {
   await gitCreateEmptyCommit(ctx.git, 'fix: 1')
   await gitCreateEmptyCommit(ctx.git, 'feat: 1')
-  await gitCreateEmptyCommit(
-    ctx.git,
-    'feat: 2\n\nBREAKING CHANGE:\nblah blah blah'
-  )
+  await gitCreateEmptyCommit(ctx.git, 'feat: 2\n\nBREAKING CHANGE:\nblah blah blah')
   const result = await ctx.dripip('preview --dry-run')
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -895,7 +888,5 @@ describe('preflight checks', () => {
   // TODO maybe... this is quite the edge-case and would charge all users a
   // latency fee wherein every stable preview release requires a pr check
   // anyways just to see if this super weird case is ocurring...
-  it.todo(
-    'fails semantically if trunk and pr detected becuase that demands conflicting reactions'
-  )
+  it.todo('fails semantically if trunk and pr detected becuase that demands conflicting reactions')
 })

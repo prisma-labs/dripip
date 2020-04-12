@@ -42,49 +42,29 @@ describe('parse', () => {
   })
 
   describe('rejects', () => {
-    it.each([
-      ['1'],
-      [''],
-      ['a.b.c'],
-      ['0.0.0-'],
-      ['0.0.0-1'],
-      ['0.0.0-a'],
-      ['0.0.0-a.a'],
-    ])('%s', caze => {
+    it.each([['1'], [''], ['a.b.c'], ['0.0.0-'], ['0.0.0-1'], ['0.0.0-a'], ['0.0.0-a.a']])('%s', (caze) => {
       expect(Semver.parse(caze)).toBeNull()
     })
   })
 })
 
-
-
 describe('incStable', () => {
   it('can bump patch', () => {
-    expect(
-      Semver.incStable('major', Semver.createStable(1, 1, 1))
-    ).toMatchSnapshot()
+    expect(Semver.incStable('major', Semver.createStable(1, 1, 1))).toMatchSnapshot()
   })
   it('can bump minor', () => {
-    expect(
-      Semver.incStable('minor', Semver.createStable(1, 1, 1))
-    ).toMatchSnapshot()
+    expect(Semver.incStable('minor', Semver.createStable(1, 1, 1))).toMatchSnapshot()
   })
   it('can bump major', () => {
-    expect(
-      Semver.incStable('major', Semver.createStable(1, 1, 1))
-    ).toMatchSnapshot()
+    expect(Semver.incStable('major', Semver.createStable(1, 1, 1))).toMatchSnapshot()
   })
   it('propagates vprefix', () => {
-    expect(
-      Semver.incStable('major', Semver.createStable(1, 1, 1, { vprefix: true }))
-    ).toMatchSnapshot()
+    expect(Semver.incStable('major', Semver.createStable(1, 1, 1, { vprefix: true }))).toMatchSnapshot()
   })
 })
 
 describe('stableToPreview', () => {
   it('turns stable-release version into a pre-release one', () => {
-    expect(
-      Semver.stableToPreview(Semver.createStable(1, 2, 3), 'foobar', 100)
-    ).toMatchSnapshot()
+    expect(Semver.stableToPreview(Semver.createStable(1, 2, 3), 'foobar', 100)).toMatchSnapshot()
   })
 })

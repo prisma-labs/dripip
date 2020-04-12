@@ -1,18 +1,10 @@
 import * as fs from 'fs-jetpack'
 
-type Json =
-  | null
-  | string
-  | number
-  | boolean
-  | { [property: string]: Json }
-  | Json[]
+type Json = null | string | number | boolean | { [property: string]: Json } | Json[]
 
 type JsonObject = { [property: string]: Json }
 
-type PackageJsonUpdater = (
-  packageJson: Record<string, any>
-) => Record<string, any>
+type PackageJsonUpdater = (packageJson: Record<string, any>) => Record<string, any>
 
 type PackageJson = {
   name: string
@@ -67,10 +59,7 @@ export async function write(cwd: string, object: object): Promise<void> {
  * receive the parsed package contents and whatever is returned will be written
  * to disk.
  */
-export async function update(
-  cwd: string,
-  updater: PackageJsonUpdater
-): Promise<void> {
+export async function update(cwd: string, updater: PackageJsonUpdater): Promise<void> {
   const packageJson = await read(cwd)
   if (packageJson) {
     const packageJsonUpdated = await updater(packageJson)

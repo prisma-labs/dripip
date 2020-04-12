@@ -51,14 +51,12 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
   if (process.env.GITHUB_HEAD_REF) {
     branchName = process.env.GITHUB_HEAD_REF
   } else if (process.env.GITHUB_REF) {
-    branchName =
-      process.env.GITHUB_REF.match(/^refs\/heads\/(.+)$/)?.[1] ?? null
+    branchName = process.env.GITHUB_REF.match(/^refs\/heads\/(.+)$/)?.[1] ?? null
   }
 
   return {
     runId: parseInt(process.env.GITHUB_RUN_ID!, 10),
-    eventName: process.env
-      .GITHUB_EVENT_NAME! as GithubCIEnvironment['eventName'],
+    eventName: process.env.GITHUB_EVENT_NAME! as GithubCIEnvironment['eventName'],
     ref: process.env.GITHUB_REF ?? null,
     headRef: process.env.GITHUB_HEAD_REF ?? null,
     repository: process.env.GITHUB_REPOSITORY!,

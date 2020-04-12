@@ -54,11 +54,7 @@ export function incStable(bumpType: MajMinPat, v: Ver): Ver {
  * Add pre-release info to a stable release. In other words convert a stable
  * release into a pre-release one.
  */
-export function stableToPreview(
-  v: StableVer,
-  identifier: string,
-  buildNum: number
-): PreviewVer {
+export function stableToPreview(v: StableVer, identifier: string, buildNum: number): PreviewVer {
   return createPreRelease(v.major, v.minor, v.patch, identifier, buildNum)
 }
 
@@ -127,18 +123,14 @@ export function parsePreview(ver: string): null | PreviewVer {
   if ((result as any).preRelease) {
     return result as PreviewVer
   }
-  throw new Error(
-    `Given version string ${ver} could not be parsed as a preview.`
-  )
+  throw new Error(`Given version string ${ver} could not be parsed as a preview.`)
 }
 
 /**
  * Parse a version string into structured data.
  */
 export function parse(ver: string): null | StableVer | PreviewVer {
-  const result = ver.match(
-    /^(v)?(\d+).(\d+).(\d+)$|^(v)?(\d+).(\d+).(\d+)-(\w+).(\d+)$/
-  )
+  const result = ver.match(/^(v)?(\d+).(\d+).(\d+)$|^(v)?(\d+).(\d+).(\d+)-(\w+).(\d+)$/)
 
   if (result === null) return null
 
