@@ -1,24 +1,43 @@
 import * as fs from 'fs-jetpack'
-
-type Json = null | string | number | boolean | { [property: string]: Json } | Json[]
-
-type JsonObject = { [property: string]: Json }
+import { PackageJson } from 'type-fest'
 
 type PackageJsonUpdater = (packageJson: Record<string, any>) => Record<string, any>
 
-type PackageJson = {
-  name: string
-  version: string
+/**
+ * Read and validate the package.json from CWD.
+ */
+export async function getPackageJson(): Promise<ValidatedPackageJson> {
+  const pj = await read(process.cwd())
+  return validate(pj)
 }
 
-export async function getPackageJson(): Promise<PackageJson> {
-  const pj = await read(process.cwd())
+/**
+ * Read and validate the package.json from CWD.
+ */
+export function getPackageJsonSync(): ValidatedPackageJson {
+  const pj = readSync(process.cwd())
+  return validate(pj)
+}
 
+type ValidatedPackageJson = PackageJson & { name: string }
+
+/**
+ * Validate that the given package json is defined, has a valid name property.
+ */
+function validate(pj: PackageJson | undefined): ValidatedPackageJson {
   if (!pj) {
     throw new Error('Could not find pacakge.json')
   }
 
-  return pj
+  if (pj.name === undefined) {
+    throw new Error('pacakge.json is missing name field')
+  }
+
+  if (pj.name === '') {
+    throw new Error('pacakge.json name field is empty')
+  }
+
+  return pj as ValidatedPackageJson
 }
 
 /**

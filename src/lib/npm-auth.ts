@@ -10,8 +10,8 @@ const TOKEN_ENV_VAR_NAME = 'NPM_TOKEN'
 const npmrcFilePath = path.join(os.homedir(), '.npmrc')
 
 /**
- * If in a CI environment and and there is an NPM_TOKEN environment variable
- * then this function will setup an auth  file that permits subsequent package
+ * If in a CI environment and there is an NPM_TOKEN environment variable
+ * then this function will setup an auth file that permits subsequent package
  * publishing commands.
  */
 export function setupNPMAuthfileOnCI(): void {

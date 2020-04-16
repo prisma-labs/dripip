@@ -1,7 +1,7 @@
-import { casesHandled } from './utils'
-import * as proc from './proc'
-import * as PJ from './package-json'
 import * as fs from 'fs-jetpack'
+import * as PJ from './package-json'
+import * as proc from './proc'
+import { casesHandled } from './utils'
 
 type PackageManagerType = 'npm' | 'yarn'
 
@@ -93,7 +93,7 @@ async function tag(
 
 export async function create(input: { defualt: PackageManagerType }) {
   const packageManagerType = detectScriptRunner() ?? input.defualt
-  const packageJson = PJ.readSync(process.cwd())! // todo
+  const packageJson = PJ.getPackageJsonSync()
   return {
     publish: publish.bind(null, packageManagerType),
     tag: tag.bind(null, packageManagerType, packageJson.name),
