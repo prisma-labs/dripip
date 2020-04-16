@@ -1,12 +1,12 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
+import * as Publish from '../../lib/publish'
 import * as Semver from '../../lib/semver'
 import { getContext } from '../../utils/context'
 import { npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
 import { getNextPreReleaseBuildNum } from '../../utils/pr-release'
-import * as Publish from '../../utils/publish'
 
 export class PR extends Command {
   static flags = {
@@ -80,7 +80,6 @@ export class PR extends Command {
       },
       options: {
         gitTag: 'none',
-        showProgress: !flags.json,
       },
     }
 
@@ -93,7 +92,11 @@ export class PR extends Command {
 
     setupNPMAuthfileOnCI()
 
-    await Publish.publish(publishPlan)
+    for await (const progress of Publish.publish(publishPlan)) {
+      if (!flags.json) {
+        console.log(progress)
+      }
+    }
 
     if (flags.json) {
       Output.didPublish({ release: publishPlan.release })

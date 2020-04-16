@@ -1,11 +1,11 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
+import * as Publish from '../../lib/publish'
 import * as Semver from '../../lib/semver'
 import { getContext } from '../../utils/context'
 import { isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
-import * as Publish from '../../utils/publish'
 import * as Rel from '../../utils/release'
 
 export class Preview extends Command {
@@ -95,14 +95,17 @@ export class Preview extends Command {
         version: release.version.version,
       },
       options: {
-        skipNPM: flags['skip-npm'],
-        showProgress: !flags.json,
+        npm: flags['skip-npm'],
       },
     }
 
     setupNPMAuthfileOnCI()
 
-    await Publish.publish(publishPlan)
+    for await (const progress of Publish.publish(publishPlan)) {
+      if (!flags.json) {
+        console.log(progress)
+      }
+    }
 
     if (flags.json) {
       Output.didPublish({ release: publishPlan.release })

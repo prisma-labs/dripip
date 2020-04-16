@@ -1,7 +1,7 @@
 import { format } from 'util'
+import { Release } from '../lib/publish'
 import { casesHandled } from '../lib/utils'
 import { ValidationResult } from './contrext-guard'
-import { Release } from './publish'
 
 type Ok<D = Record<string, any>> = {
   kind: 'ok'

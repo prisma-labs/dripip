@@ -1,10 +1,10 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
+import { publish, PublishPlan } from '../../lib/publish'
 import { getContext } from '../../utils/context'
 import { branchSynced, isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
 import * as Output from '../../utils/output'
-import { publish, PublishPlan } from '../../utils/publish'
 import * as Rel from '../../utils/release'
 
 export class Stable extends Command {
@@ -71,17 +71,20 @@ export class Stable extends Command {
       release: {
         version: release.version.version,
         distTag: 'latest',
-        additiomalDistTags: ['next'],
+        extraDistTags: ['next'],
       },
       options: {
-        showProgress: !flags.json,
-        skipNPM: flags['skip-npm'],
+        npm: flags['skip-npm'],
       },
     }
 
     setupNPMAuthfileOnCI()
 
-    await publish(publishPlan)
+    for await (const progress of publish(publishPlan)) {
+      if (!flags.json) {
+        console.log(progress)
+      }
+    }
 
     if (flags.json) {
       Output.didPublish({ release: publishPlan.release })

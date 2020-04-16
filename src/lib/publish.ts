@@ -2,32 +2,37 @@
  * This module handles the concerns of publishing. It handles interaction with
  * git tagging, pushing to the git origin, the package registry, etc.
  */
+
 import createGit from 'simple-git/promise'
-import * as Git from '../lib/git'
-import { isGithubCIEnvironment } from '../lib/github-ci-environment'
-import * as Pacman from '../lib/pacman'
+import * as Git from './git'
+import { isGithubCIEnvironment } from './github-ci-environment'
+import * as Pacman from './pacman'
 
 type Options = {
   /**
+   * Should publishing to npm take place?
+   *
+   * @default true
+   */
+  npm?: boolean
+  /**
    * Should the semver git tag have a "v" prefix.
+   *
+   * @default false
    */
   gitTagVPrefix?: boolean
-  skipNPM?: boolean
   /**
    * Should each given dist tag have a corresponding git tag made?
+   *
+   * @default 'all'
    */
   gitTag?: 'all' | 'just_version' | 'just_dist_tags' | 'none'
-  /**
-   * Should the publishing process be logged as it progressive?
-   */
-  showProgress?: boolean
 }
 
-const defaultOpts: Options = {
+const optionDefaults: Options = {
   gitTagVPrefix: false,
-  skipNPM: false,
+  npm: true,
   gitTag: 'all',
-  showProgress: true,
 }
 
 export interface Release {
@@ -39,13 +44,33 @@ export interface Release {
    * The npm dist tag to use for this release.
    */
   distTag: string
-  additiomalDistTags?: string[]
+  /**
+   * Additional dist tags to use for this release.
+   *
+   * @remarks
+   *
+   * When publishing it is sometimes desirable to update other dist tags to
+   * point at the new version. For example "next" should never fall behind
+   * stable, etc.
+   */
+  extraDistTags?: string[]
 }
 
 export interface PublishPlan {
   release: Release
   options?: Options
 }
+
+/**
+ * Events that provide insight into the progress of the publishing process.
+ */
+type ProgressMessage =
+  | { kind: 'extra_dist_tag_updated'; distTag: string }
+  | { kind: 'package_published' }
+  | { kind: 'package_json_reverted' }
+  | { kind: 'version_git_tag_created' }
+  | { kind: 'extra_dist_tag_git_tag_created'; distTag: string }
+  | { kind: 'extra_dist_tag_git_tag_pushed'; distTag: string }
 
 /**
  * Run the publishing process.
@@ -58,14 +83,14 @@ export interface PublishPlan {
  * 6. git push --tags.
  *
  */
-export async function publish(input: PublishPlan) {
+export async function* publish(input: PublishPlan): AsyncGenerator<ProgressMessage> {
   const release = input.release
   const opts = {
-    ...defaultOpts,
+    ...optionDefaults,
     ...input.options,
   }
 
-  if (!opts.skipNPM) {
+  if (opts.npm) {
     // publish to the npm registry
     //
     // If we are using a script runner then publish with that same tool. Otherwise
@@ -74,25 +99,13 @@ export async function publish(input: PublishPlan) {
     // publish` failing due to an authentication error.
     const pacman = await Pacman.create({ defualt: 'npm' })
     await pacman.publish({ version: release.version, tag: release.distTag })
-    if (opts.showProgress) {
-      console.log(
-        'published package@%s to the npm registry with dist tag %s',
-        release.version,
-        release.distTag
-      )
-    }
+    yield { kind: 'package_published' }
 
-    // When publishing it is sometimes desirable to update other dist tags to
-    // point at the new version. For example "next" should never fall behind stable,
-    // etc.
-    //
     // todo parallel optimize?
-    if (release.additiomalDistTags) {
-      for (const distTag of release.additiomalDistTags) {
+    if (release.extraDistTags) {
+      for (const distTag of release.extraDistTags) {
         await pacman.tag({ packageVersion: release.version, tagName: distTag })
-        if (opts.showProgress) {
-          console.log(`updated dist-tag "${distTag}" to point at this version`)
-        }
+        yield { kind: 'extra_dist_tag_updated', distTag }
       }
     }
   }
@@ -107,9 +120,7 @@ export async function publish(input: PublishPlan) {
   const git = createGit()
   await setupGitUsernameAndEmailOnCI(git)
   await git.checkout('package.json')
-  if (opts.showProgress) {
-    console.log('reverted package.json changes now that publishing is done')
-  }
+  yield { kind: 'package_json_reverted' }
 
   // Tag the git commit
   //
@@ -123,26 +134,23 @@ export async function publish(input: PublishPlan) {
     // for example).
     // Ref: https://stackoverflow.com/questions/23212452/how-to-only-push-a-specific-tag-to-remote
     await git.raw(['push', 'origin', `refs/tags/${versionTag}`])
-    if (opts.showProgress) {
-      console.log(`tagged this commit with ${versionTag}`)
-    }
+    yield { kind: 'version_git_tag_created' }
   }
 
   // Tag the git commit with the given dist tag names
   //
   if (opts.gitTag === 'all' || opts.gitTag === 'just_dist_tags') {
     // todo parallel optimize?
-    const distTags = [release.distTag, ...(release.additiomalDistTags ?? [])]
+    const distTags = [release.distTag, ...(release.extraDistTags ?? [])]
     for (const distTag of distTags) {
       // dist tags are movable pointers. Except for init case it is expected to
       // exist in the git repo. So use force to move the tag.
       // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
       // todo provide nice semantic descriptions for each dist tag
       await git.raw(['tag', '--force', '--message', distTag, distTag])
+      yield { kind: 'extra_dist_tag_git_tag_created', distTag }
       await git.raw(['push', '--force', '--tags'])
-      if (opts.showProgress) {
-        console.log('updated git tag %j', distTag)
-      }
+      yield { kind: 'extra_dist_tag_git_tag_pushed', distTag }
     }
   }
 }
