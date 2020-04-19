@@ -1,12 +1,14 @@
 import Command, { flags } from '@oclif/command'
 import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
 import * as Publish from '../../lib/publish'
+import { publishChangelog } from '../../lib/publish-changelog'
 import * as Semver from '../../lib/semver'
 import { getContext } from '../../utils/context'
 import { isTrunk, npmAuthSetup } from '../../utils/context-checkers'
 import { check, guard, Validator } from '../../utils/contrext-guard'
+import { octokit } from '../../utils/octokit'
 import * as Output from '../../utils/output'
-import * as Rel from '../../utils/release'
+import * as Release from '../../utils/release'
 
 export class Preview extends Command {
   static flags = {
@@ -64,9 +66,9 @@ export class Preview extends Command {
       .stopUnless(haveMeaningfulCommitsInTheSeries())
       .run()
 
-    const maybeRelease = Rel.getNextPreview(context.series)
+    const maybeRelease = Release.getNextPreview(context.series)
 
-    if (flags['build-num'] && !Rel.isNoReleaseReason(maybeRelease)) {
+    if (flags['build-num'] && !Release.isNoReleaseReason(maybeRelease)) {
       maybeRelease.version = Semver.setBuildNum(maybeRelease.version as Semver.PreviewVer, flags['build-num'])
     }
 
@@ -87,7 +89,7 @@ export class Preview extends Command {
       return this.exit(0)
     }
 
-    const release = maybeRelease as Rel.Release // now validated
+    const release = maybeRelease as Release.Release // now validated
 
     const publishPlan: Publish.PublishPlan = {
       release: {
@@ -107,6 +109,13 @@ export class Preview extends Command {
       }
     }
 
+    await publishChangelog({
+      octokit: octokit,
+      release: release,
+      repo: context.githubRepo,
+      series: context.series,
+    })
+
     if (flags.json) {
       Output.didPublish({ release: publishPlan.release })
     }
@@ -122,7 +131,7 @@ function haveCommitsInTheSeries(): Validator {
     code: 'series_empty',
     summary: 'A preview release must have at least one commit since the last preview',
     run(ctx) {
-      const release = Rel.getNextPreview(ctx.series)
+      const release = Release.getNextPreview(ctx.series)
       return release !== 'empty_series'
     },
   }
@@ -133,7 +142,7 @@ function haveMeaningfulCommitsInTheSeries(): Validator {
     code: 'series_only_has_meaningless_commits',
     summary: 'A preview release must have at least one semantic commit',
     run(ctx) {
-      const release = Rel.getNextPreview(ctx.series)
+      const release = Release.getNextPreview(ctx.series)
       return release !== 'no_meaningful_change'
       // todo
       // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',

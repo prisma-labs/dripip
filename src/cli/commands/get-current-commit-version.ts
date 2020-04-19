@@ -1,8 +1,8 @@
 import Command, { flags } from '@oclif/command'
-import { Octokit } from '@octokit/rest'
 import { rootDebug } from '../../lib/debug'
 import { createGit } from '../../lib/git'
 import { getLocationContext } from '../../utils/context'
+import { octokit } from '../../utils/octokit'
 import { getPullRequestReleaseVersionForLocation } from '../../utils/pr-release'
 import { getCurrentCommit } from '../../utils/release'
 
@@ -51,9 +51,7 @@ export class GetCurrentCommitVersion extends Command {
 
     const ctx = await getLocationContext({
       git: createGit(),
-      octokit: new Octokit({
-        auth: process.env.GITHUB_TOKEN,
-      }),
+      octokit: octokit,
     })
 
     debug('got location context', ctx)

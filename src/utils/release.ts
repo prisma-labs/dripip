@@ -7,6 +7,10 @@ export type Release = {
   version: Semver.Ver
 }
 
+export function shortSha(c: Commit): string {
+  return c.sha.slice(0, 7)
+}
+
 /**
  * Get the previous stable and commits since then. If there is no previous
  * stable then commits are counted from start of history.

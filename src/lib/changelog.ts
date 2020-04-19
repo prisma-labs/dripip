@@ -3,7 +3,7 @@
  */
 import Chalk from 'chalk'
 import { stripIndents } from 'common-tags'
-import { Commit, Series } from '../utils/release'
+import { Commit, Series, shortSha } from '../utils/release'
 import { casesHandled } from './utils'
 
 type ChangeLog = {
@@ -94,10 +94,10 @@ function organize(series: Series): ChangeLog {
   return log
 }
 
-export function render(series: Series, opts: { type: 'plain' | 'markdown' }): string {
-  if (opts.type === 'markdown') return Markdown.render(organize(series))
-  if (opts.type === 'plain') return Plain.render(organize(series))
-  casesHandled(opts.type)
+export function renderChangelog(series: Series, opts: { as: 'plain' | 'markdown' }): string {
+  if (opts.as === 'markdown') return Markdown.render(organize(series))
+  if (opts.as === 'plain') return Plain.render(organize(series))
+  casesHandled(opts.as)
 }
 
 namespace Plain {
@@ -240,8 +240,4 @@ namespace Markdown {
     const breaking = opts?.breaking === false ? '' : c.message.parsed!.breakingChange ? ' (breaking)' : ''
     return `- ${sha}${breaking}${type}${description}`
   }
-}
-
-function shortSha(c: Commit): string {
-  return c.sha.slice(0, 7)
 }

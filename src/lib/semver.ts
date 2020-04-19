@@ -101,6 +101,13 @@ export function createStable(
 }
 
 /**
+ * Is the given version a PR one?
+ */
+export function isPullRequest(v: Ver): v is PullRequestVer {
+  return typeof (v as PullRequestVer)?.preRelease?.prNum === 'number'
+}
+
+/**
  * Is the given version a preview one?
  */
 export function isPreview(v: Ver): v is PreviewVer {
@@ -111,7 +118,7 @@ export function isPreview(v: Ver): v is PreviewVer {
  * Is the given version a stable one?
  */
 export function isStable(v: Ver): v is StableVer {
-  return !isPreview(v)
+  return !isPreview(v) && !isPullRequest(v)
 }
 
 /**
@@ -181,3 +188,28 @@ export function setBuildNum(ver: PreviewVer, buildNum: number): PreviewVer {
 export const zeroVer = createStable(0, 0, 0)
 
 export const zeroBuildNum = 0
+
+/**
+ * Render the given version. This will result in a valid semver value, thus,
+ * without the vprefix (if enabled at all). If you want the vprefix see `renderStyledVersion`.
+ */
+export function renderVersion(v: Ver): string {
+  if (isPullRequest(v)) {
+    return `${v.major}.${v.minor}.${v.patch}-${v.preRelease.identifier}.${v.preRelease.prNum}.${v.preRelease.shortSha}`
+  } else if (isPreview(v)) {
+    return `${v.major}.${v.minor}.${v.patch}-${v.preRelease.identifier}.${v.preRelease.buildNum}`
+  } else if (isStable(v)) {
+    return `${v.major}.${v.minor}.${v.patch}`
+  } else {
+    throw new Error('should never happen')
+  }
+}
+
+/**
+ * Render the given verson including the vprefix if enabled. Do not use this in
+ * places where a valid semver is expected since vprefix is not valid semver.
+ */
+export function renderStyledVersion(v: Ver): string {
+  const vprefix = v.vprefix ? 'v' : ''
+  return `${vprefix}${renderVersion(v)}`
+}
