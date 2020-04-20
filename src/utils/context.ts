@@ -10,6 +10,7 @@ export interface PullRequestContext {
 }
 
 export interface Options {
+  cwd: string
   overrides?: {
     trunk?: null | string
   }
@@ -40,8 +41,8 @@ export interface Context extends LocationContext {
   series: Rel.Series
 }
 
-export async function getContext(opts?: Options): Promise<Context> {
-  const git = createGit()
+export async function getContext(opts: Options): Promise<Context> {
+  const git = createGit(opts.cwd)
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })

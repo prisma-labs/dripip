@@ -3,9 +3,9 @@ import { Release } from '../lib/publish'
 import { casesHandled } from '../lib/utils'
 import { ValidationResult } from './contrext-guard'
 
-type Ok<D = Record<string, any>> = {
+type Ok<T extends string = string, D = Record<string, any>> = {
   kind: 'ok'
-  type: string
+  type: T
   data: D
 }
 
@@ -93,12 +93,14 @@ export function output(message: Message, opts: OutputOptions): void {
 /**
  * See output version docs.
  */
-export function createOk(type: string, data: Record<string, any>): Ok {
-  return {
-    kind: 'ok',
-    type,
-    data,
-  }
+export function createOk<T extends string>(type: T, data: Record<string, any>): Ok<T> {
+  return { kind: 'ok', type, data }
+}
+
+type DryRun = Ok<'dry_run'>
+
+export function createDryRun(data: Record<string, any>): DryRun {
+  return createOk('dry_run', data)
 }
 
 /**
@@ -124,18 +126,20 @@ export function createException(
   }
 }
 
-export function didNotPublish(input: { reasons: ValidationResult[] }): void {
-  outputJson({
-    kind: 'did_not_publish',
-    reasons: input.reasons,
-  })
+export function outputDidNotPublish(data: { reasons: ValidationResult[] }): void {
+  outputJson(createDidNotPublish(data))
 }
 
-export function didPublish(input: { release: Release }): void {
-  outputJson({
-    kind: 'did_publish',
-    ...input.release,
-  })
+export function createDidNotPublish(data: { reasons: ValidationResult[] }) {
+  return createOk('did_not_publish', { data })
+}
+
+export function outputDidPublish(data: { release: Release }): void {
+  outputJson(createDidPublish(data))
+}
+
+export function createDidPublish(data: { release: Release }) {
+  return createOk('did_publish', { data })
 }
 
 /**

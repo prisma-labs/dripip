@@ -85,7 +85,7 @@ export class Preview extends Command {
     }
 
     if (flags.json && report.stops.length) {
-      Output.didNotPublish({ reasons: report.stops })
+      Output.outputDidNotPublish({ reasons: report.stops })
       return this.exit(0)
     }
 
@@ -117,7 +117,7 @@ export class Preview extends Command {
     })
 
     if (flags.json) {
-      Output.didPublish({ release: publishPlan.release })
+      Output.outputDidPublish({ release: publishPlan.release })
     }
   }
 }
