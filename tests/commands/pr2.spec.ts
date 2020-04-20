@@ -26,7 +26,7 @@ beforeEach(async () => {
   ctx.fs.copy(ctx.fixture('git/dripip-system-tests/.git'), ctx.fs.path('.git'))
 })
 
-it('preflight check that user is on branch with open pr', async () => {
+it.only('preflight check that user is on branch with open pr', async () => {
   await ctx.git.checkout({ fs, dir: ctx.dir, ref: 'no-open-pr' })
   const msg = await ctx.runPullRequestRelease()
   expect(msg).toMatchInlineSnapshot(`

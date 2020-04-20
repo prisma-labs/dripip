@@ -194,7 +194,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //   return { isPR: false, inferredBy: 'branch_no_open_pr' }
 // }
 
-export type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged' | 'remote_needs_branch'
+type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged' | 'remote_needs_branch'
 
 /**
  * Check how the local branch is not in sync or is with the remote.

@@ -16,7 +16,9 @@ interface Options {
 
 export async function runPullRequestRelease(options: Options) {
   const cwd = options.cwd ?? process.cwd()
+  // const t1 = Date.now()
   const context = await getContext({ cwd })
+  // console.log(Date.now() - t1)
 
   const report = check({ context })
     .errorUnless(npmAuthSetup())
@@ -44,7 +46,8 @@ export async function runPullRequestRelease(options: Options) {
     return createDidNotPublish({ reasons: report.stops })
     // return //this.exit(0) //todo
   }
-  console.log(2)
+
+  console.log(report)
 
   const versionPrefix = `0.0.0-pr.${context.currentBranch.pr!.number}.`
   const versionBuildNum = getNextPreReleaseBuildNum(context.package.name, versionPrefix)

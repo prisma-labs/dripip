@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest'
 import createGit from 'simple-git/promise'
 import * as Git from '../lib/git'
+import { createGit2, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import * as Rel from './release'
@@ -32,7 +33,7 @@ export interface LocationContext {
   currentBranch: {
     name: string
     isTrunk: boolean
-    syncStatus: Git.SyncStatus
+    syncStatus: GitSyncStatus
     pr: null | PullRequestContext
   }
 }
@@ -46,7 +47,7 @@ export async function getContext(opts: Options): Promise<Context> {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })
-  const locationContext = await getLocationContext({ git, octokit, opts })
+  const locationContext = await getLocationContext({ git, octokit, opts, cwd: opts.cwd })
   const series = await Rel.getCurrentSeries(git)
 
   return { series, ...locationContext }
@@ -60,12 +61,15 @@ export async function getLocationContext({
   git,
   octokit,
   opts,
+  cwd,
 }: {
   git: Git.Simple
   octokit: any
   opts?: Options
+  cwd: string
 }): Promise<LocationContext> {
   const githubCIEnvironment = parseGithubCIEnvironment()
+  const git2 = createGit2({ cwd })
 
   // Get repo info
 
@@ -87,13 +91,11 @@ export async function getLocationContext({
 
   // Get the branch
 
-  const branchesSummary = await git.branch({})
+  // const branchesSummary = await git.branch({})
 
-  let currentBranchName: undefined | string
+  let currentBranchName = await git2.getCurrentBranchName()
 
-  if (!branchesSummary.detached) {
-    currentBranchName = branchesSummary.current
-  } else if (githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
+  if (!currentBranchName && githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
     currentBranchName = githubCIEnvironment.parsed.branchName
   }
 
@@ -105,6 +107,7 @@ export async function getLocationContext({
 
   let pr: LocationContext['currentBranch']['pr'] = null
 
+  const tpulls = Date.now()
   if (githubCIEnvironment && githubCIEnvironment.parsed.prNum) {
     pr = {
       number: githubCIEnvironment.parsed.prNum,
@@ -125,10 +128,13 @@ export async function getLocationContext({
       }
     }
   }
+  console.log('tpulls', Date.now() - tpulls)
 
   // get the branch sync status
 
-  const syncStatus = await Git.checkSyncStatus(git)
+  const t1 = Date.now()
+  const syncStatus = await git2.checkSyncStatus()
+  console.log('ss', Date.now() - t1)
 
   // get package info
 
