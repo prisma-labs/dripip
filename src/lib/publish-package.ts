@@ -87,7 +87,7 @@ type ProgressMessage =
  * 6. git push --tags.
  *
  */
-export async function* publish(input: PublishPlan): AsyncGenerator<ProgressMessage> {
+export async function* publishPackage(input: PublishPlan): AsyncGenerator<ProgressMessage> {
   const release = input.release
   const opts = {
     ...optionDefaults,

@@ -1,7 +1,7 @@
 import { renderChangelog } from '../lib/changelog'
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
-import { publish, PublishPlan } from '../lib/publish'
 import { publishChangelog } from '../lib/publish-changelog'
+import { publishPackage, PublishPlan } from '../lib/publish-package'
 import { PreviewVer, setBuildNum } from '../lib/semver'
 import { getContext } from '../utils/context'
 import { isTrunk, npmAuthSetup } from '../utils/context-checkers'
@@ -88,7 +88,7 @@ export async function runPreviewRelease(input: Input) {
 
   setupNPMAuthfileOnCI()
 
-  for await (const progress of publish(publishPlan)) {
+  for await (const progress of publishPackage(publishPlan)) {
     if (input.progress) {
       console.log(progress)
     }

@@ -1,7 +1,7 @@
 import { renderChangelog } from '../lib/changelog'
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
-import { publish, PublishPlan } from '../lib/publish'
 import { publishChangelog } from '../lib/publish-changelog'
+import { publishPackage, PublishPlan } from '../lib/publish-package'
 import { getContext } from '../utils/context'
 import { branchSynced, isTrunk, npmAuthSetup } from '../utils/context-checkers'
 import { check, guard, Validator } from '../utils/contrext-guard'
@@ -71,7 +71,7 @@ export async function runStableRelease(input: Input) {
 
   setupNPMAuthfileOnCI()
 
-  for await (const progress of publish(publishPlan)) {
+  for await (const progress of publishPackage(publishPlan)) {
     if (!input.json) {
       console.log(progress)
     }

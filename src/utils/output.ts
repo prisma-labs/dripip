@@ -1,5 +1,5 @@
 import { format, inspect } from 'util'
-import { Release } from '../lib/publish'
+import { Release } from '../lib/publish-package'
 import { casesHandled } from '../lib/utils'
 import { ValidationResult } from './contrext-guard'
 

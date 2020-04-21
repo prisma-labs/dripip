@@ -1,5 +1,5 @@
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
-import { publish, PublishPlan } from '../lib/publish'
+import { publishPackage, PublishPlan } from '../lib/publish-package'
 import { PullRequestVer } from '../lib/semver'
 import { getContext } from '../utils/context'
 import { npmAuthSetup } from '../utils/context-checkers'
@@ -84,7 +84,7 @@ export async function runPullRequestRelease(options: Options) {
 
   setupNPMAuthfileOnCI()
 
-  for await (const progress of publish(publishPlan)) {
+  for await (const progress of publishPackage(publishPlan)) {
     // turn this func into async iterator and yield structured progress
     if (options.progress) {
       console.log(progress)
