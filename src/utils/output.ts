@@ -1,4 +1,4 @@
-import { format } from 'util'
+import { format, inspect } from 'util'
 import { Release } from '../lib/publish'
 import { casesHandled } from '../lib/utils'
 import { ValidationResult } from './contrext-guard'
@@ -83,7 +83,7 @@ export function output(message: Message, opts: OutputOptions): void {
       outputRaw(s)
     } else if (message.kind === 'ok') {
       let s = ''
-      s += message.data
+      s += inspect(message.data)
       // todo pretty printing
       outputRaw(s)
     } else {
