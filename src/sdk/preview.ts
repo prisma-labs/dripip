@@ -58,11 +58,14 @@ export async function runPreviewRelease(input: Input) {
     maybeRelease.version = setBuildNum(maybeRelease.version as PreviewVer, input.overrides.buildNum)
   }
 
+  const changelog = renderChangelog(context.series, { as: 'markdown' })
+
   if (input.dryRun) {
     return createDryRun({
       report: report,
       release: maybeRelease,
       commits: context.series.commitsInNextPreview.map((c) => c.message),
+      changelog: changelog,
     })
   }
 
@@ -93,8 +96,6 @@ export async function runPreviewRelease(input: Input) {
       console.log(progress)
     }
   }
-
-  const changelog = renderChangelog(context.series, { as: 'markdown' })
 
   if (input.changelog && !input.dryRun) {
     await publishChangelog({

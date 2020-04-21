@@ -35,6 +35,10 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
   expect(await ctx.runPullRequestRelease({ overrides: { buildNum: 2 } })).toMatchInlineSnapshot(`
     Object {
       "data": Object {
+        "changelog": "#### Features
+
+    - 2af8451 foo
+    ",
         "commits": Array [
           Object {
             "parsed": Object {
@@ -107,6 +111,18 @@ it('if no stable release exists then pre-releases with just patch-affecting comm
   expect(await ctx.runPullRequestRelease()).toMatchInlineSnapshot(`
     Object {
       "data": Object {
+        "changelog": "#### Fixes
+
+    - 4c0b042 1
+
+    #### Chores
+
+    - 2f963d3 who knows
+
+    #### Unspecified Changes
+
+    - ea795ea Initial commit
+    ",
         "commits": Array [
           Object {
             "parsed": Object {
@@ -196,6 +212,18 @@ it('if no stable release exists then pre-releases with at least one minor-affect
   expect(await ctx.runPullRequestRelease()).toMatchInlineSnapshot(`
     Object {
       "data": Object {
+        "changelog": "#### Features
+
+    - 890f219 1
+
+    #### Chores
+
+    - 2f963d3 who knows
+
+    #### Unspecified Changes
+
+    - ea795ea Initial commit
+    ",
         "commits": Array [
           Object {
             "parsed": Object {
