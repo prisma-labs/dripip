@@ -34,7 +34,7 @@ beforeEach(() => {
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('dripip-system-tests/git'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
 })
 
 describe('preflight requirements include that', () => {

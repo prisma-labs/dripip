@@ -9,7 +9,7 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('dripip-system-tests/git'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
 })
 
 // todo --identifier flag

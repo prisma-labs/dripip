@@ -60,7 +60,7 @@ class Git2 {
       return 'remote_needs_branch'
     }
 
-    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'head' })
+    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'HEAD' })
     const remoteBranchHeadSha = remoteInfo.refs.heads[localBranchName]
 
     if (localBranchHeadSha === remoteBranchHeadSha) {
