@@ -1,5 +1,5 @@
 import { inspect } from 'util'
-import { Octokit } from '../utils/octokit'
+import { Octokit, ReleaseByTagRes } from '../utils/octokit'
 import { Release } from '../utils/release'
 import { isPreview, isStable, PreviewVer, renderStyledVersion } from './semver'
 
@@ -11,7 +11,13 @@ interface Repo {
 interface Input {
   octokit: Octokit
   repo: Repo
-  release: Release
+  /**
+   * Uses the release manage the changelog changes. A preview relese will result
+   * in a pre-release github release. A stable release will result in the
+   * preview github release being cleared of notes and pointed toward the latest
+   * stable commit sha.
+   */
+  release: Release & { head: { sha: string } }
   /**
    * The Changelog content.
    */
@@ -31,54 +37,77 @@ interface Input {
  * made against the styled version.
  */
 export async function publishChangelog(input: Input) {
-  const { octokit, release, repo } = input
+  const {
+    octokit,
+    release,
+    repo: { owner, name: repo },
+  } = input
 
   let res: any
   if (isStable(release.version)) {
     res = await octokit.repos.createRelease({
+      owner,
+      repo,
       prerelease: false,
       tag_name: renderStyledVersion(release.version),
-      owner: repo.owner,
-      repo: repo.name,
       draft: input.options?.draft ?? false,
       body: input.body,
     })
+    const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag: 'next' })
+    if (existingPreviewRelease) {
+      res = await octokit.repos.updateRelease({
+        owner,
+        repo,
+        release_id: existingPreviewRelease.data.id,
+        target_commitish: release.head.sha,
+        body: 'None since last stable.',
+      })
+    }
   } else if (isPreview(release.version)) {
     const v = release.version as PreviewVer
-    let notFoundError
-    try {
-      res = await octokit.repos.getReleaseByTag({
-        owner: repo.owner,
-        repo: repo.name,
-        tag: v.preRelease.identifier,
-      })
-    } catch (error) {
-      if (error.status !== 404) {
-        throw error
-      } else {
-        notFoundError = error
-      }
-    }
+    const tag = v.preRelease.identifier
+    const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag })
 
-    if (notFoundError) {
+    if (!existingPreviewRelease) {
       res = await octokit.repos.createRelease({
+        owner,
+        repo,
         prerelease: true,
         tag_name: v.preRelease.identifier,
-        owner: repo.owner,
-        repo: repo.name,
         draft: input.options?.draft ?? false,
         body: input.body,
       })
     } else {
       res = await octokit.repos.updateRelease({
-        release_id: res.data.id,
-        owner: repo.owner,
-        repo: repo.name,
+        owner,
+        repo,
+        release_id: existingPreviewRelease.data.id,
         body: input.body,
       })
     }
   } else {
     console.error(`WARNING: release notes are not supported for this kind of release: ${inspect(release)}`)
+  }
+  return res
+}
+
+async function maybeGetRelease(input: {
+  octokit: Octokit
+  owner: string
+  repo: string
+  tag: string
+}): Promise<null | ReleaseByTagRes> {
+  let res = null
+  try {
+    res = await input.octokit.repos.getReleaseByTag({
+      owner: input.owner,
+      repo: input.repo,
+      tag: input.tag,
+    })
+  } catch (error) {
+    if (error.status !== 404) {
+      throw error
+    }
   }
   return res
 }

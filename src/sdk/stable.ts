@@ -79,10 +79,17 @@ export async function runStableRelease(input: Input) {
     }
   }
 
+  const releaseInfo = {
+    ...release,
+    head: {
+      sha: context.series.current.sha,
+    },
+  }
+
   if (input.changelog && !input.dryRun) {
     await publishChangelog({
       octokit: octokit,
-      release: release,
+      release: releaseInfo,
       repo: context.githubRepo,
       body: changelog,
     })
