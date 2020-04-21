@@ -25,6 +25,8 @@ export class PR extends Command {
       dryRun: flags['dry-run'],
     })
 
+    console.log(message)
+
     output(message, { json: flags.json })
   }
 }
