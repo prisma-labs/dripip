@@ -33,7 +33,7 @@ interface Input {
 export async function publishChangelog(input: Input) {
   const { octokit, release, repo } = input
 
-  let res
+  let res: any
   if (isStable(release.version)) {
     res = await octokit.repos.createRelease({
       prerelease: false,
@@ -45,14 +45,24 @@ export async function publishChangelog(input: Input) {
     })
   } else if (isPreview(release.version)) {
     const v = release.version as PreviewVer
-    res = await octokit.repos.getReleaseByTag({
-      owner: repo.owner,
-      repo: repo.name,
-      tag: v.preRelease.identifier,
-    })
-    if (res.status === 404) {
+    let notFoundError
+    try {
+      res = await octokit.repos.getReleaseByTag({
+        owner: repo.owner,
+        repo: repo.name,
+        tag: v.preRelease.identifier,
+      })
+    } catch (error) {
+      if (error.status !== 404) {
+        throw error
+      } else {
+        notFoundError = error
+      }
+    }
+
+    if (notFoundError) {
       res = await octokit.repos.createRelease({
-        prerelease: false,
+        prerelease: true,
         tag_name: v.preRelease.identifier,
         owner: repo.owner,
         repo: repo.name,
