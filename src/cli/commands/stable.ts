@@ -1,11 +1,6 @@
 import Command, { flags } from '@oclif/command'
-import { setupNPMAuthfileOnCI } from '../../lib/npm-auth'
-import { publish, PublishPlan } from '../../lib/publish'
-import { getContext } from '../../utils/context'
-import { branchSynced, isTrunk, npmAuthSetup } from '../../utils/context-checkers'
-import { check, guard, Validator } from '../../utils/contrext-guard'
-import * as Output from '../../utils/output'
-import * as Rel from '../../utils/release'
+import { runStableRelease } from '../../sdk/stable'
+import { output } from '../../utils/output'
 
 export class Stable extends Command {
   static flags = {
@@ -31,90 +26,17 @@ export class Stable extends Command {
   }
   async run() {
     const { flags } = this.parse(Stable)
-
-    const context = await getContext({
+    const message = await runStableRelease({
+      cwd: process.cwd(),
+      changelog: true,
+      dryRun: flags['dry-run'],
+      json: flags.json,
+      progress: !flags.json,
       overrides: {
-        trunk: flags.trunk || null,
+        skipNpm: flags['skip-npm'],
+        trunk: flags.trunk,
       },
     })
-
-    const report = check({ context })
-      .errorUnless(npmAuthSetup())
-      .errorUnless(isTrunk())
-      .errorUnless(branchSynced())
-      .stopUnless(notAlreadyStableRelease())
-      .stopUnless(haveMeaningfulCommitsInTheSeries())
-      .run()
-
-    const maybeRelease = Rel.getNextStable(context.series)
-
-    if (flags['dry-run']) {
-      return Output.outputOk('dry_run', {
-        report,
-        release: maybeRelease,
-        commits: context.series.commitsInNextStable,
-      })
-    }
-
-    if (report.errors.length) {
-      guard({ context, report, json: flags.json })
-    }
-
-    if (flags.json && report.stops.length) {
-      Output.didNotPublish({ reasons: report.stops })
-      return this.exit(0)
-    }
-
-    const release = maybeRelease as Rel.Release // now validated
-
-    const publishPlan: PublishPlan = {
-      release: {
-        version: release.version.version,
-        distTag: 'latest',
-        extraDistTags: ['next'],
-      },
-      options: {
-        npm: flags['skip-npm'],
-      },
-    }
-
-    setupNPMAuthfileOnCI()
-
-    for await (const progress of publish(publishPlan)) {
-      if (!flags.json) {
-        console.log(progress)
-      }
-    }
-
-    if (flags.json) {
-      Output.didPublish({ release: publishPlan.release })
-    }
-  }
-}
-
-//
-// Validators
-//
-
-function haveMeaningfulCommitsInTheSeries(): Validator {
-  return {
-    code: 'series_only_has_meaningless_commits',
-    summary: 'A stable release must have at least one semantic commit',
-    run(ctx) {
-      const release = Rel.getNextStable(ctx.series)
-      return release !== 'no_meaningful_change'
-      // todo
-      // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
-    },
-  }
-}
-
-function notAlreadyStableRelease(): Validator {
-  return {
-    code: 'commit_already_has_stable_release',
-    summary: 'A stable release requires the commit to have no existing stable release',
-    run(ctx) {
-      return ctx.series.current.releases.stable === null
-    },
+    output(message, { json: flags.json })
   }
 }

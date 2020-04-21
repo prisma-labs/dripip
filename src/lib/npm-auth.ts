@@ -52,14 +52,15 @@ interface SetupFail {
  * - An npmrc file containing auth
  */
 export function validateNPMAuthSetup(): SetupPass | SetupFail {
+  const token = process.env[TOKEN_ENV_VAR_NAME] ?? null
+
+  if (token) {
+    return { kind: 'pass', reason: 'npm_token_env_var' }
+  }
+
   const npmrc = getNpmrcFile()
   if (npmrc && npmrc.match(/_authToken=.+/)) {
     return { kind: 'pass', reason: 'npmrc_auth' }
-  }
-
-  const token = process.env[TOKEN_ENV_VAR_NAME] ?? null
-  if (token) {
-    return { kind: 'pass', reason: 'npm_token_env_var' }
   }
 
   const fail: SetupFail = { kind: 'fail', reasons: [] }

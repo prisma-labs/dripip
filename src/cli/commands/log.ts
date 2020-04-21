@@ -18,7 +18,9 @@ export class Log extends Command {
   }
   async run() {
     const { flags } = this.parse(Log)
-    const ctx = await getContext()
+    const ctx = await getContext({
+      cwd: process.cwd(),
+    })
 
     if (flags.json) {
       this.log(inspect(ctx.series, { depth: 20 }))
@@ -26,8 +28,8 @@ export class Log extends Command {
     }
 
     this.log(
-      ChangeLog.render(ctx.series, {
-        type: flags.markdown ? 'markdown' : 'plain',
+      ChangeLog.renderChangelog(ctx.series, {
+        as: flags.markdown ? 'markdown' : 'plain',
       })
     )
   }

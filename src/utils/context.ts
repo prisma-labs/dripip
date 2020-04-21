@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
-import createGit from 'simple-git/promise'
 import * as Git from '../lib/git'
+import { createGit2, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import * as Rel from './release'
@@ -10,6 +10,7 @@ export interface PullRequestContext {
 }
 
 export interface Options {
+  cwd: string
   overrides?: {
     trunk?: null | string
   }
@@ -19,10 +20,6 @@ export interface LocationContext {
   package: {
     name: string
   }
-  // nextReleasesNowWouldBe: {
-  //   stable: null | SemVer.SemVer
-  //   preview: null | SemVer.SemVer
-  // }
   githubRepo: {
     owner: string
     name: string
@@ -31,7 +28,7 @@ export interface LocationContext {
   currentBranch: {
     name: string
     isTrunk: boolean
-    syncStatus: Git.SyncStatus
+    syncStatus: GitSyncStatus
     pr: null | PullRequestContext
   }
 }
@@ -40,13 +37,12 @@ export interface Context extends LocationContext {
   series: Rel.Series
 }
 
-export async function getContext(opts?: Options): Promise<Context> {
-  const git = createGit()
+export async function getContext(opts: Options): Promise<Context> {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })
-  const locationContext = await getLocationContext({ git, octokit, opts })
-  const series = await Rel.getCurrentSeries(git)
+  const locationContext = await getLocationContext({ octokit, opts, cwd: opts.cwd })
+  const series = await Rel.getCurrentSeries({ cwd: opts.cwd })
 
   return { series, ...locationContext }
 }
@@ -56,15 +52,16 @@ export async function getContext(opts?: Options): Promise<Context> {
  * series but things like current branch, repo, pr etc.
  */
 export async function getLocationContext({
-  git,
   octokit,
   opts,
+  cwd,
 }: {
-  git: Git.Simple
   octokit: any
   opts?: Options
+  cwd: string
 }): Promise<LocationContext> {
   const githubCIEnvironment = parseGithubCIEnvironment()
+  const git = createGit2({ cwd })
 
   // Get repo info
 
@@ -86,13 +83,11 @@ export async function getLocationContext({
 
   // Get the branch
 
-  const branchesSummary = await git.branch({})
+  // const branchesSummary = await git.branch({})
 
-  let currentBranchName: undefined | string
+  let currentBranchName = await git.getCurrentBranchName()
 
-  if (!branchesSummary.detached) {
-    currentBranchName = branchesSummary.current
-  } else if (githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
+  if (!currentBranchName && githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
     currentBranchName = githubCIEnvironment.parsed.branchName
   }
 
@@ -127,7 +122,7 @@ export async function getLocationContext({
 
   // get the branch sync status
 
-  const syncStatus = await Git.checkSyncStatus(git)
+  const syncStatus = await git.checkSyncStatus()
 
   // get package info
 

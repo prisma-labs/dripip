@@ -7,12 +7,16 @@ export type Release = {
   version: Semver.Ver
 }
 
+export function shortSha(c: Commit): string {
+  return c.sha.slice(0, 7)
+}
+
 /**
  * Get the previous stable and commits since then. If there is no previous
  * stable then commits are counted from start of history.
  */
-export async function getCurrentSeries(git: Git.Simple): Promise<Series> {
-  return getLog().then(buildSeries)
+export async function getCurrentSeries(input: { cwd: string }): Promise<Series> {
+  return getLog({ cwd: input.cwd }).then(buildSeries)
 }
 
 /**
@@ -40,11 +44,11 @@ export function fromLogs(entries: Git.LogEntry[]): Series {
  * tuple contains the  stable commit partitioned from the subsequent commits.
  * The stable commit may be null.
  */
-async function getLog(): Promise<SeriesLog> {
+async function getLog(input: { cwd: string }): Promise<SeriesLog> {
   const commits: Git.LogEntry[] = []
   let previousStableCommit: null | Git.LogEntry = null
 
-  for await (const log of Git.streamLog()) {
+  for await (const log of Git.streamLog({ cwd: input.cwd })) {
     if (log.tags.find(isStableTag)) {
       previousStableCommit = log
       break
