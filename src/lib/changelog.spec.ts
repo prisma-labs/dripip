@@ -21,7 +21,7 @@ describe('.render()', () => {
   ]
   describe('option markdown', () => {
     const render = (...logs: MockLogs) => {
-      return Changelog.render(series(...logs), { type: 'markdown' })
+      return Changelog.renderChangelog(series(...logs), { as: 'markdown' })
     }
     it('renders release notes for the current release series', () => {
       const notes = render(...mockChangeLog)
@@ -48,7 +48,7 @@ describe('.render()', () => {
 
   describe('plain', () => {
     const render = (...logs: MockLogs) => {
-      return Changelog.render(series(...logs), { type: 'plain' })
+      return Changelog.renderChangelog(series(...logs), { as: 'plain' })
     }
 
     it('renders release notes for the current release series', () => {
