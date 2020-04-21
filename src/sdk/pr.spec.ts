@@ -1,32 +1,26 @@
 import * as nodefs from 'fs'
-import { runPullRequestRelease } from '../../src/sdk/pr'
-import * as TestContext from '../__lib/test-context'
+import * as TestContext from '../../tests/__lib/test-context'
+import { runPullRequestRelease } from './pr'
 
 const fs = nodefs
-const ctx = TestContext.compose(
-  TestContext.tmpDir,
-  TestContext.fs,
-  TestContext.git,
-  TestContext.fixture,
-  (ctx) => {
-    return {
-      runPullRequestRelease() {
-        return runPullRequestRelease({
-          cwd: ctx.dir,
-          json: true,
-          dryRun: true,
-          progress: false,
-        })
-      },
-    }
+const ctx = TestContext.compose(TestContext.all, (ctx) => {
+  return {
+    runPullRequestRelease() {
+      return runPullRequestRelease({
+        cwd: ctx.dir,
+        json: true,
+        dryRun: true,
+        progress: false,
+      })
+    },
   }
-)
+})
 
 beforeEach(async () => {
   ctx.fs.copy(ctx.fixture('git/dripip-system-tests/.git'), ctx.fs.path('.git'))
 })
 
-it.only('preflight check that user is on branch with open pr', async () => {
+it('preflight check that user is on branch with open pr', async () => {
   await ctx.git.checkout({ fs, dir: ctx.dir, ref: 'no-open-pr' })
   const msg = await ctx.runPullRequestRelease()
   expect(msg).toMatchInlineSnapshot(`

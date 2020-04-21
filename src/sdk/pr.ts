@@ -44,10 +44,7 @@ export async function runPullRequestRelease(options: Options) {
 
   if (report.stops.length) {
     return createDidNotPublish({ reasons: report.stops })
-    // return //this.exit(0) //todo
   }
-
-  console.log(report)
 
   const versionPrefix = `0.0.0-pr.${context.currentBranch.pr!.number}.`
   const versionBuildNum = getNextPreReleaseBuildNum(context.package.name, versionPrefix)

@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest'
-import createGit from 'simple-git/promise'
 import * as Git from '../lib/git'
 import { createGit2, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
@@ -43,12 +42,11 @@ export interface Context extends LocationContext {
 }
 
 export async function getContext(opts: Options): Promise<Context> {
-  const git = createGit(opts.cwd)
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })
-  const locationContext = await getLocationContext({ git, octokit, opts, cwd: opts.cwd })
-  const series = await Rel.getCurrentSeries(git)
+  const locationContext = await getLocationContext({ octokit, opts, cwd: opts.cwd })
+  const series = await Rel.getCurrentSeries({ cwd: opts.cwd })
 
   return { series, ...locationContext }
 }
@@ -58,12 +56,10 @@ export async function getContext(opts: Options): Promise<Context> {
  * series but things like current branch, repo, pr etc.
  */
 export async function getLocationContext({
-  git,
   octokit,
   opts,
   cwd,
 }: {
-  git: Git.Simple
   octokit: any
   opts?: Options
   cwd: string
@@ -107,7 +103,6 @@ export async function getLocationContext({
 
   let pr: LocationContext['currentBranch']['pr'] = null
 
-  const tpulls = Date.now()
   if (githubCIEnvironment && githubCIEnvironment.parsed.prNum) {
     pr = {
       number: githubCIEnvironment.parsed.prNum,
@@ -128,13 +123,10 @@ export async function getLocationContext({
       }
     }
   }
-  console.log('tpulls', Date.now() - tpulls)
 
   // get the branch sync status
 
-  const t1 = Date.now()
   const syncStatus = await git2.checkSyncStatus()
-  console.log('ss', Date.now() - t1)
 
   // get package info
 

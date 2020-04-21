@@ -1,9 +1,8 @@
 import * as path from 'path'
-
-export * from './fs'
-export * from './git'
-export * from './test-context'
-export * from './tmp-dir'
+import { fs } from './fs'
+import { git } from './git'
+import { compose } from './test-context'
+import { tmpDir } from './tmp-dir'
 
 interface FixtureContribution {
   /**
@@ -19,3 +18,10 @@ export const fixture = (): FixtureContribution => {
     },
   }
 }
+
+export const all = compose(tmpDir, fs, git, fixture)
+
+export * from './fs'
+export * from './git'
+export * from './test-context'
+export * from './tmp-dir'

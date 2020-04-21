@@ -9,7 +9,7 @@ type Ok<T extends string = string, D = Record<string, any>> = {
   data: D
 }
 
-type Exception<C = Record<string, any>> = {
+export type Exception<C = Record<string, any>> = {
   kind: 'exception'
   type: string
   data: {
