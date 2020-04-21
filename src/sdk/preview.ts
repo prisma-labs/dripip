@@ -1,3 +1,4 @@
+import { renderChangelog } from '../lib/changelog'
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
 import { publish, PublishPlan } from '../lib/publish'
 import { publishChangelog } from '../lib/publish-changelog'
@@ -43,7 +44,7 @@ export async function runPreviewRelease(input: Input) {
   //    2. show the tag author name
   //    3. show the the date the tag was made
 
-  const report = check({ context })
+  const report = check({ context: context })
     .errorUnless(npmAuthSetup())
     .errorUnless(isTrunk())
     .errorUnless(notAlreadyStableOrPreviewReleased())
@@ -66,7 +67,7 @@ export async function runPreviewRelease(input: Input) {
   }
 
   if (report.errors.length) {
-    guard({ context, report, json: input.json })
+    guard({ context: context, report, json: input.json })
   }
 
   if (input.json && report.stops.length) {
@@ -93,16 +94,18 @@ export async function runPreviewRelease(input: Input) {
     }
   }
 
+  const changelog = renderChangelog(context.series, { as: 'markdown' })
+
   if (input.changelog && !input.dryRun) {
     await publishChangelog({
       octokit: octokit,
       release: release,
       repo: context.githubRepo,
-      series: context.series,
+      body: changelog,
     })
   }
 
-  return createDidPublish({ release: publishPlan.release })
+  return createDidPublish({ release: { notes: changelog, ...publishPlan.release } })
 }
 
 //

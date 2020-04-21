@@ -1,8 +1,11 @@
+import { renderChangelog } from '../lib/changelog'
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
 import { publish, PublishPlan } from '../lib/publish'
+import { publishChangelog } from '../lib/publish-changelog'
 import { getContext } from '../utils/context'
 import { branchSynced, isTrunk, npmAuthSetup } from '../utils/context-checkers'
 import { check, guard, Validator } from '../utils/contrext-guard'
+import { octokit } from '../utils/octokit'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextStable, Release } from '../utils/release'
 
@@ -27,7 +30,7 @@ export async function runStableRelease(input: Input) {
     },
   })
 
-  const report = check({ context })
+  const report = check({ context: context })
     .errorUnless(npmAuthSetup())
     .errorUnless(isTrunk())
     .errorUnless(branchSynced())
@@ -74,7 +77,18 @@ export async function runStableRelease(input: Input) {
     }
   }
 
-  return createDidPublish({ release: publishPlan.release })
+  const changelog = renderChangelog(context.series, { as: 'markdown' })
+
+  if (input.changelog && !input.dryRun) {
+    await publishChangelog({
+      octokit: octokit,
+      release: release,
+      repo: context.githubRepo,
+      body: changelog,
+    })
+  }
+
+  return createDidPublish({ release: { notes: changelog, ...publishPlan.release } })
 }
 
 //

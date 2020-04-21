@@ -1,7 +1,7 @@
+import { inspect } from 'util'
 import { Octokit } from '../utils/octokit'
-import { Release, Series } from '../utils/release'
-import { renderChangelog } from './changelog'
-import { isStable, renderStyledVersion } from './semver'
+import { Release } from '../utils/release'
+import { isPreview, isStable, PreviewVer, renderStyledVersion } from './semver'
 
 interface Repo {
   owner: string
@@ -9,10 +9,13 @@ interface Repo {
 }
 
 interface Input {
-  repo: Repo
   octokit: Octokit
-  series: Series
+  repo: Repo
   release: Release
+  /**
+   * The Changelog content.
+   */
+  body: string
   options?: {
     /**
      * Mark the GitHub release as a draft rather than published.
@@ -23,17 +26,49 @@ interface Input {
 
 /**
  * Publish a changelog. The given git tag should have already been pushed to the
- * remote.
+ * remote. If the release is a preview then the github release will be made
+ * against the pre-release identifier name. Otherwise the github release will be
+ * made against the styled version.
  */
 export async function publishChangelog(input: Input) {
-  const { octokit, release, repo, series } = input
+  const { octokit, release, repo } = input
 
-  const res = await octokit.repos.createRelease({
-    prerelease: !isStable(release.version),
-    tag_name: renderStyledVersion(release.version),
-    owner: repo.owner,
-    repo: repo.name,
-    draft: input.options?.draft ?? false,
-    body: renderChangelog(series, { as: 'markdown' }),
-  })
+  let res
+  if (isStable(release.version)) {
+    res = await octokit.repos.createRelease({
+      prerelease: false,
+      tag_name: renderStyledVersion(release.version),
+      owner: repo.owner,
+      repo: repo.name,
+      draft: input.options?.draft ?? false,
+      body: input.body,
+    })
+  } else if (isPreview(release.version)) {
+    const v = release.version as PreviewVer
+    res = await octokit.repos.getReleaseByTag({
+      owner: repo.owner,
+      repo: repo.name,
+      tag: v.preRelease.identifier,
+    })
+    if (res.status === 404) {
+      res = await octokit.repos.createRelease({
+        prerelease: false,
+        tag_name: v.preRelease.identifier,
+        owner: repo.owner,
+        repo: repo.name,
+        draft: input.options?.draft ?? false,
+        body: input.body,
+      })
+    } else {
+      res = await octokit.repos.updateRelease({
+        release_id: res.data.id,
+        owner: repo.owner,
+        repo: repo.name,
+        body: input.body,
+      })
+    }
+  } else {
+    console.error(`WARNING: release notes are not supported for this kind of release: ${inspect(release)}`)
+  }
+  return res
 }

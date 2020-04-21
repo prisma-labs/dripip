@@ -54,6 +54,10 @@ export interface Release {
    * stable, etc.
    */
   extraDistTags?: string[]
+  /**
+   * Release notes.
+   */
+  notes?: string
 }
 
 export interface PublishPlan {
