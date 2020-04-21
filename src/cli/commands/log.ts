@@ -18,7 +18,9 @@ export class Log extends Command {
   }
   async run() {
     const { flags } = this.parse(Log)
-    const ctx = await getContext()
+    const ctx = await getContext({
+      cwd: process.cwd(),
+    })
 
     if (flags.json) {
       this.log(inspect(ctx.series, { depth: 20 }))

@@ -1,6 +1,5 @@
 import Command, { flags } from '@oclif/command'
 import { rootDebug } from '../../lib/debug'
-import { createGit } from '../../lib/git'
 import { getLocationContext } from '../../utils/context'
 import { octokit } from '../../utils/octokit'
 import { getPullRequestReleaseVersionForLocation } from '../../utils/pr-release'
@@ -50,7 +49,7 @@ export class GetCurrentCommitVersion extends Command {
     debug('commit has no release information, checking for pr-releases')
 
     const ctx = await getLocationContext({
-      git: createGit(),
+      cwd: process.cwd(),
       octokit: octokit,
     })
 
