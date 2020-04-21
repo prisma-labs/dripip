@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "1.22.2",
-    "@prisma-labs/prettier-config": "^0.1.0",
+    "@prisma-labs/prettier-config": "0.1.0",
     "@types/common-tags": "1.8.0",
     "@types/jest": "25.2.1",
     "@types/node": "13.13.0",
@@ -71,7 +71,7 @@
     "tmp": "0.1.0",
     "ts-jest": "25.4.0",
     "ts-node": "8.8.2",
-    "type-fest": "^0.13.1",
+    "type-fest": "0.13.1",
     "typescript": "3.8.3"
   },
   "prettier": "@prisma-labs/prettier-config",
