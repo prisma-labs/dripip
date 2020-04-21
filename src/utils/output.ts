@@ -128,20 +128,12 @@ export function createException(
   }
 }
 
-export function outputDidNotPublish(data: { reasons: ValidationResult[] }): void {
-  outputJson(createDidNotPublish(data))
-}
-
 export function createDidNotPublish(data: { reasons: ValidationResult[] }) {
-  return createOk('did_not_publish', { data })
-}
-
-export function outputDidPublish(data: { release: Release }): void {
-  outputJson(createDidPublish(data))
+  return createOk('did_not_publish', data)
 }
 
 export function createDidPublish(data: { release: Release }) {
-  return createOk('did_publish', { data })
+  return createOk('did_publish', data)
 }
 
 /**
