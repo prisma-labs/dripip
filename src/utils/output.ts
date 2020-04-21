@@ -84,6 +84,8 @@ export function output(message: Message, opts: OutputOptions): void {
     } else if (message.kind === 'ok') {
       let s = ''
       s += message.data
+      // todo pretty printing
+      outputRaw(s)
     } else {
       casesHandled(message)
     }
@@ -153,6 +155,5 @@ export function outputMessage(msg: Message): void {
  * Output JSON to stdout.
  */
 export function outputJson(msg: object): void {
-  console.log(JSON.stringify(msg))
   process.stdout.write(JSON.stringify(msg))
 }
