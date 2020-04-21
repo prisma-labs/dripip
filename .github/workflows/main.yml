@@ -14,15 +14,13 @@ jobs:
         node-version: [10.x, 12.x]
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - run: yarn -s test:unit # todo system tests on ci
 
   publish:
