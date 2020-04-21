@@ -31,7 +31,7 @@ export class Stable extends Command {
       changelog: true,
       dryRun: flags['dry-run'],
       json: flags.json,
-      progress: true,
+      progress: !flags.json,
       overrides: {
         skipNpm: flags['skip-npm'],
         trunk: flags.trunk,

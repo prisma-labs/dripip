@@ -36,7 +36,7 @@ export class Preview extends Command {
       changelog: true,
       dryRun: flags['dry-run'],
       json: flags.json,
-      progress: true,
+      progress: !flags.json,
       overrides: {
         skipNpm: flags['skip-npm'],
         buildNum: flags['build-num'],
