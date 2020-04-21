@@ -25,7 +25,7 @@ beforeEach(() => {
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('git/dripip-system-tests/.git'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture('git/dripip-system-tests'), ctx.fs.path('.git'))
 })
 
 it('if build-num flag passed, the build number is forced to be it', async () => {
