@@ -15,7 +15,7 @@ export interface Input {
   dryRun: boolean
   json: boolean
   progress: boolean
-  changelog: boolean
+  identifier?: string
   overrides?: {
     skipNpm?: boolean
     buildNum?: number

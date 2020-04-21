@@ -13,6 +13,28 @@ export const git = (ctx: TmpDirContribution) => {
     commit(message: string) {
       return git.commit({ fs, dir, message, author: { name: 'labs' } })
     },
+    async tag(ref: string) {
+      return git.tag({ fs, dir, ref })
+      return git.writeTag({
+        fs,
+        dir,
+        tag: {
+          tag: ref,
+          message: ref,
+          type: 'commit',
+          object: await git.resolveRef({ fs, dir, ref: 'head' }),
+          tagger: {
+            email: 'labs@prisma.io',
+            name: 'labs',
+            timestamp: Date.now() / 1000,
+            timezoneOffset: 0,
+          },
+        },
+      })
+    },
+    branch(ref: string) {
+      return git.branch({ fs, dir, checkout: true, ref })
+    },
     // https://github.com/isomorphic-git/isomorphic-git/issues/129#issuecomment-390884874
     async hardReset({ dir, ref, branch }: { dir: string; ref: string; branch: string }) {
       var re = /^HEAD~([0-9]+)$/i

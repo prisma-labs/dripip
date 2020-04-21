@@ -3,15 +3,14 @@ import * as fs from 'fs-jetpack'
 import * as OS from 'os'
 import * as Path from 'path'
 
-export interface TmpDirContribution {
-  dir: string
+export const tmpDir = () => {
+  const dir = getTmpDir()
+  fs.dir(dir)
+  const pathRelativeToSource = '../' + Path.relative(dir, Path.join(__dirname, '../../..'))
+  return { dir, pathRelativeToSource }
 }
 
-export const tmpDir = (): TmpDirContribution => {
-  const tmpDir = getTmpDir()
-  fs.dir(tmpDir)
-  return { dir: tmpDir }
-}
+export type TmpDirContribution = ReturnType<typeof tmpDir>
 
 /**
  * Return the path to a temporary directory on the machine. This works around a

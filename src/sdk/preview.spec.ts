@@ -1,8 +1,6 @@
-import * as nodefs from 'fs'
 import * as TestContext from '../../tests/__lib/test-context'
 import { Input, runPreviewRelease } from './preview'
 
-const fs = nodefs
 const ctx = TestContext.compose(TestContext.all, (ctx) => {
   return {
     runPullRequestRelease(opts?: Partial<Input>) {
@@ -13,15 +11,14 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
         progress: false,
         changelog: true,
         ...opts,
+      }).then((result) => {
+        if (result.data?.changelog) {
+          result.data.changelog = result.data.changelog.replace(/- [a-z0-9]{7}/, '__sha__')
+        }
+        return result
       })
     },
   }
-})
-
-let dir: string
-
-beforeEach(() => {
-  dir = ctx.dir
 })
 
 beforeEach(async () => {
@@ -30,14 +27,14 @@ beforeEach(async () => {
 
 it('if build-num flag passed, the build number is forced to be it', async () => {
   await ctx.commit('fix: foo')
-  await ctx.git.tag({ fs, dir, ref: '0.1.0' })
+  await ctx.tag('0.1.0')
   await ctx.commit('feat: foo')
   expect(await ctx.runPullRequestRelease({ overrides: { buildNum: 2 } })).toMatchInlineSnapshot(`
     Object {
       "data": Object {
         "changelog": "#### Features
 
-    - 2af8451 foo
+    __sha__ foo
     ",
         "commits": Array [
           Object {
@@ -113,7 +110,7 @@ it('if no stable release exists then pre-releases with just patch-affecting comm
       "data": Object {
         "changelog": "#### Fixes
 
-    - 4c0b042 1
+    __sha__ 1
 
     #### Chores
 
@@ -214,7 +211,7 @@ it('if no stable release exists then pre-releases with at least one minor-affect
       "data": Object {
         "changelog": "#### Features
 
-    - 890f219 1
+    __sha__ 1
 
     #### Chores
 
@@ -310,7 +307,7 @@ it('if no stable release exists then pre-releases with at least one minor-affect
 
 describe('preflight checks', () => {
   it('must be on trunk', async () => {
-    await ctx.git.branch({ fs, dir, checkout: true, ref: 'foo' })
+    await ctx.branch('foo')
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -351,7 +348,7 @@ describe('preflight checks', () => {
 
   it('no preview release already present', async () => {
     await ctx.commit('fix: thing')
-    await ctx.git.tag({ fs, dir, ref: 'v1.2.3-next.1' })
+    await ctx.tag('v1.2.3-next.1')
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -394,7 +391,7 @@ describe('preflight checks', () => {
 
   it('no stable release already present', async () => {
     await ctx.commit('fix: thing')
-    await ctx.git.tag({ fs, dir, ref: 'v1.2.3' })
+    await ctx.tag('v1.2.3')
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -436,8 +433,8 @@ describe('preflight checks', () => {
   })
 
   it('no stable AND preview release already present (shows graceful aggregate reporting of the cases)', async () => {
-    await ctx.git.tag({ fs, dir, ref: 'v1.2.3' })
-    await ctx.git.tag({ fs, dir, ref: 'v1.2.3-next.1' })
+    await ctx.tag('v1.2.3')
+    await ctx.tag('v1.2.3-next.1')
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {

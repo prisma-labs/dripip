@@ -20,10 +20,6 @@ export interface LocationContext {
   package: {
     name: string
   }
-  // nextReleasesNowWouldBe: {
-  //   stable: null | SemVer.SemVer
-  //   preview: null | SemVer.SemVer
-  // }
   githubRepo: {
     owner: string
     name: string
@@ -65,7 +61,7 @@ export async function getLocationContext({
   cwd: string
 }): Promise<LocationContext> {
   const githubCIEnvironment = parseGithubCIEnvironment()
-  const git2 = createGit2({ cwd })
+  const git = createGit2({ cwd })
 
   // Get repo info
 
@@ -89,7 +85,7 @@ export async function getLocationContext({
 
   // const branchesSummary = await git.branch({})
 
-  let currentBranchName = await git2.getCurrentBranchName()
+  let currentBranchName = await git.getCurrentBranchName()
 
   if (!currentBranchName && githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
     currentBranchName = githubCIEnvironment.parsed.branchName
@@ -126,7 +122,7 @@ export async function getLocationContext({
 
   // get the branch sync status
 
-  const syncStatus = await git2.checkSyncStatus()
+  const syncStatus = await git.checkSyncStatus()
 
   // get package info
 
