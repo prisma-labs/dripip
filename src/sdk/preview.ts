@@ -85,7 +85,7 @@ export async function runPreviewRelease(input: Input) {
       version: release.version.version,
     },
     options: {
-      npm: input.overrides?.skipNpm,
+      npm: input.overrides?.skipNpm !== true,
     },
   }
 

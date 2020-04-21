@@ -67,7 +67,7 @@ export async function runStableRelease(input: Input) {
       extraDistTags: ['next'],
     },
     options: {
-      npm: input.overrides?.skipNpm,
+      npm: input.overrides?.skipNpm !== true,
     },
   }
 
