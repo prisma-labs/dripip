@@ -35,6 +35,7 @@ class Git2 {
     })
     const remoteUrlPrefix = `https://github.com/`
     const remoteUrl = remoteUrlPrefix + gitConfigRemoteOriginUrl.replace('git@github.com:', '')
+    console.log(remoteUrl)
     const remoteInfo = await isogit.getRemoteInfo({
       http: this.http,
       url: remoteUrl,
@@ -73,6 +74,6 @@ class Git2 {
   }
 }
 
-export function createGit2(input?: Input) {
+export function createGit(input?: Input) {
   return new Git2(input)
 }

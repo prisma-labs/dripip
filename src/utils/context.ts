@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 import * as Git from '../lib/git'
-import { createGit2, GitSyncStatus } from '../lib/git2'
+import { createGit, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import * as Rel from './release'
@@ -68,7 +68,7 @@ export async function getLocationContext({
   octokit: any
   options?: Options
 }): Promise<LocationContext> {
-  const git = createGit2({ cwd: options?.cwd })
+  const git = createGit({ cwd: options?.cwd })
   const readFromCIEnvironment = options?.readFromCIEnvironment ?? true
 
   let githubCIEnvironment = null
