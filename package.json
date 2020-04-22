@@ -1,6 +1,6 @@
 {
   "name": "dripip",
-  "version": "0.0.0-pr.68.12.0b602db",
+  "version": "0.0.0-dripip",
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/cli/main",
   "bin": {
