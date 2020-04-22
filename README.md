@@ -7,21 +7,25 @@ Opinionated CLI for continuous delivery of npm packages.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [Installation](#installation)
 - [Overview](#overview)
   - [Pull-Request Releases](#pull-request-releases)
   - [Canary Releases](#canary-releases)
   - [Stable Releases](#stable-releases)
   - [Package.json Version Field](#packagejson-version-field)
+  - [Release Notes (aka. Changelogs)](#release-notes-aka-changelogs)
+- [Recipes](#recipes)
+  - [Usage inside GitHub Actions](#usage-inside-github-actions)
 - [CLI](#cli)
-  - [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
-  - [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
-  - [`dripip help [COMMAND]`](#dripip-help-command)
-  - [`dripip log`](#dripip-log)
-  - [`dripip pr`](#dripip-pr)
-  - [`dripip preview`](#dripip-preview)
-  - [`dripip preview-or-pr`](#dripip-preview-or-pr)
-  - [`dripip stable`](#dripip-stable)
+- [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
+- [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
+- [`dripip help [COMMAND]`](#dripip-help-command)
+- [`dripip log`](#dripip-log)
+- [`dripip pr`](#dripip-pr)
+- [`dripip preview`](#dripip-preview)
+- [`dripip preview-or-pr`](#dripip-preview-or-pr)
+- [`dripip stable`](#dripip-stable)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -114,18 +118,64 @@ Having a valid semver value in the `version` field is required by npm. Dripip pu
 0.0.0-dripip
 ```
 
-# CLI
+### Release Notes (aka. Changelogs)
+
+Dripip generates release notes for canary and stable releases. Notes are published within GitHub releases. Canary release notes are published under the `next` tag. Stable release notes are published under its respective version tag. Stable release notes are stable, while Canary release notes are always changing. When a stable release is cut, the canary release notes are cleared since `next` becomes the same as stable, until the next Canary is published.
+
+Because the canary release notes have a stable tag, it means you and your uses can _always_ check out what's coming in the next stable version by visiting:
+
+```
+https://github.com/<org>/<repo>/releases/tag/next
+```
+
+For example checkout what's coming up in dripip right now by visiting https://github.com/prisma-labs/dripip/releases/tag/next.
+
+## Recipes
+
+### Usage inside GitHub Actions
+
+We are interseted in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
+
+1. Have `dripip` installed as a dev dependency
+1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
+1. Expose `GITHUB_TOKEN` to `dripip` ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token))
+1. Expose `NPM_TOKEN` to `dripip`
+1. Checkout all repo commits and tags
+
+Example Workflow Configuration:
+
+```yml
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get all git commits and tags
+        run: git fetch --prune --unshallow --tags
+      - uses: actions/setup-node@v1
+      - run: yarn --frozen-lockfile
+      - run: yarn -s dripip preview-or-pr
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+```
+
+Real World Usage:
+
+- [`dripip`](https://github.com/prisma-labs/dripip/blob/master/.github/workflows/main.yml)
+- [`nexus`](https://github.com/graphql-nexus/nexus/blob/master/.github/workflows/trunk.yml)
+
+## CLI
 
 <!-- commands -->
-
-- [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
-- [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
-- [`dripip help [COMMAND]`](#dripip-help-command)
-- [`dripip log`](#dripip-log)
-- [`dripip pr`](#dripip-pr)
-- [`dripip preview`](#dripip-preview)
-- [`dripip preview-or-pr`](#dripip-preview-or-pr)
-- [`dripip stable`](#dripip-stable)
+* [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
+* [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
+* [`dripip help [COMMAND]`](#dripip-help-command)
+* [`dripip log`](#dripip-log)
+* [`dripip pr`](#dripip-pr)
+* [`dripip preview`](#dripip-preview)
+* [`dripip preview-or-pr`](#dripip-preview-or-pr)
+* [`dripip stable`](#dripip-stable)
 
 ## `dripip get-current-commit-version`
 
@@ -137,6 +187,8 @@ OPTIONS
   -r, --optional  Exit 0 if a version for the commit cannot be found
 ```
 
+_See code: [dist/cli/commands/get-current-commit-version.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-dripip/dist/cli/commands/get-current-commit-version.ts)_
+
 ## `dripip get-current-pr-num`
 
 ```
@@ -144,8 +196,10 @@ USAGE
   $ dripip get-current-pr-num
 
 OPTIONS
-  -r, --optional  Exit 0 if a pr number cannot be found for whatever reason (logical, error, ...)
+  -r, --optional  Exit 0 if a pr number cannot be found for whatever reason
 ```
+
+_See code: [dist/cli/commands/get-current-pr-num.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-dripip/dist/cli/commands/get-current-pr-num.ts)_
 
 ## `dripip help [COMMAND]`
 
@@ -174,6 +228,8 @@ OPTIONS
   -j, --json      format output as JSON
   -m, --markdown  format output as Markdown
 ```
+
+_See code: [dist/cli/commands/log.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-dripip/dist/cli/commands/log.ts)_
 
 ## `dripip pr`
 
@@ -209,6 +265,8 @@ USAGE
   $ dripip preview-or-pr
 ```
 
+_See code: [dist/cli/commands/preview-or-pr.ts](https://github.com/prisma-labs/dripip/blob/v0.0.0-dripip/dist/cli/commands/preview-or-pr.ts)_
+
 ## `dripip stable`
 
 ```
@@ -223,5 +281,4 @@ OPTIONS
   --trunk=trunk  State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo
                  settings.
 ```
-
 <!-- commandsstop -->
