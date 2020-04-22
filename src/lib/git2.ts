@@ -28,18 +28,26 @@ class Git2 {
    * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
    */
   async checkSyncStatus(): Promise<GitSyncStatus> {
-    const gitConfigRemoteOriginUrl = await isogit.getConfig({
+    let remoteUrl: string = await isogit.getConfig({
       fs: this.fs,
       dir: this.dir,
       path: 'remote.origin.url',
     })
-    const remoteUrlPrefix = `https://github.com/`
-    const remoteUrl = remoteUrlPrefix + gitConfigRemoteOriginUrl.replace('git@github.com:', '')
-    console.log(remoteUrl)
-    const remoteInfo = await isogit.getRemoteInfo({
-      http: this.http,
-      url: remoteUrl,
-    })
+
+    if (remoteUrl.startsWith('git@github.com:')) {
+      remoteUrl = remoteUrl.replace('git@github.com:', 'https://github.com/')
+    }
+
+    let remoteInfo
+
+    try {
+      remoteInfo = await isogit.getRemoteInfo({
+        http: this.http,
+        url: remoteUrl,
+      })
+    } catch (e) {
+      throw new Error(`Failed to fetch remote info from ${remoteUrl} due to error:\n\n${e}`)
+    }
 
     if (!remoteInfo.refs) {
       throw new Error('Could not fetch refs')
