@@ -12,13 +12,13 @@ interface Options {
   progress: boolean
   json: boolean
   cwd?: string
+  readFromCIEnvironment?: boolean
 }
 
 export async function runPullRequestRelease(options: Options) {
   const cwd = options.cwd ?? process.cwd()
-  // const t1 = Date.now()
-  const context = await getContext({ cwd })
-  // console.log(Date.now() - t1)
+  const readFromCIEnvironment = options.readFromCIEnvironment
+  const context = await getContext({ cwd, readFromCIEnvironment })
 
   const report = check({ context })
     .errorUnless(npmAuthSetup())

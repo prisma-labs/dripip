@@ -9,8 +9,8 @@ import { octokit } from '../utils/octokit'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextStable, Release } from '../utils/release'
 
-export interface Input {
-  cwd: string
+export interface Options {
+  cwd?: string
   dryRun: boolean
   json: boolean
   progress: boolean
@@ -20,13 +20,17 @@ export interface Input {
     buildNum?: number
     trunk?: string
   }
+  readFromCIEnvironment?: boolean
 }
 
-export async function runStableRelease(input: Input) {
+export async function runStableRelease(options: Options) {
+  const cwd = options.cwd ?? process.cwd()
+  const readFromCIEnvironment = options.readFromCIEnvironment
   const context = await getContext({
-    cwd: input.cwd,
+    cwd,
+    readFromCIEnvironment,
     overrides: {
-      trunk: input.overrides?.trunk ?? null,
+      trunk: options.overrides?.trunk ?? null,
     },
   })
 
@@ -41,7 +45,7 @@ export async function runStableRelease(input: Input) {
   const maybeRelease = getNextStable(context.series)
   const changelog = renderChangelog(context.series, { as: 'markdown' })
 
-  if (input.dryRun) {
+  if (options.dryRun) {
     return createDryRun({
       report,
       release: maybeRelease,
@@ -51,10 +55,10 @@ export async function runStableRelease(input: Input) {
   }
 
   if (report.errors.length) {
-    guard({ context, report, json: input.json })
+    guard({ context, report, json: options.json })
   }
 
-  if (input.json && report.stops.length) {
+  if (options.json && report.stops.length) {
     return createDidNotPublish({ reasons: report.stops })
   }
 
@@ -67,14 +71,14 @@ export async function runStableRelease(input: Input) {
       extraDistTags: ['next'],
     },
     options: {
-      npm: input.overrides?.skipNpm !== true,
+      npm: options.overrides?.skipNpm !== true,
     },
   }
 
   setupNPMAuthfileOnCI()
 
   for await (const progress of publishPackage(publishPlan)) {
-    if (!input.json) {
+    if (!options.json) {
       console.log(progress)
     }
   }
@@ -86,7 +90,7 @@ export async function runStableRelease(input: Input) {
     },
   }
 
-  if (input.changelog && !input.dryRun) {
+  if (options.changelog && !options.dryRun) {
     await publishChangelog({
       octokit: octokit,
       release: releaseInfo,

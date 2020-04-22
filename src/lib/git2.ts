@@ -3,7 +3,7 @@ import isogit from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 
 interface Input {
-  cwd: string
+  cwd?: string
 }
 
 export type GitSyncStatus = 'synced' | 'not_synced' | 'remote_needs_branch'
@@ -12,8 +12,8 @@ class Git2 {
   private dir: string
   private fs: typeof nodefs
   private http: typeof http
-  constructor(input: Input) {
-    this.dir = input.cwd
+  constructor(input?: Input) {
+    this.dir = input?.cwd ?? process.cwd()
     this.fs = nodefs
     this.http = http
   }
@@ -73,6 +73,6 @@ class Git2 {
   }
 }
 
-export function createGit2(input: Input) {
+export function createGit2(input?: Input) {
   return new Git2(input)
 }

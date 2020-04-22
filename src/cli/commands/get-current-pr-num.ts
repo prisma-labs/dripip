@@ -1,6 +1,6 @@
 import Command, { flags } from '@oclif/command'
-import { Octokit } from '@octokit/rest'
 import { getLocationContext } from '../../utils/context'
+import { octokit } from '../../utils/octokit'
 
 export class GetCurrentPRNum extends Command {
   static flags = {
@@ -14,10 +14,7 @@ export class GetCurrentPRNum extends Command {
     const { flags } = this.parse(GetCurrentPRNum)
 
     const context = await getLocationContext({
-      cwd: process.cwd(),
-      octokit: new Octokit({
-        auth: process.env.GITHUB_TOKEN,
-      }),
+      octokit: octokit,
     })
 
     const prNum = context.currentBranch.pr?.number ?? null

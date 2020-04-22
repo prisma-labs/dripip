@@ -11,6 +11,7 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
         json: true,
         dryRun: true,
         progress: false,
+        readFromCIEnvironment: false,
       })
     },
   }

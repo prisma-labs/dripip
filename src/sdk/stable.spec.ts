@@ -9,12 +9,12 @@
 
 import * as nodefs from 'fs'
 import * as TestContext from '../../tests/__lib/test-context'
-import { Input, runStableRelease } from './stable'
+import { Options, runStableRelease } from './stable'
 
 const fs = nodefs
 const ctx = TestContext.compose(TestContext.all, (ctx) => {
   return {
-    runStableRelease(opts?: Partial<Input>) {
+    runStableRelease(opts?: Partial<Options>) {
       return runStableRelease({
         cwd: ctx.dir,
         json: true,

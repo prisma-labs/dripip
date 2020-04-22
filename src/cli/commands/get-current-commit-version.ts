@@ -48,10 +48,7 @@ export class GetCurrentCommitVersion extends Command {
     // Try to get version from pr release
     debug('commit has no release information, checking for pr-releases')
 
-    const ctx = await getLocationContext({
-      cwd: process.cwd(),
-      octokit: octokit,
-    })
+    const ctx = await getLocationContext({ octokit: octokit })
 
     debug('got location context', ctx)
 

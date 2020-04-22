@@ -1,9 +1,9 @@
 import * as TestContext from '../../tests/__lib/test-context'
-import { Input, runPreviewRelease } from './preview'
+import { Options, runPreviewRelease } from './preview'
 
 const ctx = TestContext.compose(TestContext.all, (ctx) => {
   return {
-    runPullRequestRelease(opts?: Partial<Input>) {
+    runPullRequestRelease(opts?: Partial<Options>) {
       return runPreviewRelease({
         cwd: ctx.dir,
         json: true,
