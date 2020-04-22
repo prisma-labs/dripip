@@ -37,6 +37,9 @@ class Git2 {
     if (remoteUrl.startsWith('git@github.com:')) {
       remoteUrl = remoteUrl.replace('git@github.com:', 'https://github.com/')
     }
+    if (!remoteUrl.endsWith('.git')) {
+      remoteUrl = remoteUrl + '.git'
+    }
 
     let remoteInfo
 
