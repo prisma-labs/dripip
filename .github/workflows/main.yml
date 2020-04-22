@@ -39,3 +39,4 @@ jobs:
       - run: yarn -s dripip preview-or-pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
