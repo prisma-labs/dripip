@@ -26,7 +26,7 @@ export interface Options {
 
 export async function runPreviewRelease(options: Options) {
   const cwd = options.cwd ?? process.cwd()
-  const readFromCIEnvironment = options.readFromCIEnvironment
+  const readFromCIEnvironment = options.readFromCIEnvironment ?? true
   const context = await getContext({
     cwd,
     readFromCIEnvironment,
@@ -48,7 +48,7 @@ export async function runPreviewRelease(options: Options) {
   //    2. show the tag author name
   //    3. show the the date the tag was made
 
-  const report = check({ context: context })
+  const report = check({ context })
     .errorUnless(npmAuthSetup())
     .errorUnless(isTrunk())
     .errorUnless(notAlreadyStableOrPreviewReleased())

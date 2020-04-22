@@ -1,8 +1,8 @@
-import { Octokit } from '@octokit/rest'
 import * as Git from '../lib/git'
 import { createGit, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
+import { octokit } from './octokit'
 import * as Rel from './release'
 
 export interface PullRequestContext {
@@ -17,7 +17,7 @@ export interface Options {
    *
    * @default true
    */
-  readFromCIEnvironment?: boolean
+  readFromCIEnvironment: boolean
   overrides?: {
     /**
      * @default null
@@ -48,12 +48,8 @@ export interface Context extends LocationContext {
 }
 
 export async function getContext(options: Options): Promise<Context> {
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
-  })
   const locationContext = await getLocationContext({ octokit, options })
   const series = await Rel.getCurrentSeries({ cwd: options.cwd })
-
   return { series, ...locationContext }
 }
 
@@ -69,7 +65,7 @@ export async function getLocationContext({
   options?: Options
 }): Promise<LocationContext> {
   const git = createGit({ cwd: options?.cwd })
-  const readFromCIEnvironment = options?.readFromCIEnvironment ?? true
+  const readFromCIEnvironment = options?.readFromCIEnvironment
 
   let githubCIEnvironment = null
 
@@ -94,10 +90,18 @@ export async function getLocationContext({
   if (options?.overrides?.trunk) {
     trunkBranch = options.overrides.trunk
   } else {
-    const githubRepo = await octokit.repos.get({
-      owner: repoInfo.owner,
-      repo: repoInfo.name,
-    })
+    let githubRepo
+    try {
+      githubRepo = await octokit.repos.get({
+        owner: repoInfo.owner,
+        repo: repoInfo.name,
+      })
+    } catch (e) {
+      throw new Error(
+        `Failed to fetch repo info from ${repoInfo.owner}/${repoInfo.name} in order to get the default branch.\n\n${e}`
+      )
+    }
+
     trunkBranch = githubRepo.data.default_branch
   }
 
@@ -124,14 +128,19 @@ export async function getLocationContext({
       number: githubCIEnvironment.parsed.prNum,
     }
   } else {
-    const maybePR = (
-      await octokit.pulls.list({
-        owner: repoInfo.owner,
-        repo: repoInfo.name,
-        head: `${repoInfo.owner}:${currentBranchName}`,
-        state: 'open',
-      })
-    ).data[0]
+    const head = `${repoInfo.owner}:${currentBranchName}`
+    const owner = repoInfo.owner
+    const repo = repoInfo.name
+    const state = 'open'
+    let maybePR
+
+    try {
+      maybePR = (await octokit.pulls.list({ owner, repo, head, state })).data[0]
+    } catch (e) {
+      throw new Error(
+        `Failed to fetch ${state} pull requests from ${owner}/${name} for head ${head} in order to find out if this branch has an open pull-request.\n\n${e}`
+      )
+    }
 
     if (maybePR) {
       pr = {

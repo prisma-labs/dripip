@@ -25,7 +25,7 @@ export interface Options {
 
 export async function runStableRelease(options: Options) {
   const cwd = options.cwd ?? process.cwd()
-  const readFromCIEnvironment = options.readFromCIEnvironment
+  const readFromCIEnvironment = options.readFromCIEnvironment ?? true
   const context = await getContext({
     cwd,
     readFromCIEnvironment,

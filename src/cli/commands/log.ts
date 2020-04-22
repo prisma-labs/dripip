@@ -20,6 +20,7 @@ export class Log extends Command {
     const { flags } = this.parse(Log)
     const ctx = await getContext({
       cwd: process.cwd(),
+      readFromCIEnvironment: true,
     })
 
     if (flags.json) {
