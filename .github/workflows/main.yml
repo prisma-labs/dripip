@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get all git tags
-        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        run: git fetch --prune --unshallow --tags
       - uses: actions/setup-node@v1
         with:
           node-version: 10.x
