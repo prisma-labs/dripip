@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - run: yarn -s test:unit # todo system tests on ci
 
   publish:
