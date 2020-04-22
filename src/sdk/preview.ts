@@ -10,8 +10,8 @@ import { octokit } from '../utils/octokit'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextPreview, isNoReleaseReason, Release } from '../utils/release'
 
-export interface Input {
-  cwd: string
+export interface Options {
+  cwd?: string
   dryRun: boolean
   json: boolean
   progress: boolean
@@ -21,13 +21,17 @@ export interface Input {
     buildNum?: number
     trunk?: string
   }
+  readFromCIEnvironment?: boolean
 }
 
-export async function runPreviewRelease(input: Input) {
+export async function runPreviewRelease(options: Options) {
+  const cwd = options.cwd ?? process.cwd()
+  const readFromCIEnvironment = options.readFromCIEnvironment
   const context = await getContext({
-    cwd: input.cwd,
+    cwd,
+    readFromCIEnvironment,
     overrides: {
-      trunk: input.overrides?.trunk ?? null,
+      trunk: options.overrides?.trunk ?? null,
     },
   })
 
@@ -54,13 +58,13 @@ export async function runPreviewRelease(input: Input) {
 
   const maybeRelease = getNextPreview(context.series)
 
-  if (input.overrides?.buildNum !== undefined && !isNoReleaseReason(maybeRelease)) {
-    maybeRelease.version = setBuildNum(maybeRelease.version as PreviewVer, input.overrides.buildNum)
+  if (options.overrides?.buildNum !== undefined && !isNoReleaseReason(maybeRelease)) {
+    maybeRelease.version = setBuildNum(maybeRelease.version as PreviewVer, options.overrides.buildNum)
   }
 
   const changelog = renderChangelog(context.series, { as: 'markdown' })
 
-  if (input.dryRun) {
+  if (options.dryRun) {
     return createDryRun({
       report: report,
       release: maybeRelease,
@@ -70,10 +74,10 @@ export async function runPreviewRelease(input: Input) {
   }
 
   if (report.errors.length) {
-    guard({ context: context, report, json: input.json })
+    guard({ context: context, report, json: options.json })
   }
 
-  if (input.json && report.stops.length) {
+  if (options.json && report.stops.length) {
     return createDidNotPublish({ reasons: report.stops })
   }
 
@@ -85,14 +89,14 @@ export async function runPreviewRelease(input: Input) {
       version: release.version.version,
     },
     options: {
-      npm: input.overrides?.skipNpm !== true,
+      npm: options.overrides?.skipNpm !== true,
     },
   }
 
   setupNPMAuthfileOnCI()
 
   for await (const progress of publishPackage(publishPlan)) {
-    if (input.progress) {
+    if (options.progress) {
       console.log(progress)
     }
   }
@@ -104,7 +108,7 @@ export async function runPreviewRelease(input: Input) {
     },
   }
 
-  if (input.changelog && !input.dryRun) {
+  if (options.changelog && !options.dryRun) {
     await publishChangelog({
       octokit: octokit,
       release: releaseInfo,

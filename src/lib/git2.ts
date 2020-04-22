@@ -3,7 +3,7 @@ import isogit from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 
 interface Input {
-  cwd: string
+  cwd?: string
 }
 
 export type GitSyncStatus = 'synced' | 'not_synced' | 'remote_needs_branch'
@@ -12,8 +12,8 @@ class Git2 {
   private dir: string
   private fs: typeof nodefs
   private http: typeof http
-  constructor(input: Input) {
-    this.dir = input.cwd
+  constructor(input?: Input) {
+    this.dir = input?.cwd ?? process.cwd()
     this.fs = nodefs
     this.http = http
   }
@@ -27,18 +27,30 @@ class Git2 {
    * Check how the local branch is not in sync or is with the remote.
    * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
    */
-  async checkSyncStatus(): Promise<GitSyncStatus> {
-    const gitConfigRemoteOriginUrl = await isogit.getConfig({
+  async checkSyncStatus(input: { branchName: string }): Promise<GitSyncStatus> {
+    let remoteUrl: string = await isogit.getConfig({
       fs: this.fs,
       dir: this.dir,
       path: 'remote.origin.url',
     })
-    const remoteUrlPrefix = `https://github.com/`
-    const remoteUrl = remoteUrlPrefix + gitConfigRemoteOriginUrl.replace('git@github.com:', '')
-    const remoteInfo = await isogit.getRemoteInfo({
-      http: this.http,
-      url: remoteUrl,
-    })
+
+    if (remoteUrl.startsWith('git@github.com:')) {
+      remoteUrl = remoteUrl.replace('git@github.com:', 'https://github.com/')
+    }
+    if (!remoteUrl.endsWith('.git')) {
+      remoteUrl = remoteUrl + '.git'
+    }
+
+    let remoteInfo
+
+    try {
+      remoteInfo = await isogit.getRemoteInfo({
+        http: this.http,
+        url: remoteUrl,
+      })
+    } catch (e) {
+      throw new Error(`Failed to fetch remote info from ${remoteUrl} due to error:\n\n${e}`)
+    }
 
     if (!remoteInfo.refs) {
       throw new Error('Could not fetch refs')
@@ -48,20 +60,14 @@ class Git2 {
       throw new Error('Could not fetch ref heads')
     }
 
-    const localBranchName = await this.getCurrentBranchName()
-
-    if (!localBranchName) {
-      throw new Error('Could not read own branch name')
-    }
-
     if (
-      !Object.keys(remoteInfo.refs.heads).find((remoteBranchName) => remoteBranchName === localBranchName)
+      !Object.keys(remoteInfo.refs.heads).find((remoteBranchName) => remoteBranchName === input.branchName)
     ) {
       return 'remote_needs_branch'
     }
 
-    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'head' })
-    const remoteBranchHeadSha = remoteInfo.refs.heads[localBranchName]
+    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'HEAD' })
+    const remoteBranchHeadSha = remoteInfo.refs.heads[input.branchName]
 
     if (localBranchHeadSha === remoteBranchHeadSha) {
       return 'synced'
@@ -73,6 +79,6 @@ class Git2 {
   }
 }
 
-export function createGit2(input: Input) {
+export function createGit(input?: Input) {
   return new Git2(input)
 }

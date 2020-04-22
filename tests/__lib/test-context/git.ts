@@ -14,21 +14,13 @@ export const git = (ctx: TmpDirContribution) => {
       return git.commit({ fs, dir, message, author: { name: 'labs' } })
     },
     async tag(ref: string) {
-      return git.tag({ fs, dir, ref })
-      return git.writeTag({
+      return git.annotatedTag({
         fs,
         dir,
-        tag: {
-          tag: ref,
-          message: ref,
-          type: 'commit',
-          object: await git.resolveRef({ fs, dir, ref: 'head' }),
-          tagger: {
-            email: 'labs@prisma.io',
-            name: 'labs',
-            timestamp: Date.now() / 1000,
-            timezoneOffset: 0,
-          },
+        ref,
+        message: ref,
+        tagger: {
+          name: 'labs',
         },
       })
     },

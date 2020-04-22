@@ -11,13 +11,14 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
         json: true,
         dryRun: true,
         progress: false,
+        readFromCIEnvironment: false,
       })
     },
   }
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('git/dripip-system-tests'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
 })
 
 it('preflight check that user is on branch with open pr', async () => {

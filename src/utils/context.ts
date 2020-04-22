@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 import * as Git from '../lib/git'
-import { createGit2, GitSyncStatus } from '../lib/git2'
+import { createGit, GitSyncStatus } from '../lib/git2'
 import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import * as Rel from './release'
@@ -11,7 +11,17 @@ export interface PullRequestContext {
 
 export interface Options {
   cwd: string
+  /**
+   * When building the context should the CI environment be checked for data?
+   * Useful to boost performance.
+   *
+   * @default true
+   */
+  readFromCIEnvironment?: boolean
   overrides?: {
+    /**
+     * @default null
+     */
     trunk?: null | string
   }
 }
@@ -37,12 +47,12 @@ export interface Context extends LocationContext {
   series: Rel.Series
 }
 
-export async function getContext(opts: Options): Promise<Context> {
+export async function getContext(options: Options): Promise<Context> {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })
-  const locationContext = await getLocationContext({ octokit, opts, cwd: opts.cwd })
-  const series = await Rel.getCurrentSeries({ cwd: opts.cwd })
+  const locationContext = await getLocationContext({ octokit, options })
+  const series = await Rel.getCurrentSeries({ cwd: options.cwd })
 
   return { series, ...locationContext }
 }
@@ -53,26 +63,36 @@ export async function getContext(opts: Options): Promise<Context> {
  */
 export async function getLocationContext({
   octokit,
-  opts,
-  cwd,
+  options,
 }: {
   octokit: any
-  opts?: Options
-  cwd: string
+  options?: Options
 }): Promise<LocationContext> {
-  const githubCIEnvironment = parseGithubCIEnvironment()
-  const git = createGit2({ cwd })
+  const git = createGit({ cwd: options?.cwd })
+  const readFromCIEnvironment = options?.readFromCIEnvironment ?? true
+
+  let githubCIEnvironment = null
+
+  if (readFromCIEnvironment) {
+    githubCIEnvironment = parseGithubCIEnvironment()
+  }
 
   // Get repo info
 
-  const repoInfo = githubCIEnvironment?.parsed.repo ?? (await Git.parseGithubRepoInfoFromGitConfig())
+  let repoInfo
+
+  repoInfo = githubCIEnvironment?.parsed.repo
+
+  if (!repoInfo) {
+    repoInfo = await Git.parseGithubRepoInfoFromGitConfig()
+  }
 
   // Get which branch is trunk, overridable
 
   let trunkBranch: string
 
-  if (opts?.overrides?.trunk) {
-    trunkBranch = opts.overrides.trunk
+  if (options?.overrides?.trunk) {
+    trunkBranch = options.overrides.trunk
   } else {
     const githubRepo = await octokit.repos.get({
       owner: repoInfo.owner,
@@ -122,7 +142,9 @@ export async function getLocationContext({
 
   // get the branch sync status
 
-  const syncStatus = await git.checkSyncStatus()
+  const syncStatus = await git.checkSyncStatus({
+    branchName: currentBranchName,
+  })
 
   // get package info
 
