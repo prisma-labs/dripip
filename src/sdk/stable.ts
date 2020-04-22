@@ -58,7 +58,7 @@ export async function runStableRelease(options: Options) {
     guard({ context, report, json: options.json })
   }
 
-  if (options.json && report.stops.length) {
+  if (report.stops.length) {
     return createDidNotPublish({ reasons: report.stops })
   }
 

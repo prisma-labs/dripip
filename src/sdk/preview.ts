@@ -77,7 +77,7 @@ export async function runPreviewRelease(options: Options) {
     guard({ context: context, report, json: options.json })
   }
 
-  if (options.json && report.stops.length) {
+  if (report.stops.length) {
     return createDidNotPublish({ reasons: report.stops })
   }
 
