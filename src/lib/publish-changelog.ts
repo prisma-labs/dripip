@@ -44,49 +44,56 @@ export async function publishChangelog(input: Input) {
   } = input
 
   let res: any
-  if (isStable(release.version)) {
-    res = await octokit.repos.createRelease({
-      owner,
-      repo,
-      prerelease: false,
-      tag_name: renderStyledVersion(release.version),
-      draft: input.options?.draft ?? false,
-      body: input.body,
-    })
-    const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag: 'next' })
-    if (existingPreviewRelease) {
-      res = await octokit.repos.updateRelease({
-        owner,
-        repo,
-        release_id: existingPreviewRelease.data.id,
-        target_commitish: release.head.sha,
-        body: 'None since last stable.',
-      })
-    }
-  } else if (isPreview(release.version)) {
-    const v = release.version as PreviewVer
-    const tag = v.preRelease.identifier
-    const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag })
-
-    if (!existingPreviewRelease) {
+  try {
+    if (isStable(release.version)) {
       res = await octokit.repos.createRelease({
         owner,
         repo,
-        prerelease: true,
-        tag_name: v.preRelease.identifier,
+        prerelease: false,
+        tag_name: renderStyledVersion(release.version),
         draft: input.options?.draft ?? false,
         body: input.body,
       })
+      const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag: 'next' })
+      if (existingPreviewRelease) {
+        res = await octokit.repos.updateRelease({
+          owner,
+          repo,
+          release_id: existingPreviewRelease.data.id,
+          target_commitish: release.head.sha,
+          body: 'None since last stable.',
+        })
+      }
+    } else if (isPreview(release.version)) {
+      const v = release.version as PreviewVer
+      const tag = v.preRelease.identifier
+      const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag })
+
+      if (!existingPreviewRelease) {
+        res = await octokit.repos.createRelease({
+          owner,
+          repo,
+          prerelease: true,
+          tag_name: v.preRelease.identifier,
+          draft: input.options?.draft ?? false,
+          body: input.body,
+        })
+      } else {
+        res = await octokit.repos.updateRelease({
+          owner,
+          repo,
+          release_id: existingPreviewRelease.data.id,
+          body: input.body,
+        })
+      }
     } else {
-      res = await octokit.repos.updateRelease({
-        owner,
-        repo,
-        release_id: existingPreviewRelease.data.id,
-        body: input.body,
-      })
+      // Should never happen if used correctly.
+      throw new Error(
+        `WARNING: release notes are not supported for this kind of release: ${inspect(release)}`
+      )
     }
-  } else {
-    console.error(`WARNING: release notes are not supported for this kind of release: ${inspect(release)}`)
+  } catch (e) {
+    throw new Error(`Failed to publish changelog\n\n${inspect(e)}`)
   }
   return res
 }
@@ -106,7 +113,11 @@ async function maybeGetRelease(input: {
     })
   } catch (error) {
     if (error.status !== 404) {
-      throw error
+      throw new Error(
+        `Failed to fetch releases for tag ${input.tag} on repo ${input.owner}/${input.repo}.\n\n${inspect(
+          error
+        )}`
+      )
     }
   }
   return res
