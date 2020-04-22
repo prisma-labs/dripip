@@ -27,7 +27,7 @@ class Git2 {
    * Check how the local branch is not in sync or is with the remote.
    * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
    */
-  async checkSyncStatus(): Promise<GitSyncStatus> {
+  async checkSyncStatus(input: { branchName: string }): Promise<GitSyncStatus> {
     let remoteUrl: string = await isogit.getConfig({
       fs: this.fs,
       dir: this.dir,
@@ -60,20 +60,14 @@ class Git2 {
       throw new Error('Could not fetch ref heads')
     }
 
-    const localBranchName = await this.getCurrentBranchName()
-
-    if (!localBranchName) {
-      throw new Error('Could not read own branch name')
-    }
-
     if (
-      !Object.keys(remoteInfo.refs.heads).find((remoteBranchName) => remoteBranchName === localBranchName)
+      !Object.keys(remoteInfo.refs.heads).find((remoteBranchName) => remoteBranchName === input.branchName)
     ) {
       return 'remote_needs_branch'
     }
 
     const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'HEAD' })
-    const remoteBranchHeadSha = remoteInfo.refs.heads[localBranchName]
+    const remoteBranchHeadSha = remoteInfo.refs.heads[input.branchName]
 
     if (localBranchHeadSha === remoteBranchHeadSha) {
       return 'synced'

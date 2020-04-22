@@ -142,7 +142,9 @@ export async function getLocationContext({
 
   // get the branch sync status
 
-  const syncStatus = await git.checkSyncStatus()
+  const syncStatus = await git.checkSyncStatus({
+    branchName: currentBranchName,
+  })
 
   // get package info
 
