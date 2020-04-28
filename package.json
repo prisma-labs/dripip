@@ -53,7 +53,7 @@
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.0",
-    "simple-git": "^1.126.0"
+    "simple-git": "^2.0.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "1.22.2",
