@@ -1,7 +1,4 @@
-// Disable colour from test output
-// https://github.com/chalk/chalk#chalklevel
-process.env.FORCE_COLOR = '0'
-
+import stripAnsi from 'strip-ansi'
 import * as Release from '../utils/release'
 import * as Changelog from './changelog'
 
@@ -52,7 +49,7 @@ describe('.render()', () => {
     }
 
     it('renders release notes for the current release series', () => {
-      const notes = render(...mockChangeLog)
+      const notes = stripAnsi(render(...mockChangeLog))
       expect(notes).toMatchSnapshot()
     })
   })
