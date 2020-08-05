@@ -7,6 +7,8 @@ describe(calcBumpType.name, () => {
     expect(calcBumpType(false, ['unknown', 'feat: 1'])).toEqual('minor')
     expect(calcBumpType(false, ['unknown\n\nBREAKING CHANGE: foo\nfoobar'])).toEqual(null)
     expect(calcBumpType(false, ['unknown', 'fix: 1\n\nBREAKING CHANGE: foo'])).toEqual('major')
+    expect(calcBumpType(false, ['unknown', 'fix!: 1\n\nBREAKING CHANGE: foo'])).toEqual('major')
+    expect(calcBumpType(false, ['unknown', 'fix!: 1'])).toEqual('major')
   })
 
   describe('initial development', () => {
