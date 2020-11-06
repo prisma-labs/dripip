@@ -1,5 +1,5 @@
-import { Octokit } from '@octokit/rest'
 import { format } from 'util'
+import { Octokit } from '@octokit/rest'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
 
@@ -121,8 +121,6 @@ function createDripipRunner(cwd: string, pathToProject: string) {
     const runString = `${createDripipRunString(pathToProject)} ${command} --json`
     return proc.run(runString, opts).then(result => {
       if (opts.raw === true) {
-        // TODO remove given new json parse approach?
-        delete result.command
         // TODO not used/helpful...?
         sanitizeResultForSnap(result as RunDripipResult)
         return result as RunDripipResult // force TS to ignore the stderr: null possibility

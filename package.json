@@ -40,39 +40,39 @@
     "@oclif/config": "^1.17.0",
     "@oclif/errors": "^1.3.3",
     "@oclif/plugin-help": "^3.2.0",
-    "@octokit/rest": "^18.0.3",
+    "@octokit/rest": "^18.0.9",
     "@types/debug": "^4.1.5",
     "@types/parse-git-config": "^3.0.0",
     "@types/parse-github-url": "^1.0.0",
     "chalk": "^4.1.0",
     "common-tags": "^1.8.0",
-    "debug": "^4.1.1",
-    "fs-jetpack": "^3.1.0",
-    "isomorphic-git": "^1.7.4",
+    "debug": "^4.2.0",
+    "fs-jetpack": "^4.0.1",
+    "isomorphic-git": "^1.7.8",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.2",
-    "simple-git": "^2.17.0"
+    "simple-git": "^2.21.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "1.22.2",
     "@prisma-labs/prettier-config": "0.1.0",
     "@types/common-tags": "1.8.0",
-    "@types/jest": "26.0.8",
-    "@types/node": "14.0.27",
+    "@types/jest": "26.0.15",
+    "@types/node": "14.14.6",
     "@types/tmp": "0.2.0",
     "doctoc": "1.4.0",
-    "jest": "26.2.2",
+    "jest": "26.6.3",
     "jest-watch-suspend": "1.1.2",
     "jest-watch-toggle-config": "2.0.1",
-    "jest-watch-typeahead": "0.6.0",
-    "prettier": "2.0.5",
+    "jest-watch-typeahead": "0.6.1",
+    "prettier": "2.1.2",
     "strip-ansi": "6.0.0",
     "tmp": "0.2.1",
-    "ts-jest": "26.1.4",
-    "ts-node": "8.10.2",
-    "type-fest": "0.16.0",
-    "typescript": "3.9.7"
+    "ts-jest": "26.4.3",
+    "ts-node": "9.0.0",
+    "type-fest": "0.18.0",
+    "typescript": "4.0.5"
   },
   "prettier": "@prisma-labs/prettier-config",
   "oclif": {
@@ -103,7 +103,7 @@
     ],
     "globals": {
       "ts-jest": {
-        "tsConfig": "tests/tsconfig.json",
+        "tsconfig": "tests/tsconfig.json",
         "diagnostics": {
           "ignoreCodes": [
             151001
