@@ -1,6 +1,6 @@
 import Command, { flags } from '@oclif/command'
 import { inspect } from 'util'
-import * as ChangeLog from '../../lib/changelog'
+import * as ChangeLog from '../../lib/changelog/data'
 import { getContext } from '../../utils/context'
 
 export class Log extends Command {
@@ -29,7 +29,7 @@ export class Log extends Command {
     }
 
     this.log(
-      ChangeLog.renderChangelog(ctx.series, {
+      ChangeLog.render(ctx.series, {
         as: flags.markdown ? 'markdown' : 'plain',
       })
     )

@@ -1,4 +1,4 @@
-import { renderChangelog } from '../lib/changelog'
+import * as Changelog from '../lib/changelog'
 import { setupNPMAuthfileOnCI } from '../lib/npm-auth'
 import { publishChangelog } from '../lib/publish-changelog'
 import { publishPackage, PublishPlan } from '../lib/publish-package'
@@ -62,7 +62,7 @@ export async function runPreviewRelease(options: Options) {
     maybeRelease.version = setBuildNum(maybeRelease.version as PreviewVer, options.overrides.buildNum)
   }
 
-  const changelog = renderChangelog(context.series, { as: 'markdown' })
+  const changelog = Changelog.renderFromSeries(context.series, { as: 'markdown' })
 
   if (options.dryRun) {
     return createDryRun({

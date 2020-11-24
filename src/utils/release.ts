@@ -23,7 +23,7 @@ export async function getCurrentSeries(input: { cwd: string }): Promise<Series> 
  * Like `getLog` but works on the given data. Useful for unit testing with mock
  * log data.
  */
-export function fromLogs(entries: Git.LogEntry[]): Series {
+export function fromCommits(entries: Git.LogEntry[]): Series {
   const commits: Git.LogEntry[] = []
   let previousStableCommit: null | Git.LogEntry = null
 
@@ -36,6 +36,63 @@ export function fromLogs(entries: Git.LogEntry[]): Series {
   }
 
   return buildSeries([previousStableCommit, commits])
+}
+
+export type MockCommit = {
+  /**
+   * Commit message
+   */
+  message?: string
+  /**
+   * A semver value expressed as a string. This will become a tag on the commit with a "v" prefix.
+   *
+   * @example "1.2.3"
+   */
+  version?: string
+  /**
+   * The SHA of the commit.
+   *
+   * @default A short SHA: "shasha#"
+   */
+  sha?: string
+  /**
+   * Arbitrary tags to add to the commit.
+   */
+  tags?: string[]
+}
+
+export function fromMockCommits(commits: MockCommit[]): Series {
+  const defaultSha = 'shasha#'
+  const defaultMessage = 'Blah blah blah'
+
+  return fromCommits(
+    commits.map((commit) => {
+      return {
+        message: commit.message ?? defaultMessage,
+        tags: arrayify(commit.version)
+          .map(vPrefixify)
+          .concat(commit.tags ?? []),
+        sha: commit.sha ?? defaultSha,
+      }
+    })
+  )
+}
+
+function vPrefixify(ver: string): string {
+  return 'v' + ver
+}
+
+/**
+ * Wrap value in an array if not already an array. If value is undefined return an empty array.
+ */
+function arrayify<T>(x: T): Exclude<T, undefined>[] {
+  if (Array.isArray(x)) {
+    return x
+  }
+  if (x === undefined) {
+    return []
+  }
+  return [x as any]
 }
 
 /**
