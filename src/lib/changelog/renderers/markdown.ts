@@ -1,4 +1,4 @@
-import { stripIndents } from 'common-tags'
+import * as Chaindown from 'chaindown'
 import { Commit, shortSha } from '../../../utils/release'
 import { Changelog } from '../data'
 
@@ -11,58 +11,37 @@ export function render(log: Changelog): string {
     'chores',
   ]
 
-  const doc = order
+  const doc = Chaindown.create()
+
+  order
     .filter((sectionName) => {
       return log[sectionName].commits.length > 0
     })
-    .map((sectionName) => {
+    .forEach((sectionName) => {
       if (sectionName === 'breaking') {
-        return (
-          stripIndents`
-            ${sectionTitle(log[sectionName].label)}
-  
-            ${log[sectionName].commits.map((c) => sectionCommit(c, { breaking: false })).join('\n')}
-          ` + '\n'
-        )
+        doc
+          .heading(4, log[sectionName].label)
+          .list(log[sectionName].commits.map((c) => sectionCommit(c, { breaking: false })))
+        return
       }
 
       if (sectionName === 'improvements') {
-        return (
-          stripIndents`
-            ${sectionTitle(log[sectionName].label)}
-  
-            ${log[sectionName].commits.map((c) => sectionCommit(c, { type: true })).join('\n')}
-          ` + '\n'
-        )
+        doc
+          .heading(4, log[sectionName].label)
+          .list(log[sectionName].commits.map((c) => sectionCommit(c, { type: true })))
+        return
       }
 
-      return (
-        stripIndents`
-          ${sectionTitle(log[sectionName].label)}
-
-          ${sectionCommits(log[sectionName].commits)}
-        ` + '\n'
-      )
+      doc.heading(4, log[sectionName].label).list(log[sectionName].commits.map((c) => sectionCommit(c)))
     })
 
   if (log.unspecified.commits.length) {
-    doc.push(
-      stripIndents`
-        ${sectionTitle(log.unspecified.label)}
-
-        - ${log.unspecified.commits.map((c) => `${shortSha(c)} ${c.message.raw}`).join('\n- ')}
-      ` + '\n'
-    )
+    doc
+      .heading(4, log.unspecified.label)
+      .list(log.unspecified.commits.map((c) => `${shortSha(c)} ${c.message.raw}`))
   }
 
-  return doc.join('\n')
-}
-function sectionCommits(cs: Commit[]): string {
-  return cs.map((c) => sectionCommit(c)).join('\n')
-}
-
-function sectionTitle(title: string): string {
-  return `#### ${title}`
+  return doc.render({ level: 5 })
 }
 
 function sectionCommit(c: Commit, opts?: { type?: boolean; breaking?: boolean }): string {
@@ -70,5 +49,5 @@ function sectionCommit(c: Commit, opts?: { type?: boolean; breaking?: boolean })
   const type = opts?.type === true ? ' ' + c.message.parsed!.type + ':' : ''
   const description = ' ' + c.message.parsed!.description
   const breaking = opts?.breaking === false ? '' : c.message.parsed!.breakingChange ? ' (breaking)' : ''
-  return `- ${sha}${breaking}${type}${description}`
+  return `${sha}${breaking}${type}${description}`
 }

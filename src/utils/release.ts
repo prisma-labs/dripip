@@ -87,7 +87,7 @@ function vPrefixify(ver: string): string {
  */
 function arrayify<T>(x: T): Exclude<T, undefined>[] {
   if (Array.isArray(x)) {
-    return x
+    return x as any
   }
   if (x === undefined) {
     return []
