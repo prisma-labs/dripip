@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.render() markdown renderer option renders release changelog for the current release series 1`] = `
+exports[`.render() with markdown renders release changelog for the current release series 1`] = `
 "#### BREAKING CHANGES
 
 - shasha# a
@@ -32,7 +32,7 @@ exports[`.render() markdown renderer option renders release changelog for the cu
 "
 `;
 
-exports[`.render() termimal renderer option renders changelog for the current release series 1`] = `
+exports[`.render() with termimal renders changelog for the current release series 1`] = `
 "BREAKING CHANGES
 
   shasha# a
