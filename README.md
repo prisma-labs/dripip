@@ -134,7 +134,7 @@ For example checkout what's coming up in dripip right now by visiting https://gi
 
 ### Usage inside GitHub Actions
 
-We are interseted in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
+We are interested in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
 
 1. Have `dripip` installed as a dev dependency
 1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
