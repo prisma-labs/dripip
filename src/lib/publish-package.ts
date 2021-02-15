@@ -101,7 +101,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
     // default to using npm. The reason we need to do this is that problems occur
     // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
     // publish` failing due to an authentication error.
-    const pacman = await Pacman.create({ defualt: 'npm' })
+    const pacman = await Pacman.create({ default: 'npm' })
     await pacman.publish({ version: release.version, tag: release.distTag })
     yield { kind: 'package_published' }
 

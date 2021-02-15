@@ -91,8 +91,8 @@ async function tag(
   }
 }
 
-export async function create(input: { defualt: PackageManagerType }) {
-  const packageManagerType = detectScriptRunner() ?? input.defualt
+export async function create(input: { default: PackageManagerType }) {
+  const packageManagerType = detectScriptRunner() ?? input.default
   const packageJson = PJ.getPackageJsonSync()
   return {
     publish: publish.bind(null, packageManagerType),
