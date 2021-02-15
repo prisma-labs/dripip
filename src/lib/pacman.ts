@@ -31,7 +31,7 @@ function detectScriptRunner(): null | 'npm' | 'yarn' {
  *
  * In the case of yarn, package.json is not touched at all.
  *
- * Either way, it should not be noticable to the user of this function.
+ * Either way, it should not be noticeable to the user of this function.
  */
 async function publish(manType: PackageManagerType, input: { version: string; tag: string }): Promise<void> {
   if (manType === 'yarn') {
