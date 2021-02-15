@@ -44,7 +44,7 @@ export async function runPreviewRelease(options: Options) {
   // TODO handle edge case: not a git repo
   // TODO handle edge case: a git repo with no commits
   // TODO nicer tag rendering:
-  //    1. for annotated tags should the messge
+  //    1. for annotated tags should the message
   //    2. show the tag author name
   //    3. show the the date the tag was made
 

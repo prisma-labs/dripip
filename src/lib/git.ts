@@ -97,8 +97,8 @@ export async function gitInitRepo(git: Simple): Promise<void> {
 /**
  * Create an empty commit in the repo.
  */
-export async function gitCreateEmptyCommit(git: Simple, messge?: string): Promise<void> {
-  await git.raw(['commit', '--allow-empty', '--message', messge ?? 'Nothing to see here, move along'])
+export async function gitCreateEmptyCommit(git: Simple, message?: string): Promise<void> {
+  await git.raw(['commit', '--allow-empty', '--message', message ?? 'Nothing to see here, move along'])
 }
 
 export async function createFixCommit(git: Simple, msg?: string) {
