@@ -116,7 +116,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
 
   // While the fields of the package.json should not have changed, its
   // formatting, like indentation level, might have. We do not want to leave a
-  // dirty working directoy on the user's system.
+  // dirty working directory on the user's system.
   //
   // TODO no invariant in system that checks that package.json was not modified
   // before beginning the publishing process. In other words we may be losing
