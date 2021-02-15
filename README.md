@@ -41,7 +41,7 @@ npm install --save-dev dripip
 
 Dripip is a command line interface (CLI) for continuously releasing npm packages. It has support for three kinds of releases: pull-request releases, canary releases, stable releases. It builds on top of Git, Semver, Conventional Commit, and GitHub. Support for alternative version control systems (e.g. Darcs) and platforms (e.g. GitLab) are not currently supported but they probably could be. The concepts of dripip are relatively general.
 
-Continuous delivery means that every single meaningful commit to your library will be released. The benefit of this approach is that when you ship value your users get access to it immeditely, and as an author you don't need to manage incoming queries like "when will this be released?". You get to to auto-reply: "It already it! :)".
+Continuous delivery means that every single meaningful commit to your library will be released. The benefit of this approach is that when you ship value your users get access to it immediately, and as an author you don't need to manage incoming queries like "when will this be released?". You get to to auto-reply: "It already it! :)".
 
 ### Pull-Request Releases
 
