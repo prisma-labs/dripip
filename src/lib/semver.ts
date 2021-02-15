@@ -206,7 +206,7 @@ export function renderVersion(v: Ver): string {
 }
 
 /**
- * Render the given verson including the vprefix if enabled. Do not use this in
+ * Render the given version including the vprefix if enabled. Do not use this in
  * places where a valid semver is expected since vprefix is not valid semver.
  */
 export function renderStyledVersion(v: Ver): string {
