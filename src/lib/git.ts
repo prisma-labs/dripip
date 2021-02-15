@@ -353,7 +353,7 @@ export async function log(git: Simple, ops?: { since?: null | string }): Promise
 }
 
 const logEntrySeparator = '$@<!____LOG____!>@$'
-const logEntryValueSepartaor = '$@<!____PROP____!>@$'
+const logEntryValueSeparator = '$@<!____PROP____!>@$'
 
 type CommitDatum = { name: string; code: 'H' | 'D' | 's' | 'b' | 'B' }
 
@@ -367,7 +367,7 @@ export const commitDatums: CommitDatum[] = [
 const commitDatumNames = commitDatums.map((datum) => datum.name)
 
 export function gitLogFormat(commitDatums: CommitDatum[]): string {
-  return commitDatums.map((part) => '%' + part.code).join(logEntryValueSepartaor) + logEntrySeparator
+  return commitDatums.map((part) => '%' + part.code).join(logEntryValueSeparator) + logEntrySeparator
 }
 
 export function parseRawLog(rawLog: string): LogEntryWithRefs[] {
@@ -385,7 +385,7 @@ export function parseRawLogEntry(rawLogEntry: string): LogEntryWithRefs {
   // propsRemaining and logParts are guaranteed to be the same length
   // TODO should be a zip...
   const propsRemaining = [...commitDatumNames]
-  const logParts = rawLogEntry.split(logEntryValueSepartaor)
+  const logParts = rawLogEntry.split(logEntryValueSeparator)
   while (propsRemaining.length > 0) {
     // @ts-ignore
     log[propsRemaining.shift()!] = logParts.shift()!.trim()
@@ -422,7 +422,7 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
  */
 export function serializeLog(values: [string, string, string][]): string {
   if (values.length === 0) return ''
-  return values.map((v) => v.join(logEntryValueSepartaor)).join(logEntrySeparator) + logEntrySeparator
+  return values.map((v) => v.join(logEntryValueSeparator)).join(logEntrySeparator) + logEntrySeparator
 }
 
 export async function* streamLog(opts?: { cwd?: string }): AsyncGenerator<LogEntry> {
