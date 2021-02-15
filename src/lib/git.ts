@@ -160,7 +160,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //     }
 //   }
 //
-//   const githubRepo = await parseGithubRepoInfoFromGitConfig()
+//   const githubRepo = await parseGitHubRepoInfoFromGitConfig()
 
 //   // TODO Refactor this to have instance passed as arg.
 //   const octoOps = {} as Octokit.Options
@@ -225,7 +225,7 @@ export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
     : 'diverged'
 }
 
-export interface BasicGithubRepoInfo {
+export interface BasicGitHubRepoInfo {
   name: string
   owner: string
 }
@@ -234,7 +234,7 @@ export interface BasicGithubRepoInfo {
  * Extract the github repo name and owner from the git config. If anything goes
  * wrong during extraction a specific error about it will be thrown.
  */
-export async function parseGithubRepoInfoFromGitConfig(): Promise<BasicGithubRepoInfo> {
+export async function parseGitHubRepoInfoFromGitConfig(): Promise<BasicGitHubRepoInfo> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 

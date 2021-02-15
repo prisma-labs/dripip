@@ -2,7 +2,7 @@ import { rootDebug } from './debug'
 
 const debug = rootDebug(__filename)
 
-export interface GithubCIEnvironment {
+export interface GitHubCIEnvironment {
   runId: number
   eventName: 'pull_request'
   ref: null | string
@@ -19,17 +19,17 @@ export interface GithubCIEnvironment {
 }
 
 /**
- * Parse the Github CI Environment. Returns null if parsing fails which should
- * mean it is not a Github CI Environment.
+ * Parse the GitHub CI Environment. Returns null if parsing fails which should
+ * mean it is not a GitHub CI Environment.
  *
  * @remarks
  *
- * Github docs: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+ * GitHub docs: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
  */
-export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
-  if (!isGithubCIEnvironment()) return null
+export function parseGitHubCIEnvironment(): null | GitHubCIEnvironment {
+  if (!isGitHubCIEnvironment()) return null
 
-  let prNum: GithubCIEnvironment['parsed']['prNum']
+  let prNum: GitHubCIEnvironment['parsed']['prNum']
 
   if (process.env.GITHUB_REF) {
     const match = process.env.GITHUB_REF.match(/refs\/pull\/(\d+)\/merge/)
@@ -56,7 +56,7 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
 
   return {
     runId: parseInt(process.env.GITHUB_RUN_ID!, 10),
-    eventName: process.env.GITHUB_EVENT_NAME! as GithubCIEnvironment['eventName'],
+    eventName: process.env.GITHUB_EVENT_NAME! as GitHubCIEnvironment['eventName'],
     ref: process.env.GITHUB_REF ?? null,
     headRef: process.env.GITHUB_HEAD_REF ?? null,
     repository: process.env.GITHUB_REPOSITORY!,
@@ -69,8 +69,8 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
 }
 
 /**
- * Check if the current process appears to be running in a Github CI environment.
+ * Check if the current process appears to be running in a GitHub CI environment.
  */
-export function isGithubCIEnvironment() {
+export function isGitHubCIEnvironment() {
   return process.env.GITHUB_RUN_ID !== undefined
 }

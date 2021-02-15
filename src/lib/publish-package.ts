@@ -5,7 +5,7 @@
 
 import createGit from 'simple-git/promise'
 import * as Git from './git'
-import { isGithubCIEnvironment } from './github-ci-environment'
+import { isGitHubCIEnvironment } from './github-ci-environment'
 import * as Pacman from './pacman'
 
 type Options = {
@@ -171,7 +171,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
  * https://stackoverflow.com/questions/11656761/git-please-tell-me-who-you-are-error.
  */
 async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
-  if (!isGithubCIEnvironment()) return
+  if (!isGitHubCIEnvironment()) return
 
   const [email, name] = await Promise.all([
     git.raw(['config', '--get', 'user.email']),

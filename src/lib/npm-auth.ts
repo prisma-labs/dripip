@@ -2,7 +2,7 @@ import * as fs from 'fs-jetpack'
 import * as os from 'os'
 import * as path from 'path'
 import { rootDebug } from './debug'
-import { isGithubCIEnvironment } from './github-ci-environment'
+import { isGitHubCIEnvironment } from './github-ci-environment'
 
 const debug = rootDebug(__filename)
 
@@ -15,7 +15,7 @@ const npmrcFilePath = path.join(os.homedir(), '.npmrc')
  * publishing commands.
  */
 export function setupNPMAuthfileOnCI(): void {
-  if (isGithubCIEnvironment() && process.env.NPM_TOKEN) {
+  if (isGitHubCIEnvironment() && process.env.NPM_TOKEN) {
     const authContent = `//registry.npmjs.org/:_authToken=${process.env[TOKEN_ENV_VAR_NAME]}`
     debug('writing or appending npm auth token to %s', npmrcFilePath)
     fs.append(npmrcFilePath, authContent)
