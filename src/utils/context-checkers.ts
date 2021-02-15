@@ -33,7 +33,7 @@ export function branchSynced(): Validator {
 export function npmAuthSetup(): Validator {
   return {
     code: 'npm_auth_not_setup',
-    summary: 'You must have npm auth setup to publish to the registrty',
+    summary: 'You must have npm auth setup to publish to the registry',
     run() {
       const result = validateNPMAuthSetup()
 

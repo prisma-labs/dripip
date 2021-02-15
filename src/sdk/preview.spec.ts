@@ -71,7 +71,7 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
             Object {
               "code": "npm_auth_not_setup",
               "details": Object {},
-              "summary": "You must have npm auth setup to publish to the registrty",
+              "summary": "You must have npm auth setup to publish to the registry",
             },
             Object {
               "code": "must_be_on_trunk",
@@ -123,7 +123,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
@@ -166,7 +166,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
@@ -209,7 +209,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
