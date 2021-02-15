@@ -1,5 +1,5 @@
 /**
- * This module deals with building changelogs from serieses.
+ * This module deals with building changelogs from multiple series.
  */
 import { Commit } from '../../utils/release'
 
