@@ -1,5 +1,5 @@
 import { validateNPMAuthSetup } from '../lib/npm-auth'
-import { Validator } from './contrext-guard'
+import { Validator } from './context-guard'
 
 export function isTrunk(): Validator {
   return {

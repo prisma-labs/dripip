@@ -1,7 +1,7 @@
 import { format, inspect } from 'util'
 import { Release } from '../lib/publish-package'
 import { casesHandled } from '../lib/utils'
-import { ValidationResult } from './contrext-guard'
+import { ValidationResult } from './context-guard'
 
 type Ok<T extends string = string, D = Record<string, any>> = {
   kind: 'ok'

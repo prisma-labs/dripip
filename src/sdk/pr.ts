@@ -3,7 +3,7 @@ import { publishPackage, PublishPlan } from '../lib/publish-package'
 import { PullRequestVer } from '../lib/semver'
 import { getContext } from '../utils/context'
 import { npmAuthSetup } from '../utils/context-checkers'
-import { check, guard, Validator } from '../utils/contrext-guard'
+import { check, guard, Validator } from '../utils/context-guard'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextPreReleaseBuildNum } from '../utils/pr-release'
 
