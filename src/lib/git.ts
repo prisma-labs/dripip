@@ -203,8 +203,8 @@ type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged' | 'remote_
 export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
   await git.remote(['update'])
   const remoteHeads = await git.raw(['ls-remote', '--heads'])
-  const branchSumamry = await git.branch({})
-  const branchOnRemoteRE = new RegExp(`.*refs/heads/${branchSumamry.current}$`, 'm')
+  const branchSummary = await git.branch({})
+  const branchOnRemoteRE = new RegExp(`.*refs/heads/${branchSummary.current}$`, 'm')
 
   if (remoteHeads.match(branchOnRemoteRE) === null) {
     return 'remote_needs_branch'
@@ -281,8 +281,8 @@ export async function parseGitHubRepoInfoFromGitConfig(): Promise<BasicGitHubRep
  * branch of the repo is set to something else than `master`.
  */
 export async function isTrunk(git: Simple): Promise<boolean> {
-  const branchSumamry = await git.branch({})
-  return branchSumamry.current === 'master'
+  const branchSummary = await git.branch({})
+  return branchSummary.current === 'master'
 }
 
 /**
