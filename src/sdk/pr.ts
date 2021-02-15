@@ -23,7 +23,7 @@ export async function runPullRequestRelease(options: Options) {
   const report = check({ context })
     .errorUnless(npmAuthSetup())
     .errorUnless(branchHasOpenPR())
-    // todo only we if can figoure the commits since last pr release
+    // todo only we if can figure the commits since last pr release
     // .must(haveMeaningfulCommitsInTheSeries())
     .run()
 
