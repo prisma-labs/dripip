@@ -73,7 +73,7 @@ export function output(message: Message, opts: OutputOptions): void {
   } else {
     if (message.kind === 'exception') {
       let s = ''
-      s += `An exception occured: ${message.type}\n`
+      s += `An exception occurred: ${message.type}\n`
       s += `\n`
       s += message.data.summary
       if (message.data.context && Object.keys(message.data.context).length > 0) {

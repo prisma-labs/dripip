@@ -157,7 +157,7 @@ function createCommandError({
 
         ${exitCode}
 
-    This underlying error occured (null = none occured):
+    This underlying error occurred (null = none occurred):
 
         ${underlyingError}
 
