@@ -25,7 +25,7 @@ export class GetCurrentCommitVersion extends Command {
     // Note:
     //
     // - PR release should not be possible on same commit as stable/preview
-    // anyways
+    // anyway
     //
     // - PR release is much more costly to calculate than others
     //
