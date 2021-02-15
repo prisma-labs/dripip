@@ -45,7 +45,7 @@ export function outputOk(type: string, data: Record<string, any>): void {
 }
 
 /**
- * Outout Exception data to stdout. Unlike an error, exceptions are failure
+ * Output Exception data to stdout. Unlike an error, exceptions are failure
  * scenarios that are known to be possible, and thus handled gracefully.
  *
  * @param identifier This is a meaningful exception slug like `no_permissions`.
