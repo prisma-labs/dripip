@@ -49,7 +49,7 @@ export function outputOk(type: string, data: Record<string, any>): void {
  * scenarios that are known to be possible, and thus handled gracefully.
  *
  * @param identifier This is a meaningful exception slug like `no_permissions`.
- * Use this for to organize exeptions into a catalogue.
+ * Use this for to organize exceptions into a catalogue.
  *
  * @param summary Free form text that briefly explains what the exception
  * is, why it is happening, etc. Do not rely on rich context rendering here.
