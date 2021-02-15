@@ -236,5 +236,5 @@ describe('preflight checks', () => {
   // TODO maybe... this is quite the edge-case and would charge all users a
   // latency fee wherein every stable preview release requires a pr check
   // anyway just to see if this super weird case is ocurring...
-  it.todo('fails semantically if trunk and pr detected becuase that demands conflicting reactions')
+  it.todo('fails semantically if trunk and pr detected because that demands conflicting reactions')
 })
