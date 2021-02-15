@@ -174,7 +174,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //   // to trunk branch?", etc.
 //   //
 //   // To attain this level of feedback users would need to accept potentially
-//   // higher levels of latentcy to pagination through all pull-requests.
+//   // higher levels of latency to pagination through all pull-requests.
 //   // TODO pagination https://octokit.github.io/rest.js/#pagination
 //   const pullsRes = await octokit.pulls.list({
 //     owner: githubRepo.owner,
