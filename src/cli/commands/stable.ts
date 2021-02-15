@@ -7,7 +7,7 @@ export class Stable extends Command {
     trunk: flags.string({
       default: '',
       description:
-        'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
+        'State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub repo settings.',
     }),
     'dry-run': flags.boolean({
       default: false,

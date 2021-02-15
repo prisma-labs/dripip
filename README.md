@@ -254,7 +254,7 @@ OPTIONS
   -n, --build-num=build-num  Force a build number. Should not be needed generally. For exceptional cases.
   --skip-npm                 skip the step of publishing the package to npm
 
-  --trunk=trunk              State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub
+  --trunk=trunk              State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub
                              repo settings.
 ```
 
@@ -278,7 +278,7 @@ OPTIONS
   -j, --json     format output as JSON
   --skip-npm     skip the step of publishing the package to npm
 
-  --trunk=trunk  State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo
+  --trunk=trunk  State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub repo
                  settings.
 ```
 <!-- commandsstop -->

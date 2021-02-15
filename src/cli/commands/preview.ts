@@ -7,7 +7,7 @@ export class Preview extends Command {
     trunk: flags.string({
       default: '',
       description:
-        'State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo settings.',
+        'State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub repo settings.',
     }),
     ['build-num']: flags.integer({
       description: 'Force a build number. Should not be needed generally. For exceptional cases.',
