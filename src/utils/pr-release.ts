@@ -27,7 +27,7 @@ export function getPullRequestReleaseVersionForLocation(input: {
  *
  * The pre-release series is the group versions published matching the given prefix.
  *
- * The buld num is assumed to be digits immediately following the prefix up to
+ * The build num is assumed to be digits immediately following the prefix up to
  * the end of the version or up to the next `.`.
  *
  * If a version matches prefix but then not the pattern described above then it
