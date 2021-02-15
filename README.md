@@ -110,7 +110,7 @@ When Dripip makes a canary release, it includes an upsert of a dist-tag called `
 
 ### Package.json Version Field
 
-Typically when an npm package is released its package.json `version` field will be updated and committed into version control. This is a bad match for continuous delivery however, because it meanss that, more or less, half of the git history will become meta commits. To solve this, `dripip` takes a novel approach of keeping the version out of version control. It uses Git tags to store that state, and when publishing your package, will set the package.json `version` field right before publishing, and then unset it right after publishing completes. You notice nothing, your users notice nothing, and your git history looks ideal. This is unorthadox, but it works well.
+Typically when an npm package is released its package.json `version` field will be updated and committed into version control. This is a bad match for continuous delivery however, because it means that, more or less, half of the git history will become meta commits. To solve this, `dripip` takes a novel approach of keeping the version out of version control. It uses Git tags to store that state, and when publishing your package, will set the package.json `version` field right before publishing, and then unset it right after publishing completes. You notice nothing, your users notice nothing, and your git history looks ideal. This is unorthadox, but it works well.
 
 Having a valid semver value in the `version` field is required by npm. Dripip puts the following value into your project's package.json to satisfy that constraint. This is what you should check into version control.
 
