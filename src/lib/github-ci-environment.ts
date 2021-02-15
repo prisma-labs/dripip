@@ -69,7 +69,7 @@ export function parseGithubCIEnvironment(): null | GithubCIEnvironment {
 }
 
 /**
- * Check if the current process appers to be running in a Github CI environment.
+ * Check if the current process appears to be running in a Github CI environment.
  */
 export function isGithubCIEnvironment() {
   return process.env.GITHUB_RUN_ID !== undefined
