@@ -275,7 +275,7 @@ export async function parseGithubRepoInfoFromGitConfig(): Promise<BasicGithubRep
 }
 
 /**
- * Determin if the current branch is trunk or not. Currently a simple check
+ * Determine if the current branch is trunk or not. Currently a simple check
  * against if current branch is master or not but TODO in the future will
  * account for checking against the remote Git repo for if the so-called `base`
  * branch of the repo is set to something else than `master`.
