@@ -83,7 +83,7 @@ function s(): RawLogEntryValues {
 }
 
 /**
- * unreleaesd commit
+ * unreleased commit
  */
 function n(): RawLogEntryValues {
   return ['sha', '', `fix: thing ${noneCounter++}`]
