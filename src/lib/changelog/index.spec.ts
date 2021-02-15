@@ -44,7 +44,7 @@ describe('.render() with markdown', () => {
   })
 })
 
-describe('.render() with termimal', () => {
+describe('.render() with terminal', () => {
   const render = (...commits: Release.MockCommit[]) => {
     return Changelog.render(Changelog.fromSeries(Release.fromMockCommits(commits)), { as: 'plain' })
   }
