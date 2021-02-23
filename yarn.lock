@@ -1264,10 +1264,10 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
-chaindown@^0.1.0-next.1:
-  version "0.1.0-next.1"
-  resolved "https://registry.yarnpkg.com/chaindown/-/chaindown-0.1.0-next.1.tgz#b899ca84919cd8897a3a22fee20997fe89da73bd"
-  integrity sha512-K0OU0y9LltlqtGDrLjqqw5o5+Ow+JA4sOsUwPBWY7uvIWP/h41t/gIDPAZjrClLuJxfem8BEscu4+v2r0PILPw==
+chaindown@^0.1.0-next.2:
+  version "0.1.0-next.2"
+  resolved "https://registry.yarnpkg.com/chaindown/-/chaindown-0.1.0-next.2.tgz#4d02c4048b5ea785813831f23d5c9a0fd3b8ff3f"
+  integrity sha512-S251yycN0A+5scqYGgp+cdvj+vbwb0cvwXPSAGsrq5C31OlGdmD76f4ESBNOZf+heY/nTanhwdWaRrt/4wqtsg==
   dependencies:
     lodash "^4.17.20"
 
