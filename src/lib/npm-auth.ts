@@ -17,7 +17,7 @@ const npmrcFilePath = path.join(os.homedir(), '.npmrc')
 export function setupNPMAuthfileOnCI(): void {
   if (isGithubCIEnvironment() && process.env.NPM_TOKEN) {
     const authContent = `//registry.npmjs.org/:_authToken=${process.env[TOKEN_ENV_VAR_NAME]}`
-    debug('writing or appending npm token to %s', npmrcFilePath)
+    debug('writing or appending npm auth token to %s', npmrcFilePath)
     fs.append(npmrcFilePath, authContent)
   }
 }
