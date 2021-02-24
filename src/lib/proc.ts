@@ -8,7 +8,7 @@ export type SuccessfulRunResult = {
   stdout: null | string // present if stdio using pipe mode
   signal: null | string
   exitCode: null | number // present if optional (non-throw) mode
-  error: null | Error // present if optonal (non-throw) mode
+  error: null | Error // present if optional (non-throw) mode
 }
 
 export type RunOptions = SpawnOptions & {
@@ -157,7 +157,7 @@ function createCommandError({
 
         ${exitCode}
 
-    This underlying error occured (null = none occured):
+    This underlying error occurred (null = none occurred):
 
         ${underlyingError}
 

@@ -97,8 +97,8 @@ export async function gitInitRepo(git: Simple): Promise<void> {
 /**
  * Create an empty commit in the repo.
  */
-export async function gitCreateEmptyCommit(git: Simple, messge?: string): Promise<void> {
-  await git.raw(['commit', '--allow-empty', '--message', messge ?? 'Nothing to see here, move along'])
+export async function gitCreateEmptyCommit(git: Simple, message?: string): Promise<void> {
+  await git.raw(['commit', '--allow-empty', '--message', message ?? 'Nothing to see here, move along'])
 }
 
 export async function createFixCommit(git: Simple, msg?: string) {
@@ -160,7 +160,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //     }
 //   }
 //
-//   const githubRepo = await parseGithubRepoInfoFromGitConfig()
+//   const githubRepo = await parseGitHubRepoInfoFromGitConfig()
 
 //   // TODO Refactor this to have instance passed as arg.
 //   const octoOps = {} as Octokit.Options
@@ -174,7 +174,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //   // to trunk branch?", etc.
 //   //
 //   // To attain this level of feedback users would need to accept potentially
-//   // higher levels of latentcy to pagination through all pull-requests.
+//   // higher levels of latency to pagination through all pull-requests.
 //   // TODO pagination https://octokit.github.io/rest.js/#pagination
 //   const pullsRes = await octokit.pulls.list({
 //     owner: githubRepo.owner,
@@ -203,8 +203,8 @@ type SyncStatus = 'needs_pull' | 'needs_push' | 'synced' | 'diverged' | 'remote_
 export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
   await git.remote(['update'])
   const remoteHeads = await git.raw(['ls-remote', '--heads'])
-  const branchSumamry = await git.branch({})
-  const branchOnRemoteRE = new RegExp(`.*refs/heads/${branchSumamry.current}$`, 'm')
+  const branchSummary = await git.branch({})
+  const branchOnRemoteRE = new RegExp(`.*refs/heads/${branchSummary.current}$`, 'm')
 
   if (remoteHeads.match(branchOnRemoteRE) === null) {
     return 'remote_needs_branch'
@@ -225,7 +225,7 @@ export async function checkSyncStatus(git: Simple): Promise<SyncStatus> {
     : 'diverged'
 }
 
-export interface BasicGithubRepoInfo {
+export interface BasicGitHubRepoInfo {
   name: string
   owner: string
 }
@@ -234,7 +234,7 @@ export interface BasicGithubRepoInfo {
  * Extract the github repo name and owner from the git config. If anything goes
  * wrong during extraction a specific error about it will be thrown.
  */
-export async function parseGithubRepoInfoFromGitConfig(): Promise<BasicGithubRepoInfo> {
+export async function parseGitHubRepoInfoFromGitConfig(): Promise<BasicGitHubRepoInfo> {
   // Inspiration from how `$ hub pr show` works
   // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
 
@@ -275,14 +275,14 @@ export async function parseGithubRepoInfoFromGitConfig(): Promise<BasicGithubRep
 }
 
 /**
- * Determin if the current branch is trunk or not. Currently a simple check
+ * Determine if the current branch is trunk or not. Currently a simple check
  * against if current branch is master or not but TODO in the future will
  * account for checking against the remote Git repo for if the so-called `base`
  * branch of the repo is set to something else than `master`.
  */
 export async function isTrunk(git: Simple): Promise<boolean> {
-  const branchSumamry = await git.branch({})
-  return branchSumamry.current === 'master'
+  const branchSummary = await git.branch({})
+  return branchSummary.current === 'master'
 }
 
 /**
@@ -353,7 +353,7 @@ export async function log(git: Simple, ops?: { since?: null | string }): Promise
 }
 
 const logEntrySeparator = '$@<!____LOG____!>@$'
-const logEntryValueSepartaor = '$@<!____PROP____!>@$'
+const logEntryValueSeparator = '$@<!____PROP____!>@$'
 
 type CommitDatum = { name: string; code: 'H' | 'D' | 's' | 'b' | 'B' }
 
@@ -367,7 +367,7 @@ export const commitDatums: CommitDatum[] = [
 const commitDatumNames = commitDatums.map((datum) => datum.name)
 
 export function gitLogFormat(commitDatums: CommitDatum[]): string {
-  return commitDatums.map((part) => '%' + part.code).join(logEntryValueSepartaor) + logEntrySeparator
+  return commitDatums.map((part) => '%' + part.code).join(logEntryValueSeparator) + logEntrySeparator
 }
 
 export function parseRawLog(rawLog: string): LogEntryWithRefs[] {
@@ -385,7 +385,7 @@ export function parseRawLogEntry(rawLogEntry: string): LogEntryWithRefs {
   // propsRemaining and logParts are guaranteed to be the same length
   // TODO should be a zip...
   const propsRemaining = [...commitDatumNames]
-  const logParts = rawLogEntry.split(logEntryValueSepartaor)
+  const logParts = rawLogEntry.split(logEntryValueSeparator)
   while (propsRemaining.length > 0) {
     // @ts-ignore
     log[propsRemaining.shift()!] = logParts.shift()!.trim()
@@ -422,7 +422,7 @@ export function parseLogRefs({ refs, ...rest }: LogEntryWithRefs): LogEntry {
  */
 export function serializeLog(values: [string, string, string][]): string {
   if (values.length === 0) return ''
-  return values.map((v) => v.join(logEntryValueSepartaor)).join(logEntrySeparator) + logEntrySeparator
+  return values.map((v) => v.join(logEntryValueSeparator)).join(logEntrySeparator) + logEntrySeparator
 }
 
 export async function* streamLog(opts?: { cwd?: string }): AsyncGenerator<LogEntry> {

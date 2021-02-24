@@ -5,7 +5,7 @@
 
 import createGit from 'simple-git/promise'
 import * as Git from './git'
-import { isGithubCIEnvironment } from './github-ci-environment'
+import { isGitHubCIEnvironment } from './github-ci-environment'
 import * as Pacman from './pacman'
 
 type Options = {
@@ -101,7 +101,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
     // default to using npm. The reason we need to do this is that problems occur
     // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
     // publish` failing due to an authentication error.
-    const pacman = await Pacman.create({ defualt: 'npm' })
+    const pacman = await Pacman.create({ default: 'npm' })
     await pacman.publish({ version: release.version, tag: release.distTag })
     yield { kind: 'package_published' }
 
@@ -116,7 +116,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
 
   // While the fields of the package.json should not have changed, its
   // formatting, like indentation level, might have. We do not want to leave a
-  // dirty working directoy on the user's system.
+  // dirty working directory on the user's system.
   //
   // TODO no invariant in system that checks that package.json was not modified
   // before beginning the publishing process. In other words we may be losing
@@ -171,7 +171,7 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
  * https://stackoverflow.com/questions/11656761/git-please-tell-me-who-you-are-error.
  */
 async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
-  if (!isGithubCIEnvironment()) return
+  if (!isGitHubCIEnvironment()) return
 
   const [email, name] = await Promise.all([
     git.raw(['config', '--get', 'user.email']),

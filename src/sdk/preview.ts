@@ -5,7 +5,7 @@ import { publishPackage, PublishPlan } from '../lib/publish-package'
 import { PreviewVer, setBuildNum } from '../lib/semver'
 import { getContext } from '../utils/context'
 import { isTrunk, npmAuthSetup } from '../utils/context-checkers'
-import { check, guard, Validator } from '../utils/contrext-guard'
+import { check, guard, Validator } from '../utils/context-guard'
 import { octokit } from '../utils/octokit'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextPreview, isNoReleaseReason, Release } from '../utils/release'
@@ -44,7 +44,7 @@ export async function runPreviewRelease(options: Options) {
   // TODO handle edge case: not a git repo
   // TODO handle edge case: a git repo with no commits
   // TODO nicer tag rendering:
-  //    1. for annotated tags should the messge
+  //    1. for annotated tags should the message
   //    2. show the tag author name
   //    3. show the the date the tag was made
 

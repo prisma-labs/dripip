@@ -26,15 +26,15 @@ type ValidatedPackageJson = PackageJson & { name: string }
  */
 function validate(pj: PackageJson | undefined): ValidatedPackageJson {
   if (!pj) {
-    throw new Error('Could not find pacakge.json')
+    throw new Error('Could not find package.json')
   }
 
   if (pj.name === undefined) {
-    throw new Error('pacakge.json is missing name field')
+    throw new Error('package.json is missing name field')
   }
 
   if (pj.name === '') {
-    throw new Error('pacakge.json name field is empty')
+    throw new Error('package.json name field is empty')
   }
 
   return pj as ValidatedPackageJson

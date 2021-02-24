@@ -12,7 +12,7 @@ interface Input {
   octokit: Octokit
   repo: Repo
   /**
-   * Uses the release to manage the changelog changes. A preview relese will result
+   * Uses the release to manage the changelog changes. A preview release will result
    * in a pre-release github release. A stable release will result in the
    * preview github release being cleared of notes and pointed toward the latest
    * stable commit sha.

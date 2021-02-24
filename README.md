@@ -39,9 +39,9 @@ npm install --save-dev dripip
 
 ![diagram](https://dsc.cloud/661643/dripip.png)
 
-Dripip is a command line interface (CLI) for continuously releasing npm packages. It has support for three kinds of releases: pull-request releases, canary releases, stable releases. It builds on top of Git, Semver, Conventional Commit, and GitHub. Support for alterntive version control systems (e.g. Darcs) and platforms (e.g. GitLab) are not currently supported but they probably could be. The concepts of dripip are relatively general.
+Dripip is a command line interface (CLI) for continuously releasing npm packages. It has support for three kinds of releases: pull-request releases, canary releases, stable releases. It builds on top of Git, Semver, Conventional Commit, and GitHub. Support for alternative version control systems (e.g. Darcs) and platforms (e.g. GitLab) are not currently supported but they probably could be. The concepts of dripip are relatively general.
 
-Continuous delivery means that every single meaningful commit to your library will be released. The benefit of this approach is that when you ship value your users get access to it immeditely, and as an author you don't need to manage incoming queries like "when will this be released?". You get to to auto-reply: "It already it! :)".
+Continuous delivery means that every single meaningful commit to your library will be released. The benefit of this approach is that when you ship value your users get access to it immediately, and as an author you don't need to manage incoming queries like "when will this be released?". You get to to auto-reply: "It already it! :)".
 
 ### Pull-Request Releases
 
@@ -63,7 +63,7 @@ The `pr_num` part is the pull-request number. The same one that you see on the G
 
 The `pr_release_num` is a monotonically increasing 1-based (starts from 1, not 0) integer. It serves a few purposes. It provides orientation for humans at a glance, like how many releases has a PR had or where does a given release fall within the PR release set. Its functional purpose is to support correct lexical sorting. Without this little number it would be impossible to sort PR releases without some kind of additional metadata e.g. publish time. Thanks to this, when you run e.g. `npm versions`, you get an accurate ordering.
 
-The `short_sha` is what you see next to commits in much of the GitHub UI, including PR pages. Its primary purpose is to make it easy for you to tie a release back to something in your Git history. For example when looking at a PR page you can copy-paste the sha into search to find the exact commit for that release. Whatever the particular, this is just a convenient piece of information for you. Ultimately we develoeprs pratice many a crude workflow, habbits (console.log vs debugger anyone?).
+The `short_sha` is what you see next to commits in much of the GitHub UI, including PR pages. Its primary purpose is to make it easy for you to tie a release back to something in your Git history. For example when looking at a PR page you can copy-paste the sha into search to find the exact commit for that release. Whatever the particular, this is just a convenient piece of information for you. Ultimately we developers practice many a crude workflow, habits (console.log vs debugger anyone?).
 
 When Dripip makes a pr release, it includes an upsert of a dist-tag of pattern `pr.${pr_num}`. This makes it very easy to install the latest published version for a given pull-request.
 
@@ -110,7 +110,7 @@ When Dripip makes a canary release, it includes an upsert of a dist-tag called `
 
 ### Package.json Version Field
 
-Typically when an npm package is released its package.json `version` field will be updated and committed into version control. This is a bad match for continuous delivery however, because it meanss that, more or less, half of the git history will become meta commits. To solve this, `dripip` takes a novel approach of keeping the version out of version control. It uses Git tags to store that state, and when publishing your package, will set the package.json `version` field right before publishing, and then unset it right after publishing completes. You notice nothing, your users notice nothing, and your git history looks ideal. This is unorthadox, but it works well.
+Typically when an npm package is released its package.json `version` field will be updated and committed into version control. This is a bad match for continuous delivery however, because it means that, more or less, half of the git history will become meta commits. To solve this, `dripip` takes a novel approach of keeping the version out of version control. It uses Git tags to store that state, and when publishing your package, will set the package.json `version` field right before publishing, and then unset it right after publishing completes. You notice nothing, your users notice nothing, and your git history looks ideal. This is unorthodox, but it works well.
 
 Having a valid semver value in the `version` field is required by npm. Dripip puts the following value into your project's package.json to satisfy that constraint. This is what you should check into version control.
 
@@ -134,7 +134,7 @@ For example checkout what's coming up in dripip right now by visiting https://gi
 
 ### Usage inside GitHub Actions
 
-We are interseted in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
+We are interested in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
 
 1. Have `dripip` installed as a dev dependency
 1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
@@ -254,7 +254,7 @@ OPTIONS
   -n, --build-num=build-num  Force a build number. Should not be needed generally. For exceptional cases.
   --skip-npm                 skip the step of publishing the package to npm
 
-  --trunk=trunk              State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub
+  --trunk=trunk              State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub
                              repo settings.
 ```
 
@@ -278,7 +278,7 @@ OPTIONS
   -j, --json     format output as JSON
   --skip-npm     skip the step of publishing the package to npm
 
-  --trunk=trunk  State which branch is trunk. Defaults to honuring the "base" branch setting in the GitHub repo
+  --trunk=trunk  State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub repo
                  settings.
 ```
 <!-- commandsstop -->

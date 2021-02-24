@@ -1,4 +1,4 @@
-// TODO test that context honours the base branch setting of the repo
+// TODO test that context honors the base branch setting of the repo
 
 // async function setupPackageJson() {
 //   await ctx.fs.writeAsync('package.json', {

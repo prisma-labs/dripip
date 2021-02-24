@@ -41,7 +41,7 @@ export function calcBumpType(
     if (isMinorChange(cc)) {
       semverPart = 'minor'
       // during initial development breaking changes are permitted without
-      // having to bump the major. Therefore, we know we won't get a bunmpType
+      // having to bump the major. Therefore, we know we won't get a bumpType
       // higher than this, can short-circuit.
       if (isInitialDevelopment) break
       else continue

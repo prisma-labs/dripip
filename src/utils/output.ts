@@ -1,7 +1,7 @@
 import { format, inspect } from 'util'
 import { Release } from '../lib/publish-package'
 import { casesHandled } from '../lib/utils'
-import { ValidationResult } from './contrext-guard'
+import { ValidationResult } from './context-guard'
 
 type Ok<T extends string = string, D = Record<string, any>> = {
   kind: 'ok'
@@ -45,11 +45,11 @@ export function outputOk(type: string, data: Record<string, any>): void {
 }
 
 /**
- * Outout Exception data to stdout. Unlike an error, exceptions are failure
+ * Output Exception data to stdout. Unlike an error, exceptions are failure
  * scenarios that are known to be possible, and thus handled gracefully.
  *
  * @param identifier This is a meaningful exception slug like `no_permissions`.
- * Use this for to organize exeptions into a catalogue.
+ * Use this for to organize exceptions into a catalogue.
  *
  * @param summary Free form text that briefly explains what the exception
  * is, why it is happening, etc. Do not rely on rich context rendering here.
@@ -73,7 +73,7 @@ export function output(message: Message, opts: OutputOptions): void {
   } else {
     if (message.kind === 'exception') {
       let s = ''
-      s += `An exception occured: ${message.type}\n`
+      s += `An exception occurred: ${message.type}\n`
       s += `\n`
       s += message.data.summary
       if (message.data.context && Object.keys(message.data.context).length > 0) {

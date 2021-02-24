@@ -32,7 +32,7 @@ exports[`.render() with markdown renders release changelog for the current relea
 "
 `;
 
-exports[`.render() with termimal renders changelog for the current release series 1`] = `
+exports[`.render() with terminal renders changelog for the current release series 1`] = `
 "BREAKING CHANGES
 
   shasha# a

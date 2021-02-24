@@ -85,7 +85,7 @@ export function casesHandled(x: never): never {
 }
 
 /**
- * Determin if the given array or object is empty.
+ * Determine if the given array or object is empty.
  */
 export function isEmpty(x: {} | unknown[]): boolean {
   return Array.isArray(x) ? x.length === 0 : Object.keys(x).length > 0

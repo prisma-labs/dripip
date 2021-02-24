@@ -71,7 +71,7 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
             Object {
               "code": "npm_auth_not_setup",
               "details": Object {},
-              "summary": "You must have npm auth setup to publish to the registrty",
+              "summary": "You must have npm auth setup to publish to the registry",
             },
             Object {
               "code": "must_be_on_trunk",
@@ -123,7 +123,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
@@ -166,7 +166,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
@@ -209,7 +209,7 @@ describe('preflight checks', () => {
           Object {
             "code": "npm_auth_not_setup",
             "details": Object {},
-            "summary": "You must have npm auth setup to publish to the registrty",
+            "summary": "You must have npm auth setup to publish to the registry",
           },
           Object {
             "code": "must_be_on_trunk",
@@ -235,6 +235,6 @@ describe('preflight checks', () => {
 
   // TODO maybe... this is quite the edge-case and would charge all users a
   // latency fee wherein every stable preview release requires a pr check
-  // anyways just to see if this super weird case is ocurring...
-  it.todo('fails semantically if trunk and pr detected becuase that demands conflicting reactions')
+  // anyway just to see if this super weird case is occurring...
+  it.todo('fails semantically if trunk and pr detected because that demands conflicting reactions')
 })

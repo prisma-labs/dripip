@@ -18,7 +18,7 @@ export function resetEnvironmentBeforeEachTest() {
  * Helper for creating a specialized workspace
  */
 export function createContext(name: string) {
-  const ws = addOctokitToworkspace(
+  const ws = addOctokitToWorkspace(
     addDripipToWorkspace(
       WS.createWorkspace({
         name: name,
@@ -47,7 +47,7 @@ export function createContext(name: string) {
 }
 
 // any https://github.com/octokit/rest.js/issues/1624
-export function addOctokitToworkspace<T>(ws: T): T & { octokit: any } {
+export function addOctokitToWorkspace<T>(ws: T): T & { octokit: any } {
   beforeAll(() => {
     // @ts-ignore
     ws.octokit = new Octokit({

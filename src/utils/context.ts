@@ -1,6 +1,6 @@
 import * as Git from '../lib/git'
 import { createGit, GitSyncStatus } from '../lib/git2'
-import { parseGithubCIEnvironment } from '../lib/github-ci-environment'
+import { parseGitHubCIEnvironment } from '../lib/github-ci-environment'
 import * as PackageJson from '../lib/package-json'
 import { octokit } from './octokit'
 import * as Rel from './release'
@@ -70,7 +70,7 @@ export async function getLocationContext({
   let githubCIEnvironment = null
 
   if (readFromCIEnvironment) {
-    githubCIEnvironment = parseGithubCIEnvironment()
+    githubCIEnvironment = parseGitHubCIEnvironment()
   }
 
   // Get repo info
@@ -80,7 +80,7 @@ export async function getLocationContext({
   repoInfo = githubCIEnvironment?.parsed.repo
 
   if (!repoInfo) {
-    repoInfo = await Git.parseGithubRepoInfoFromGitConfig()
+    repoInfo = await Git.parseGitHubRepoInfoFromGitConfig()
   }
 
   // Get which branch is trunk, overridable

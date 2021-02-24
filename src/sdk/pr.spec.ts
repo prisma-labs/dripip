@@ -40,7 +40,7 @@ it('preflight check that user is on branch with open pr', async () => {
             Object {
               "code": "npm_auth_not_setup",
               "details": Object {},
-              "summary": "You must have npm auth setup to publish to the registrty",
+              "summary": "You must have npm auth setup to publish to the registry",
             },
           ],
           "stops": Array [],
@@ -71,7 +71,7 @@ it('makes a release for the current commit, updating pr dist tag, and version fo
             Object {
               "code": "npm_auth_not_setup",
               "details": Object {},
-              "summary": "You must have npm auth setup to publish to the registrty",
+              "summary": "You must have npm auth setup to publish to the registry",
             },
           ],
           "stops": Array [],
