@@ -14,14 +14,14 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "release:stable": "yarn -s dripip stable",
-    "release:preview": "yarn -s dripip preview",
-    "release:pr": "yarn -s  dripip pr",
+    "release:stable": "yarn dripip stable",
+    "release:preview": "yarn dripip preview",
+    "release:pr": "yarn  dripip pr",
     "format": "prettier --write .",
     "dripip": "ts-node src/cli/main",
     "clean": "rm -rf dist oclif.manifest.json",
     "build:oclif": "oclif-dev manifest",
-    "build": "yarn -s build:oclif && tsc",
+    "build": "yarn build:oclif && tsc",
     "dev": "tsc --watch",
     "dev:test": "jest --watch --testPathPattern '.*/src/.*'",
     "test:unit": "jest --testPathPattern '.*/src/.*' --verbose",
@@ -29,9 +29,9 @@
     "test": "jest  --testTimeout 15000 --verbose",
     "build:docs:toc": "doctoc README.md",
     "build:docs:commands": "oclif-dev readme",
-    "build:docs": "yarn -s build:docs:commands && yarn -s build:docs:toc",
-    "postpublish": "yarn -s run clean",
-    "prepublishOnly": "yarn -s run build"
+    "build:docs": "yarn build:docs:commands && yarn build:docs:toc",
+    "postpublish": "yarn run clean",
+    "prepublishOnly": "yarn run build"
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",

@@ -7,7 +7,6 @@ Opinionated CLI for continuous delivery of npm packages.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Installation](#installation)
 - [Overview](#overview)
   - [Pull-Request Releases](#pull-request-releases)
@@ -154,7 +153,7 @@ jobs:
         run: git fetch --prune --unshallow --tags
       - uses: actions/setup-node@v1
       - run: yarn --frozen-lockfile
-      - run: yarn -s dripip preview-or-pr
+      - run: yarn dripip preview-or-pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -168,14 +167,15 @@ Real World Usage:
 ## CLI
 
 <!-- commands -->
-* [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
-* [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
-* [`dripip help [COMMAND]`](#dripip-help-command)
-* [`dripip log`](#dripip-log)
-* [`dripip pr`](#dripip-pr)
-* [`dripip preview`](#dripip-preview)
-* [`dripip preview-or-pr`](#dripip-preview-or-pr)
-* [`dripip stable`](#dripip-stable)
+
+- [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
+- [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
+- [`dripip help [COMMAND]`](#dripip-help-command)
+- [`dripip log`](#dripip-log)
+- [`dripip pr`](#dripip-pr)
+- [`dripip preview`](#dripip-preview)
+- [`dripip preview-or-pr`](#dripip-preview-or-pr)
+- [`dripip stable`](#dripip-stable)
 
 ## `dripip get-current-commit-version`
 
@@ -281,4 +281,5 @@ OPTIONS
   --trunk=trunk  State which branch is trunk. Defaults to honoring the "base" branch setting in the GitHub repo
                  settings.
 ```
+
 <!-- commandsstop -->

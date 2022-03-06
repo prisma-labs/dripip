@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn --frozen-lockfile
-      - run: yarn -s test:unit # todo system tests on ci
+      - run: yarn test:unit # todo system tests on ci
 
   publish:
     needs: test
@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: 12.x
       - run: yarn --frozen-lockfile
-      - run: yarn -s dripip preview-or-pr
+      - run: yarn dripip preview-or-pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
