@@ -10,8 +10,7 @@
   "license": "MIT",
   "files": [
     "/src",
-    "/dist",
-    "/oclif.manifest.json"
+    "/dist"
   ],
   "scripts": {
     "release:stable": "yarn dripip stable",
@@ -19,25 +18,19 @@
     "release:pr": "yarn  dripip pr",
     "format": "prettier --write .",
     "dripip": "ts-node src/cli/main",
-    "clean": "rm -rf dist oclif.manifest.json",
-    "build:oclif": "oclif-dev manifest",
-    "build": "yarn build:oclif && tsc",
+    "clean": "rm -rf dist",
+    "build": "tsc",
     "dev": "tsc --watch",
     "dev:test": "jest --watch --testPathPattern '.*/src/.*'",
     "test:unit": "jest --testPathPattern '.*/src/.*' --verbose",
     "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
     "test": "jest  --testTimeout 15000 --verbose",
     "build:docs:toc": "doctoc README.md",
-    "build:docs:commands": "oclif-dev readme",
     "build:docs": "yarn build:docs:commands && yarn build:docs:toc",
     "postpublish": "yarn run clean",
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@oclif/command": "^1.8.0",
-    "@oclif/config": "^1.17.0",
-    "@oclif/errors": "^1.3.4",
-    "@oclif/plugin-help": "^3.2.0",
     "@octokit/rest": "^18.12.0",
     "@types/debug": "^4.1.5",
     "@types/parse-git-config": "^3.0.0",
@@ -51,10 +44,10 @@
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.2",
-    "simple-git": "^2.23.0"
+    "simple-git": "^2.23.0",
+    "yargs": "^17.3.1"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "1.24.1",
     "@prisma-labs/prettier-config": "0.1.0",
     "@types/common-tags": "1.8.0",
     "@types/jest": "26.0.15",
@@ -74,13 +67,6 @@
     "typescript": "4.1.2"
   },
   "prettier": "@prisma-labs/prettier-config",
-  "oclif": {
-    "commands": "./dist/cli/commands",
-    "bin": "dripip",
-    "plugins": [
-      "@oclif/plugin-help"
-    ]
-  },
   "jest": {
     "preset": "ts-jest",
     "watchPlugins": [

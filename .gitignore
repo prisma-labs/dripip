@@ -62,7 +62,6 @@ typings/
 
 # app
 dist
-oclif.manifest.json
 .vscode
 
 # Yarn 2

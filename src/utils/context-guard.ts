@@ -1,4 +1,3 @@
-import { CLIError } from '@oclif/errors'
 import * as Context from './context'
 
 type Options = {
@@ -131,12 +130,11 @@ interface Report {
 // Errors for halting CLI process
 //
 
-export class JSONCLIError extends CLIError {
-  oclif!: { exit: number }
+export class JSONCLIError extends Error {
   code = 'JSONError'
 
   constructor(private errorObject: object) {
-    super('...todo...', { exit: 1 })
+    super('...todo...')
   }
 
   render(): string {
@@ -144,12 +142,11 @@ export class JSONCLIError extends CLIError {
   }
 }
 
-export class PassthroughCLIError extends CLIError {
-  oclif!: { exit: number }
+export class PassthroughCLIError extends Error {
   code = 'PassthroughError'
 
   constructor(private errorString: string) {
-    super('...todo...', { exit: 1 })
+    super('...todo...')
   }
 
   render(): string {
@@ -157,12 +154,11 @@ export class PassthroughCLIError extends CLIError {
   }
 }
 
-export class CLIStop extends CLIError {
-  oclif!: { exit: number }
+export class CLIStop extends Error {
   code = 'Stop'
 
   constructor(private input: { reasons: ValidationResult[]; json?: boolean }) {
-    super('...todo...', { exit: 0 })
+    super('...todo...')
   }
 
   render(): string {
