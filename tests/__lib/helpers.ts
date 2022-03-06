@@ -1,5 +1,6 @@
 import { format } from 'util'
 import { Octokit } from '@octokit/rest'
+import { errorFromMaybeError } from '../../src/lib/utils'
 import * as proc from '../../src/lib/proc'
 import * as WS from '../__lib/workspace'
 
@@ -136,7 +137,8 @@ function createDripipRunner(cwd: string, pathToProject: string) {
       try {
         // TODO typed response...
         return JSON.parse(contentSanitized) as Record<string, any>
-      } catch (e) {
+      } catch (maybeError) {
+        const e = errorFromMaybeError(maybeError)
         throw new Error(
           `Something went wrong while trying to JSON parse the dripip cli stdout:\n\n${
             e.stack

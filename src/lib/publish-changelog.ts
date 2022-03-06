@@ -2,6 +2,7 @@ import { inspect } from 'util'
 import { Octokit, ReleaseByTagRes } from '../utils/octokit'
 import { Release } from '../utils/release'
 import { isPreview, isStable, PreviewVer, renderStyledVersion } from './semver'
+import { errorFromMaybeError } from './utils'
 
 interface Repo {
   owner: string
@@ -111,7 +112,8 @@ async function maybeGetRelease(input: {
       repo: input.repo,
       tag: input.tag,
     })
-  } catch (error) {
+  } catch (maybeError) {
+    const error = errorFromMaybeError(maybeError) as Error & { status: number }
     if (error.status !== 404) {
       throw new Error(
         `Failed to fetch releases for tag ${input.tag} on repo ${input.owner}/${input.repo}.\n\n${inspect(

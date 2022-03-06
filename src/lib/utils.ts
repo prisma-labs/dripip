@@ -1,5 +1,12 @@
 import { inspect } from 'util'
 
+export const errorFromMaybeError = (e: unknown) => {
+  if (e instanceof Error) {
+    return e
+  }
+  return Error(String(e))
+}
+
 export function dump(arg: unknown): void {
   console.error(inspect(arg, { depth: 30 }))
 }

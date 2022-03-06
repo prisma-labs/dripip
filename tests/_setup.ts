@@ -16,5 +16,7 @@ declare global {
   }
 }
 
+//@ts-expect-error
 global.createContext = Context.createContext
+//@ts-expect-error
 global.createWorkspace = WS.createWorkspace

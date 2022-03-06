@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import { rootDebug } from '../lib/debug'
 import { numericAscending } from '../lib/utils'
+import * as Execa from 'execa'
 
 const debug = rootDebug(__filename)
 
@@ -102,7 +103,7 @@ function getNextPreReleaseBuildNumFromVersions(prefix: string, versions: string[
  */
 function getPackageVersions(packageName: string): string[] {
   // todo do http request instead of cli spawn for perf
-  const result = spawnSync('npm', ['show', packageName, 'versions', '--json'])
-  if (result.error) throw result.error
+  const result = Execa.commandSync(`npm show ${packageName} versions --json`)
+  if (result.failed) throw new Error(result.stderr)
   return JSON.parse(result.stdout)
 }

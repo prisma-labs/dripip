@@ -1,7 +1,7 @@
 import * as fs from 'fs-jetpack'
 import * as PJ from './package-json'
 import * as proc from './proc'
-import { casesHandled } from './utils'
+import { casesHandled, errorFromMaybeError } from './utils'
 
 type PackageManagerType = 'npm' | 'yarn'
 
@@ -71,7 +71,8 @@ async function tag(
       : casesHandled(manType)
   try {
     await proc.run(runString, { require: true })
-  } catch (e) {
+  } catch (maybeError) {
+    const e = errorFromMaybeError(maybeError)
     if (
       manType === 'yarn' &&
       e.message.match(/error Couldn't add tag./) &&
