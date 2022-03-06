@@ -3,13 +3,11 @@
   "version": "0.0.0-dripip",
   "description": "Opinionated CLI for continuous delivery of npm packages",
   "main": "dist/cli/main",
-  "bin": {
-    "dripip": "dist/cli/main.js"
-  },
+  "bin": "dist/cli/main.js",
   "repository": "git@github.com:prisma-labs/dripip.git",
+  "packageManager": "yarn@3.2.0",
   "author": "Jason Kuhrt <jasonkuhrt@me.com>",
   "license": "MIT",
-  "private": false,
   "files": [
     "/src",
     "/dist",
