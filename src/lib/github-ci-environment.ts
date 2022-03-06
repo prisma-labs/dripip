@@ -36,15 +36,15 @@ export function parseGitHubCIEnvironment(): null | GitHubCIEnvironment {
 
     if (match) {
       debug('found a pr number from github ci environment %s', match[1])
-      prNum = parseInt(match[1], 10)
+      prNum = parseInt(match[1]!, 10)
     }
   }
 
   const repoPath = process.env.GITHUB_REPOSITORY!.split('/')
 
   const repo = {
-    owner: repoPath[0],
-    name: repoPath[1],
+    owner: repoPath[0]!,
+    name: repoPath[1]!,
   }
 
   let branchName: null | string = null

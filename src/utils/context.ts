@@ -138,7 +138,7 @@ export async function getLocationContext({
       maybePR = (await octokit.pulls.list({ owner, repo, head, state })).data[0]
     } catch (e) {
       throw new Error(
-        `Failed to fetch ${state} pull requests from ${owner}/${name} for head ${head} in order to find out if this branch has an open pull-request.\n\n${e}`
+        `Failed to fetch ${state} pull requests from ${owner}/${repo} for head ${head} in order to find out if this branch has an open pull-request.\n\n${e}`
       )
     }
 

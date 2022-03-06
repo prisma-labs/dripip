@@ -1078,7 +1078,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node14@npm:^1.0.0":
+"@tsconfig/node14@npm:^1.0.0, @tsconfig/node14@npm:^1.0.1":
   version: 1.0.1
   resolution: "@tsconfig/node14@npm:1.0.1"
   checksum: 976345e896c0f059867f94f8d0f6ddb8b1844fb62bf36b727de8a9a68f024857e5db97ed51d3325e23e0616a5e48c034ff51a8d595b3fe7e955f3587540489be
@@ -1190,6 +1190,13 @@ __metadata:
     jest-matcher-utils: ^27.0.0
     pretty-format: ^27.0.0
   checksum: 5184f3eef4832d01ee8f59bed15eec45ccc8e29c724a5e6ce37bf74396b37bdf04f557000f45ba4fc38ae6075cf9cfcce3d7a75abc981023c61ceb27230a93e4
+  languageName: node
+  linkType: hard
+
+"@types/json5@npm:^0.0.29":
+  version: 0.0.29
+  resolution: "@types/json5@npm:0.0.29"
+  checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
   languageName: node
   linkType: hard
 
@@ -2243,6 +2250,7 @@ __metadata:
     "@swc/core": ^1.2.148
     "@swc/helpers": ^0.3.6
     "@swc/jest": ^0.2.20
+    "@tsconfig/node14": ^1.0.1
     "@types/common-tags": 1.8.1
     "@types/debug": ^4.1.7
     "@types/jest": 27.4.1
@@ -2272,11 +2280,15 @@ __metadata:
     tmp: 0.2.1
     ts-jest: 27.1.3
     ts-node: 10.6.0
+    tsconfig-paths: ^3.13.0
+    tslib: ^2.3.1
     type-fest: 2.12.0
     typescript: 4.6.2
+    typescript-snapshots-plugin: ^1.7.0
+    typescript-transform-paths: ^3.3.1
     yargs: ^17.3.1
   bin:
-    dripip: dist/cli/main.js
+    dripip: dist-cjs/cli/main.js
   languageName: unknown
   linkType: soft
 
@@ -3839,6 +3851,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json5@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "json5@npm:1.0.1"
+  dependencies:
+    minimist: ^1.2.0
+  bin:
+    json5: lib/cli.js
+  checksum: e76ea23dbb8fc1348c143da628134a98adf4c5a4e8ea2adaa74a80c455fc2cdf0e2e13e6398ef819bfe92306b610ebb2002668ed9fc1af386d593691ef346fc3
+  languageName: node
+  linkType: hard
+
 "jsprim@npm:^1.2.2":
   version: 1.4.2
   resolution: "jsprim@npm:1.4.2"
@@ -4033,7 +4056,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.5, minimist@npm:~1.2.0":
+"minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:~1.2.0":
   version: 1.2.5
   resolution: "minimist@npm:1.2.5"
   checksum: 86706ce5b36c16bfc35c5fe3dbb01d5acdc9a22f2b6cc810b6680656a1d2c0e44a0159c9a3ba51fb072bb5c203e49e10b51dcd0eec39c481f4c42086719bae52
@@ -5075,6 +5098,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strip-bom@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "strip-bom@npm:3.0.0"
+  checksum: 8d50ff27b7ebe5ecc78f1fe1e00fcdff7af014e73cf724b46fb81ef889eeb1015fc5184b64e81a2efe002180f3ba431bdd77e300da5c6685d702780fbf0c8d5b
+  languageName: node
+  linkType: hard
+
 "strip-bom@npm:^4.0.0":
   version: 4.0.0
   resolution: "strip-bom@npm:4.0.0"
@@ -5366,6 +5396,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tsconfig-paths@npm:^3.13.0":
+  version: 3.13.0
+  resolution: "tsconfig-paths@npm:3.13.0"
+  dependencies:
+    "@types/json5": ^0.0.29
+    json5: ^1.0.1
+    minimist: ^1.2.0
+    strip-bom: ^3.0.0
+  checksum: 64f0de3c882c016cdfe34d5261087fcf0c75048c4206ee32540e36df9f99d82d2caa5872135d3b6704324f5fd7d9032131caf316c1da83c2ac465d5dfb2aafd4
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "tslib@npm:2.3.1"
+  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
+  languageName: node
+  linkType: hard
+
 "tunnel-agent@npm:^0.6.0":
   version: 0.6.0
   resolution: "tunnel-agent@npm:0.6.0"
@@ -5418,6 +5467,24 @@ __metadata:
   dependencies:
     is-typedarray: ^1.0.0
   checksum: 99c11aaa8f45189fcfba6b8a4825fd684a321caa9bd7a76a27cf0c7732c174d198b99f449c52c3818107430b5f41c0ccbbfb75cb2ee3ca4a9451710986d61a60
+  languageName: node
+  linkType: hard
+
+"typescript-snapshots-plugin@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "typescript-snapshots-plugin@npm:1.7.0"
+  checksum: b0b4cade84617bf329c2a7d0b89d54ee49805b029f55da8693f7343656143650a053e4c95b868fbc88cc41b3bb88f4e352806344f04a06d2d1bd9fd0c56e90f2
+  languageName: node
+  linkType: hard
+
+"typescript-transform-paths@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "typescript-transform-paths@npm:3.3.1"
+  dependencies:
+    minimatch: ^3.0.4
+  peerDependencies:
+    typescript: ">=3.6.5"
+  checksum: aa4d36c2767ae3c8801b03ecfc8cb2a1ca164f82b4abb34f14b20d5184fc62310d02ed34298d68934ba976e281cd7e6ba26ff7e89467e1dca2f561b3e88b306d
   languageName: node
   linkType: hard
 

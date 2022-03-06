@@ -61,7 +61,7 @@ typings/
 .next
 
 # app
-dist
+dist-*
 .vscode
 .swc
 

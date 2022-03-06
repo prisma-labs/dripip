@@ -112,7 +112,7 @@ export function delay(milliseconds: number): Promise<void> {
  */
 export function findIndexFromEnd<T>(xs: T[], f: (x: T) => boolean): number {
   for (let index = xs.length - 1; index > -1; index--) {
-    if (f(xs[index])) return index
+    if (f(xs[index]!)) return index
   }
   return -1
 }
@@ -122,7 +122,7 @@ export function findIndexFromEnd<T>(xs: T[], f: (x: T) => boolean): number {
  */
 export function last<T>(xs: T[]): null | T {
   if (xs.length === 0) return null
-  return xs[xs.length - 1]
+  return xs[xs.length - 1]!
 }
 
 export function numericAscending(n1: number, n2: number): -1 | 0 | 1 {

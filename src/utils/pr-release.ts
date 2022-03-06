@@ -57,6 +57,7 @@ function getNextPreReleaseBuildNumFromVersions(prefix: string, versions: string[
       if (match[1] !== undefined) return match[1]
       if (match[2] !== undefined) return match[2]
       // never
+      return null
     })
     .filter((v) => v !== null)
     .map((v) => Number(v))

@@ -192,7 +192,7 @@ function parseCommandString(cmd: string): { name: string; args: string[] } {
   const [name, ...args] = cmd.split(' ')
 
   return {
-    name,
+    name: name!,
     args,
   }
 }
@@ -210,7 +210,7 @@ function isFailedExitCode(exitCode: null | number): boolean {
  * @param packageJsonPath
  */
 export function isProcessFromProjectBin(packageJsonPath: string): boolean {
-  const processBinPath = process.argv[1]
+  const processBinPath = process.argv[1]!
   const processBinDirPath = Path.dirname(processBinPath)
   const projectBinDirPath = Path.join(Path.dirname(packageJsonPath), 'node_modules/.bin')
   return processBinDirPath !== projectBinDirPath

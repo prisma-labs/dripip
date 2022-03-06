@@ -143,11 +143,11 @@ export function parse(ver: string): null | StableVer | PreviewVer {
 
   if (result[6]) {
     const vprefix = result[5] === 'v'
-    const major = parseInt(result[6], 10)
-    const minor = parseInt(result[7], 10)
-    const patch = parseInt(result[8], 10)
-    const identifier = result[9]
-    const buildNum = parseInt(result[10], 10)
+    const major = parseInt(result[6]!, 10)
+    const minor = parseInt(result[7]!, 10)
+    const patch = parseInt(result[8]!, 10)
+    const identifier = result[9]!
+    const buildNum = parseInt(result[10]!, 10)
     return {
       version: `${major}.${minor}.${patch}-${identifier}.${buildNum}`,
       vprefix,
@@ -162,9 +162,9 @@ export function parse(ver: string): null | StableVer | PreviewVer {
   }
 
   const vprefix = result[1] === 'v'
-  const major = parseInt(result[2], 10)
-  const minor = parseInt(result[3], 10)
-  const patch = parseInt(result[4], 10)
+  const major = parseInt(result[2]!, 10)
+  const minor = parseInt(result[3]!, 10)
+  const patch = parseInt(result[4]!, 10)
   return {
     version: `${major}.${minor}.${patch}`,
     vprefix,

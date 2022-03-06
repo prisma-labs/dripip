@@ -113,19 +113,19 @@ export function parse(message: string): null | ConventionalCommit {
     footers = rawFooters.map((f) => {
       const [, type, body] = f.trim().split(/^\s*([\w-]+)\s*:/)
       return {
-        type: type.trim(),
-        body: body.trim(),
+        type: type!.trim(),
+        body: body!.trim(),
       }
     })
   }
 
-  const typeTrimmed = type.trim()
+  const typeTrimmed = type!.trim()
 
   return {
     typeKind: getKind(typeTrimmed),
     type: typeTrimmed,
     scope: scope?.trim() ?? null,
-    description: description.trim(),
+    description: description!.trim(),
     body: body?.trim() ?? null,
     footers: footers ?? [],
     breakingChange: breakingChange?.trim() ?? null,
