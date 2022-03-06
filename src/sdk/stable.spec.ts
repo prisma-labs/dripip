@@ -37,7 +37,7 @@ beforeEach(async () => {
   ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
 })
 
-describe('preflight requirements include that', () => {
+describe.skip('preflight requirements include that', () => {
   it('the branch is trunk', async () => {
     await ctx.git.branch({ fs, dir, checkout: true, ref: 'foo' })
     const result = await ctx.runStableRelease()

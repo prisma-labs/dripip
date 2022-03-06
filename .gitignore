@@ -63,6 +63,7 @@ typings/
 # app
 dist
 .vscode
+.swc
 
 # Yarn 2
 .pnp.*

@@ -25,7 +25,7 @@ beforeEach(async () => {
   ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
 })
 
-it('if build-num flag passed, the build number is forced to be it', async () => {
+it.skip('if build-num flag passed, the build number is forced to be it', async () => {
   await ctx.commit('fix: foo')
   await ctx.tag('0.1.0')
   await ctx.commit('feat: foo')
@@ -103,7 +103,7 @@ it('if build-num flag passed, the build number is forced to be it', async () => 
   `)
 })
 
-describe('preflight checks', () => {
+describe.skip('preflight checks', () => {
   it('no preview release already present', async () => {
     await ctx.commit('fix: thing')
     await ctx.tag('v1.2.3-next.1')

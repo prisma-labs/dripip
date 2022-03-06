@@ -21,8 +21,9 @@
     "clean": "rm -rf dist",
     "build": "tsc",
     "dev": "tsc --watch",
+    "type-check": "yarn tsc --noEmit",
     "dev:test": "jest --watch --testPathPattern '.*/src/.*'",
-    "test:unit": "jest --testPathPattern '.*/src/.*' --verbose",
+    "test:unit": "jest --config jest.config.unit.ts",
     "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
     "test": "jest  --testTimeout 15000 --verbose",
     "build:docs:toc": "doctoc README.md",
@@ -50,12 +51,16 @@
   },
   "devDependencies": {
     "@prisma-labs/prettier-config": "0.1.0",
+    "@swc/core": "^1.2.148",
+    "@swc/helpers": "^0.3.6",
+    "@swc/jest": "^0.2.20",
     "@types/common-tags": "1.8.1",
     "@types/jest": "27.4.1",
     "@types/node": "17.0.21",
     "@types/tmp": "0.2.3",
     "doctoc": "1.4.0",
     "jest": "27.5.1",
+    "jest-watch-select-projects": "^2.0.0",
     "jest-watch-suspend": "1.1.2",
     "jest-watch-toggle-config": "2.0.1",
     "jest-watch-typeahead": "1.0.0",
@@ -67,35 +72,5 @@
     "type-fest": "2.12.0",
     "typescript": "4.6.2"
   },
-  "prettier": "@prisma-labs/prettier-config",
-  "jest": {
-    "preset": "ts-jest",
-    "watchPlugins": [
-      "jest-watch-suspend",
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname",
-      [
-        "jest-watch-toggle-config",
-        {
-          "setting": "verbose"
-        }
-      ]
-    ],
-    "watchPathIgnorePatterns": [
-      "<rootDir>/dist/"
-    ],
-    "setupFiles": [
-      "./tests/_setup.ts"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tests/tsconfig.json",
-        "diagnostics": {
-          "ignoreCodes": [
-            151001
-          ]
-        }
-      }
-    }
-  }
+  "prettier": "@prisma-labs/prettier-config"
 }
