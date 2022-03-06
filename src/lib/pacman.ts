@@ -1,9 +1,9 @@
-import * as fs from 'fs-jetpack'
 import * as PJ from './package-json'
 import * as proc from './proc'
 import { casesHandled, errorFromMaybeError } from './utils'
+import * as fs from 'fs-jetpack'
 
-type PackageManagerType = 'npm' | 'yarn'
+type PackageManagerType = `npm` | `yarn`
 
 /**
  * This module abstracts running package manager commands. It is useful when
@@ -15,9 +15,9 @@ type PackageManagerType = 'npm' | 'yarn'
  * Detect if being run within a yarn or npm script. Ref
  * https://stackoverflow.com/questions/51768743/how-to-detect-that-the-script-is-running-with-npm-or-yarn/51793644#51793644
  */
-function detectScriptRunner(): null | 'npm' | 'yarn' {
-  if (process.env.npm_execpath?.match(/.+npm-cli.js$/)) return 'npm'
-  if (process.env.npm_execpath?.match(/.+yarn.js$/)) return 'yarn'
+function detectScriptRunner(): null | `npm` | `yarn` {
+  if (process.env.npm_execpath?.match(/.+npm-cli.js$/)) return `npm`
+  if (process.env.npm_execpath?.match(/.+yarn.js$/)) return `yarn`
   return null
 }
 
@@ -34,10 +34,10 @@ function detectScriptRunner(): null | 'npm' | 'yarn' {
  * Either way, it should not be noticeable to the user of this function.
  */
 async function publish(manType: PackageManagerType, input: { version: string; tag: string }): Promise<void> {
-  if (manType === 'yarn') {
+  if (manType === `yarn`) {
     const runString = `yarn publish --tag ${input.tag} --no-git-tag-version --new-version ${input.version}`
     await proc.run(runString, { require: true })
-  } else if (manType === 'npm') {
+  } else if (manType === `npm`) {
     const pj = PJ.create(process.cwd())
     const pjd = (await pj.read())! // assume present and valid package.json has been validated already
     await pj.write({ ...pjd, version: input.version })
@@ -64,9 +64,9 @@ async function tag(
   }
 ) {
   const runString =
-    manType === 'npm'
+    manType === `npm`
       ? `npm dist-tags add ${packageName}@${input.packageVersion} ${input.tagName}`
-      : manType === 'yarn'
+      : manType === `yarn`
       ? `yarn tag add ${packageName}@${input.packageVersion} ${input.tagName}`
       : casesHandled(manType)
   try {
@@ -74,12 +74,12 @@ async function tag(
   } catch (maybeError) {
     const e = errorFromMaybeError(maybeError)
     if (
-      manType === 'yarn' &&
+      manType === `yarn` &&
       e.message.match(/error Couldn't add tag./) &&
       e.message.match(/error An unexpected error occurred: ""./)
     ) {
       try {
-        fs.remove('yarn-error.log')
+        fs.remove(`yarn-error.log`)
       } catch (e) {
         // silence error if for some reason we cannot clean up the yarn error
         // log because it is not important enough to handle/tell user about.

@@ -18,7 +18,7 @@ export function calcBumpType(
 
     // Completing initial development is a spec extension
     // https://github.com/conventional-commits/conventionalcommits.org/pull/214
-    if (isInitialDevelopment && cc.completesInitialDevelopment) return 'major'
+    if (isInitialDevelopment && cc.completesInitialDevelopment) return `major`
 
     if (isMetaChange(cc)) {
       // chore type commits are considered to not change the runtime in any way
@@ -29,17 +29,17 @@ export function calcBumpType(
     if (cc.breakingChange) {
       // during initial development breaking changes are permitted without
       // having to bump the major.
-      semverPart = isInitialDevelopment ? 'minor' : 'major'
+      semverPart = isInitialDevelopment ? `minor` : `major`
       break
     }
 
     // If already at minor continue, now looking only for major changes
-    if (semverPart === 'minor') {
+    if (semverPart === `minor`) {
       continue
     }
 
     if (isMinorChange(cc)) {
-      semverPart = 'minor'
+      semverPart = `minor`
       // during initial development breaking changes are permitted without
       // having to bump the major. Therefore, we know we won't get a bumpType
       // higher than this, can short-circuit.
@@ -47,21 +47,21 @@ export function calcBumpType(
       else continue
     }
 
-    semverPart = 'patch'
+    semverPart = `patch`
   }
 
   return semverPart
 }
 
 function isMinorChange(conventionalCommit: ConventionalCommit): boolean {
-  return ['feat', 'feature'].includes(conventionalCommit.type)
+  return [`feat`, `feature`].includes(conventionalCommit.type)
 }
 
 function isMetaChange(conventionalCommit: ConventionalCommit): boolean {
-  return ['chore'].includes(conventionalCommit.type)
+  return [`chore`].includes(conventionalCommit.type)
 }
 
-type Kind = 'feat' | 'fix' | 'chore' | 'other'
+type Kind = `feat` | `fix` | `chore` | `other`
 
 export type ConventionalCommit = {
   typeKind: Kind
@@ -82,31 +82,31 @@ export function parse(message: string): null | ConventionalCommit {
   const [, type, scope, breakingChangeMarker, description, rest] = result
 
   let completesInitialDevelopment = false
-  let breakingChange = breakingChangeMarker === undefined ? null : 'No Explanation'
+  let breakingChange = breakingChangeMarker === undefined ? null : `No Explanation`
   let body = null
-  let footers: ConventionalCommit['footers'] = []
+  let footers: ConventionalCommit[`footers`] = []
 
   if (rest) {
     const rawFooters: string[] = []
 
     let currFooter = -1
-    let currSection = 'body'
+    let currSection = `body`
     for (const para of rest.split(/(?:\r?\n){2}/)) {
       if (para.match(/^COMPLETES[-\s]INITIAL[-\s]DEVELOPMENT\s*/)) {
         completesInitialDevelopment = true
       } else if (para.match(/^\s*BREAKING[-\s]CHANGE\s*:\s*.*/)) {
-        currSection = 'breaking_change'
-        breakingChange = (breakingChange ?? '') + '\n\n' + para.replace(/^BREAKING[-\s]CHANGE\s*:/, '')
+        currSection = `breaking_change`
+        breakingChange = (breakingChange ?? ``) + `\n\n` + para.replace(/^BREAKING[-\s]CHANGE\s*:/, ``)
       } else if (para.match(/^\s*[\w-]+\s*:.*/)) {
-        currSection = 'footers'
+        currSection = `footers`
         rawFooters.push(para)
         currFooter++
-      } else if (currSection === 'body') {
-        body = (body ?? '') + '\n\n' + para
-      } else if (currSection === 'breaking_change') {
-        breakingChange = (breakingChange ?? '') + '\n\n' + para
+      } else if (currSection === `body`) {
+        body = (body ?? ``) + `\n\n` + para
+      } else if (currSection === `breaking_change`) {
+        breakingChange = (breakingChange ?? ``) + `\n\n` + para
       } else {
-        rawFooters[currFooter] += '\n\n' + para
+        rawFooters[currFooter] += `\n\n` + para
       }
     }
 
@@ -134,8 +134,8 @@ export function parse(message: string): null | ConventionalCommit {
 }
 
 function getKind(s: string): Kind {
-  if (s === 'feat') return 'feat'
-  if (s === 'fix') return 'fix'
-  if (s === 'chore') return 'chore'
-  return 'other'
+  if (s === `feat`) return `feat`
+  if (s === `fix`) return `fix`
+  if (s === `chore`) return `chore`
+  return `other`
 }

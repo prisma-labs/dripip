@@ -1,8 +1,8 @@
-import * as path from 'path'
 import { fs } from './fs'
 import { git } from './git'
 import { compose } from './test-context'
 import { tmpDir } from './tmp-dir'
+import * as path from 'path'
 
 interface FixtureContribution {
   /**
@@ -14,7 +14,7 @@ interface FixtureContribution {
 export const fixture = (): FixtureContribution => {
   return {
     fixture(fixturePath) {
-      return path.join(__dirname, '..', '..', '__fixtures', fixturePath)
+      return path.join(__dirname, `..`, `..`, `__fixtures`, fixturePath)
     },
   }
 }

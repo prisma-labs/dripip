@@ -1,13 +1,13 @@
+import { rootDebug } from './debug'
+import { isGitHubCIEnvironment } from './github-ci-environment'
 import * as fs from 'fs-jetpack'
 import * as os from 'os'
 import * as path from 'path'
-import { rootDebug } from './debug'
-import { isGitHubCIEnvironment } from './github-ci-environment'
 
 const debug = rootDebug(__filename)
 
-const TOKEN_ENV_VAR_NAME = 'NPM_TOKEN'
-const npmrcFilePath = path.join(os.homedir(), '.npmrc')
+const TOKEN_ENV_VAR_NAME = `NPM_TOKEN`
+const npmrcFilePath = path.join(os.homedir(), `.npmrc`)
 
 /**
  * If in a CI environment and there is an NPM_TOKEN environment variable
@@ -17,7 +17,7 @@ const npmrcFilePath = path.join(os.homedir(), '.npmrc')
 export function setupNPMAuthfileOnCI(): void {
   if (isGitHubCIEnvironment() && process.env.NPM_TOKEN) {
     const authContent = `//registry.npmjs.org/:_authToken=${process.env[TOKEN_ENV_VAR_NAME]}`
-    debug('writing or appending npm auth token to %s', npmrcFilePath)
+    debug(`writing or appending npm auth token to %s`, npmrcFilePath)
     fs.append(npmrcFilePath, authContent)
   }
 }
@@ -29,17 +29,17 @@ function getNpmrcFile(): null | string {
   return fs.read(npmrcFilePath) ?? null
 }
 
-type PassReason = 'npmrc_auth' | 'npm_token_env_var'
+type PassReason = `npmrc_auth` | `npm_token_env_var`
 
 interface SetupPass {
-  kind: 'pass'
+  kind: `pass`
   reason: PassReason
 }
 
-type FailReason = 'no_npmrc' | 'npmrc_missing_auth' | 'env_var_empty' | 'no_env_var'
+type FailReason = `no_npmrc` | `npmrc_missing_auth` | `env_var_empty` | `no_env_var`
 
 interface SetupFail {
-  kind: 'fail'
+  kind: `fail`
   reasons: FailReason[]
 }
 
@@ -55,26 +55,26 @@ export function validateNPMAuthSetup(): SetupPass | SetupFail {
   const token = process.env[TOKEN_ENV_VAR_NAME] ?? null
 
   if (token) {
-    return { kind: 'pass', reason: 'npm_token_env_var' }
+    return { kind: `pass`, reason: `npm_token_env_var` }
   }
 
   const npmrc = getNpmrcFile()
   if (npmrc && npmrc.match(/_authToken=.+/)) {
-    return { kind: 'pass', reason: 'npmrc_auth' }
+    return { kind: `pass`, reason: `npmrc_auth` }
   }
 
-  const fail: SetupFail = { kind: 'fail', reasons: [] }
+  const fail: SetupFail = { kind: `fail`, reasons: [] }
 
   if (npmrc === null) {
-    fail.reasons.push('no_npmrc')
+    fail.reasons.push(`no_npmrc`)
   } else {
-    fail.reasons.push('npmrc_missing_auth')
+    fail.reasons.push(`npmrc_missing_auth`)
   }
 
   if (token === null) {
-    fail.reasons.push('no_env_var')
+    fail.reasons.push(`no_env_var`)
   } else {
-    fail.reasons.push('env_var_empty')
+    fail.reasons.push(`env_var_empty`)
   }
 
   return fail

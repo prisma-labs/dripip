@@ -2,10 +2,10 @@ import baseConfig from './jest.config'
 
 const config = {
   ...baseConfig,
-  testRegex: 'src/.*\\.spec\\.ts$',
+  testRegex: `src/.*\\.spec\\.ts$`,
   displayName: {
-    name: 'Unit',
-    color: 'blue',
+    name: `Unit`,
+    color: `blue`,
   },
 }
 

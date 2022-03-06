@@ -8,15 +8,15 @@ export function renderFromSeries(series: Series, options: RenderOptions): string
 }
 
 export type RenderOptions = {
-  as: 'plain' | 'markdown'
+  as: `plain` | `markdown`
 }
 
 /**
  * Render a changelog into a string using the chosen renderer (Markdown, Terminal, etc.).
  */
 export function render(changelog: Changelog, opts: RenderOptions): string {
-  if (opts.as === 'markdown') return Markdown.render(changelog)
-  if (opts.as === 'plain') return Terminal.render(changelog)
+  if (opts.as === `markdown`) return Markdown.render(changelog)
+  if (opts.as === `plain`) return Terminal.render(changelog)
   casesHandled(opts.as)
 }
 
@@ -39,13 +39,13 @@ export function fromSeries(series: Series): Changelog {
       log.breaking.commits.push(c)
     }
 
-    if (cp.typeKind === 'feat') {
+    if (cp.typeKind === `feat`) {
       log.features.commits.push(c)
-    } else if (cp.typeKind === 'fix') {
+    } else if (cp.typeKind === `fix`) {
       log.fixes.commits.push(c)
-    } else if (cp.typeKind === 'chore') {
+    } else if (cp.typeKind === `chore`) {
       log.chores.commits.push(c)
-    } else if (cp.typeKind === 'other') {
+    } else if (cp.typeKind === `other`) {
       log.improvements.commits.push(c)
     } else {
       casesHandled(cp.typeKind)

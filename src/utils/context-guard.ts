@@ -24,25 +24,25 @@ export function check(options: Options) {
   const contextualizedCheckers: Requirement[] = []
 
   const api = {
-    check(level: Requirement['level'], validator: Validator) {
+    check(level: Requirement[`level`], validator: Validator) {
       contextualizedCheckers.push({ level, validator })
       return api
     },
     stopUnless(checker: Validator) {
-      return api.check('prefer', checker)
+      return api.check(`prefer`, checker)
     },
     errorUnless(checker: Validator) {
-      return api.check('must', checker)
+      return api.check(`must`, checker)
     },
     run() {
       return contextualizedCheckers.reduce((results, requirement) => {
         const resultSugar = requirement.validator.run(options.context)
-        const result = typeof resultSugar === 'boolean' ? booleanResult(resultSugar) : resultSugar
+        const result = typeof resultSugar === `boolean` ? booleanResult(resultSugar) : resultSugar
 
         const group =
-          result.kind === 'pass'
+          result.kind === `pass`
             ? results.passes
-            : requirement.level === 'must'
+            : requirement.level === `must`
             ? results.errors
             : results.stops
 
@@ -99,7 +99,7 @@ export function guard(input: EnforceInput): void {
           .map((failure) => {
             return failure.summary
           })
-          .join('\n - ')
+          .join(`\n - `)
       )
     }
   }
@@ -111,11 +111,11 @@ export function guard(input: EnforceInput): void {
 
 interface Requirement {
   validator: Validator
-  level: 'prefer' | 'must'
+  level: `prefer` | `must`
 }
 
 export interface ValidationResult {
-  code: Validator['code']
+  code: Validator[`code`]
   summary: string
   details: Record<string, unknown>
 }
@@ -131,10 +131,10 @@ interface Report {
 //
 
 export class JSONCLIError extends Error {
-  code = 'JSONError'
+  code = `JSONError`
 
   constructor(private errorObject: object) {
-    super('...todo...')
+    super(`...todo...`)
   }
 
   render(): string {
@@ -143,10 +143,10 @@ export class JSONCLIError extends Error {
 }
 
 export class PassthroughCLIError extends Error {
-  code = 'PassthroughError'
+  code = `PassthroughError`
 
   constructor(private errorString: string) {
-    super('...todo...')
+    super(`...todo...`)
   }
 
   render(): string {
@@ -155,17 +155,17 @@ export class PassthroughCLIError extends Error {
 }
 
 export class CLIStop extends Error {
-  code = 'Stop'
+  code = `Stop`
 
   constructor(private input: { reasons: ValidationResult[]; json?: boolean }) {
-    super('...todo...')
+    super(`...todo...`)
   }
 
   render(): string {
     if (this.input.json) {
       return JSON.stringify({ reasons: this.input.reasons })
     } else {
-      return 'Nothing to do:\n\n' + this.input.reasons.map((r) => r.summary).join('\n -')
+      return `Nothing to do:\n\n` + this.input.reasons.map((r) => r.summary).join(`\n -`)
     }
   }
 }
@@ -181,17 +181,17 @@ export interface Validator {
 }
 
 interface Pass {
-  kind: 'pass'
+  kind: `pass`
   details: Record<string, unknown>
 }
 
 interface Fail {
-  kind: 'fail'
+  kind: `fail`
   details: Record<string, unknown>
 }
 
 export type Result = Pass | Fail
 
 export function booleanResult(bool: boolean): Result {
-  return bool ? { kind: 'pass', details: {} } : { kind: 'fail', details: {} }
+  return bool ? { kind: `pass`, details: {} } : { kind: `fail`, details: {} }
 }

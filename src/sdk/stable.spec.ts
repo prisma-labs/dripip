@@ -7,9 +7,9 @@
 //   })
 // }
 
-import * as nodefs from 'fs'
 import * as TestContext from '../../tests/__lib/test-context'
 import { Options, runStableRelease } from './stable'
+import * as nodefs from 'fs'
 
 const fs = nodefs
 const ctx = TestContext.compose(TestContext.all, (ctx) => {
@@ -34,12 +34,12 @@ beforeEach(() => {
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture(`git`), ctx.fs.path(`.git`))
 })
 
-describe.skip('preflight requirements include that', () => {
-  it('the branch is trunk', async () => {
-    await ctx.git.branch({ fs, dir, checkout: true, ref: 'foo' })
+describe.skip(`preflight requirements include that`, () => {
+  it(`the branch is trunk`, async () => {
+    await ctx.git.branch({ fs, dir, checkout: true, ref: `foo` })
     const result = await ctx.runStableRelease()
     // todo doesn't make sense to show both of these errors at once,
     // only check for sync once on-trunk established
@@ -64,8 +64,8 @@ describe.skip('preflight requirements include that', () => {
   // TODO need a flag like --queued-releases which permits releasing on
   // potentially not the latest commit of trunk. Think of a CI situation with
   // race-condition PR merges.
-  it('the branch is synced with remote (needs push)', async () => {
-    await ctx.commit('some work')
+  it(`the branch is synced with remote (needs push)`, async () => {
+    await ctx.commit(`some work`)
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -80,8 +80,8 @@ describe.skip('preflight requirements include that', () => {
     `)
   })
 
-  it('the branch is synced with remote (needs pull)', async () => {
-    await ctx.hardReset({ dir, ref: 'head~1', branch: 'master' })
+  it(`the branch is synced with remote (needs pull)`, async () => {
+    await ctx.hardReset({ dir, ref: `head~1`, branch: `master` })
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -96,9 +96,9 @@ describe.skip('preflight requirements include that', () => {
     `)
   })
 
-  it('the branch is synced with remote (diverged)', async () => {
-    await ctx.hardReset({ dir, ref: 'head~1', branch: 'master' })
-    await ctx.commit('foo')
+  it(`the branch is synced with remote (diverged)`, async () => {
+    await ctx.hardReset({ dir, ref: `head~1`, branch: `master` })
+    await ctx.commit(`foo`)
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -113,8 +113,8 @@ describe.skip('preflight requirements include that', () => {
     `)
   })
 
-  it('check that the commit does not already have a stable release present', async () => {
-    await ctx.git.tag({ fs, dir, ref: '1.0.0' })
+  it(`check that the commit does not already have a stable release present`, async () => {
+    await ctx.git.tag({ fs, dir, ref: `1.0.0` })
     const result = await ctx.runStableRelease()
     expect(result.data.report.stops).toMatchInlineSnapshot(`
       Array [

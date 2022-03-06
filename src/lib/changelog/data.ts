@@ -53,11 +53,11 @@ export type Changelog = {
  */
 export function empty(): Changelog {
   return {
-    breaking: { commits: [], label: 'BREAKING CHANGES' },
-    features: { commits: [], label: 'Features' },
-    chores: { commits: [], label: 'Chores' },
-    fixes: { commits: [], label: 'Fixes' },
-    improvements: { commits: [], label: 'Improvements' },
-    unspecified: { commits: [], label: 'Unspecified Changes' },
+    breaking: { commits: [], label: `BREAKING CHANGES` },
+    features: { commits: [], label: `Features` },
+    chores: { commits: [], label: `Chores` },
+    fixes: { commits: [], label: `Fixes` },
+    improvements: { commits: [], label: `Improvements` },
+    unspecified: { commits: [], label: `Unspecified Changes` },
   }
 }

@@ -1,8 +1,8 @@
-import { format } from 'util'
-import { Octokit } from '@octokit/rest'
-import { errorFromMaybeError } from '../../src/lib/utils'
 import * as proc from '../../src/lib/proc'
+import { errorFromMaybeError } from '../../src/lib/utils'
 import * as WS from '../__lib/workspace'
+import { Octokit } from '@octokit/rest'
+import { format } from 'util'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
@@ -23,9 +23,9 @@ export function createContext(name: string) {
     addDripipToWorkspace(
       WS.createWorkspace({
         name: name,
-        repo: 'git@github.com:prisma-labs/dripip-system-tests.git',
+        repo: `git@github.com:prisma-labs/dripip-system-tests.git`,
         cache: {
-          version: '8',
+          version: `8`,
         },
       })
     )
@@ -35,13 +35,13 @@ export function createContext(name: string) {
 
   beforeEach(async () => {
     await Promise.all([
-      ws.fs.writeAsync('package.json', {
-        name: 'test-app',
-        license: 'MIT',
+      ws.fs.writeAsync(`package.json`, {
+        name: `test-app`,
+        license: `MIT`,
       }),
     ])
-    await ws.git.add('package.json')
-    await ws.git.commit('chore: add package.json')
+    await ws.git.add(`package.json`)
+    await ws.git.commit(`chore: add package.json`)
   })
 
   return ws
@@ -86,11 +86,11 @@ export function addDripipToWorkspace<T extends {}>(
  */
 function sanitizeResultForSnap(result: RunDripipResult): void {
   const shortSHAPattern = /\(.{7}\)/g
-  result.stderr = result.stderr!.replace(shortSHAPattern, '(__SHORT_SHA__)')
-  result.stdout = result.stdout!.replace(shortSHAPattern, '(__SHORT_SHA__)')
+  result.stderr = result.stderr.replace(shortSHAPattern, `(__SHORT_SHA__)`)
+  result.stdout = result.stdout!.replace(shortSHAPattern, `(__SHORT_SHA__)`)
 }
 
-export type RunDripipResult = Omit<proc.SuccessfulRunResult, 'command'> & {
+export type RunDripipResult = Omit<proc.SuccessfulRunResult, `command`> & {
   stderr: string
 }
 
@@ -127,8 +127,8 @@ function createDripipRunner(cwd: string, pathToProject: string) {
         return result as RunDripipResult // force TS to ignore the stderr: null possibility
       }
 
-      const content = opts.error === true ? result.stderr ?? '' : result.stdout ?? ''
-      let contentSanitized = content.replace(/"sha": *"[^"]+"/g, '"sha": "__dynamic_content__"')
+      const content = opts.error === true ? result.stderr ?? `` : result.stdout ?? ``
+      let contentSanitized = content.replace(/"sha": *"[^"]+"/g, `"sha": "__dynamic_content__"`)
       
       opts.replacements?.forEach(([pattern, replacement]:any) => {
         contentSanitized = content.replace(pattern, replacement)

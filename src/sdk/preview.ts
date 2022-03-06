@@ -62,7 +62,7 @@ export async function runPreviewRelease(options: Options) {
     maybeRelease.version = setBuildNum(maybeRelease.version as PreviewVer, options.overrides.buildNum)
   }
 
-  const changelog = Changelog.renderFromSeries(context.series, { as: 'markdown' })
+  const changelog = Changelog.renderFromSeries(context.series, { as: `markdown` })
 
   if (options.dryRun) {
     return createDryRun({
@@ -85,7 +85,7 @@ export async function runPreviewRelease(options: Options) {
 
   const publishPlan: PublishPlan = {
     release: {
-      distTag: 'next',
+      distTag: `next`,
       version: release.version.version,
     },
     options: {
@@ -126,22 +126,22 @@ export async function runPreviewRelease(options: Options) {
 
 function haveCommitsInTheSeries(): Validator {
   return {
-    code: 'series_empty',
-    summary: 'A preview release must have at least one commit since the last preview',
+    code: `series_empty`,
+    summary: `A preview release must have at least one commit since the last preview`,
     run(ctx) {
       const release = getNextPreview(ctx.series)
-      return release !== 'empty_series'
+      return release !== `empty_series`
     },
   }
 }
 
 function haveMeaningfulCommitsInTheSeries(): Validator {
   return {
-    code: 'series_only_has_meaningless_commits',
-    summary: 'A preview release must have at least one semantic commit',
+    code: `series_only_has_meaningless_commits`,
+    summary: `A preview release must have at least one semantic commit`,
     run(ctx) {
       const release = getNextPreview(ctx.series)
-      return release !== 'no_meaningful_change'
+      return release !== `no_meaningful_change`
       // todo
       // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
     },
@@ -150,19 +150,19 @@ function haveMeaningfulCommitsInTheSeries(): Validator {
 
 function notAlreadyStableOrPreviewReleased(): Validator {
   return {
-    code: 'preview_on_commit_with_preview_and_or_stable',
-    summary: 'A preview release requires the commit to have no existing stable or preview release.',
+    code: `preview_on_commit_with_preview_and_or_stable`,
+    summary: `A preview release requires the commit to have no existing stable or preview release.`,
     run(ctx) {
       if (ctx.series.current.releases.stable && ctx.series.current.releases.preview) {
-        return { kind: 'fail', details: { subCode: 'preview_and_stable' } }
+        return { kind: `fail`, details: { subCode: `preview_and_stable` } }
       }
 
       if (ctx.series.current.releases.stable) {
-        return { kind: 'fail', details: { subCode: 'stable' } }
+        return { kind: `fail`, details: { subCode: `stable` } }
       }
 
       if (ctx.series.current.releases.preview) {
-        return { kind: 'fail', details: { subCode: 'preview' } }
+        return { kind: `fail`, details: { subCode: `preview` } }
       }
 
       return true

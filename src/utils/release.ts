@@ -62,8 +62,8 @@ export type MockCommit = {
 }
 
 export function fromMockCommits(commits: MockCommit[]): Series {
-  const defaultSha = 'shasha#'
-  const defaultMessage = 'Blah blah blah'
+  const defaultSha = `shasha#`
+  const defaultMessage = `Blah blah blah`
 
   return fromCommits(
     commits.map((commit) => {
@@ -79,7 +79,7 @@ export function fromMockCommits(commits: MockCommit[]): Series {
 }
 
 function vPrefixify(ver: string): string {
-  return 'v' + ver
+  return `v` + ver
 }
 
 /**
@@ -127,7 +127,7 @@ export async function getCurrentCommit(): Promise<Commit> {
   }
 
   if (!currLog) {
-    throw new Error('There are no commits in this repo')
+    throw new Error(`There are no commits in this repo`)
   }
 
   return logEntryToCommit(currLog)
@@ -238,8 +238,8 @@ export function buildSeries([previousStableLogEntry, commitsSincePrevStable]: Se
       sha: c.sha,
       nonReleaseTags: c.tags.filter(isUnknownTag),
       releases: {
-        stable: Semver.parse(c.tags.find(isStableTag) ?? ''),
-        preview: Semver.parsePreview(c.tags.find(isPreviewTag) ?? ''),
+        stable: Semver.parse(c.tags.find(isStableTag) ?? ``),
+        preview: Semver.parsePreview(c.tags.find(isPreviewTag) ?? ``),
       },
     } as MaybePreviewCommit
   })
@@ -266,7 +266,7 @@ export function buildSeries([previousStableLogEntry, commitsSincePrevStable]: Se
           nonReleaseTags: previousStableLogEntry.tags.filter(isUnknownTag),
           releases: {
             stable: Semver.parse(previousStableLogEntry.tags.find(isStableTag)!)!,
-            preview: Semver.parsePreview(previousStableLogEntry.tags.find(isPreviewTag) ?? ''),
+            preview: Semver.parsePreview(previousStableLogEntry.tags.find(isPreviewTag) ?? ``),
           },
         } as StableCommit)
 
@@ -308,10 +308,10 @@ function isPreviewTag(tag: string): boolean {
 //   }
 // }
 
-export type NoReleaseReason = 'empty_series' | 'no_meaningful_change'
+export type NoReleaseReason = `empty_series` | `no_meaningful_change`
 
 export function isNoReleaseReason(x: unknown): x is NoReleaseReason {
-  return x === 'no_meaningful_change' || x === 'empty_series'
+  return x === `no_meaningful_change` || x === `empty_series`
 }
 
 /**
@@ -320,7 +320,7 @@ export function isNoReleaseReason(x: unknown): x is NoReleaseReason {
  */
 export function getNextStable(series: Series): NoReleaseReason | Release {
   if (series.commitsInNextStable.length === 0) {
-    return 'empty_series'
+    return `empty_series`
   }
 
   const bumpType = ConventionalCommit.calcBumpType(
@@ -328,7 +328,7 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
     series.commitsInNextStable.map((c) => c.message.raw)
   )
 
-  if (bumpType === null) return 'no_meaningful_change'
+  if (bumpType === null) return `no_meaningful_change`
 
   const version = Semver.incStable(
     bumpType,
@@ -343,7 +343,7 @@ export function getNextStable(series: Series): NoReleaseReason | Release {
  */
 export function getNextPreview(series: Series): NoReleaseReason | Release {
   if (series.commitsInNextStable.length === 0) {
-    return 'empty_series'
+    return `empty_series`
   }
 
   // todo test this case, it was fixed without regression test being added
@@ -352,7 +352,7 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
     series.commitsInNextPreview.map((c) => c.message.raw)
   )
 
-  if (bumpTypeContributionFromCommitsInNextPreview === null) return 'no_meaningful_change'
+  if (bumpTypeContributionFromCommitsInNextPreview === null) return `no_meaningful_change`
 
   const bumpType = ConventionalCommit.calcBumpType(
     series.isInitialDevelopment,
@@ -363,7 +363,7 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
   // bumpType here.
   if (!bumpType) {
     throw new Error(
-      'next preview in series has bump type but not series as a whole. You should not be seeing this. This should be impossible.'
+      `next preview in series has bump type but not series as a whole. You should not be seeing this. This should be impossible.`
     )
   }
 
@@ -371,7 +371,7 @@ export function getNextPreview(series: Series): NoReleaseReason | Release {
 
   const version = Semver.stableToPreview(
     nextStable,
-    'next',
+    `next`,
     (series.previousPreview?.releases.preview.preRelease.buildNum ?? Semver.zeroBuildNum) + 1
   )
 

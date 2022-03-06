@@ -1,8 +1,8 @@
+import { gitInitRepo, Simple } from '../../src/lib/git'
+import { createRunner } from '../../src/lib/proc'
 import * as jetpack from 'fs-jetpack'
 import * as Path from 'path'
 import createGit from 'simple-git/promise'
-import { gitInitRepo, Simple } from '../../src/lib/git'
-import { createRunner } from '../../src/lib/proc'
 
 type Workspace = {
   dir: { path: string; pathRelativeToSource: string; cacheHit: boolean }
@@ -69,23 +69,23 @@ async function doCreateWorkspace(optsGiven: Options): Promise<Workspace> {
   if (opts.cache?.on) {
     const yarnLockHash =
       opts.cache?.includeLock === true
-        ? jetpack.inspect('yarn.lock', {
-            checksum: 'md5',
+        ? jetpack.inspect(`yarn.lock`, {
+            checksum: `md5`,
           })!.md5
-        : 'off'
-    const ver = '8'
-    const testVer = opts.cache?.version ?? 'off'
-    const currentGitBranch = (await createGit().raw(['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
+        : `off`
+    const ver = `8`
+    const testVer = opts.cache?.version ?? `off`
+    const currentGitBranch = (await createGit().raw([`rev-parse`, `--abbrev-ref`, `HEAD`])).trim()
     cacheKey = `v${ver}-yarnlock-${yarnLockHash}-gitbranch-${currentGitBranch}-testv${testVer}`
   } else {
     cacheKey = Math.random().toString().slice(2)
   }
 
-  const projectName = require('../../package.json').name
-  const dir = {} as Workspace['dir']
+  const projectName = require(`../../package.json`).name
+  const dir = {} as Workspace[`dir`]
   dir.path = `/tmp/${projectName}-integration-test-project-bases/${opts.name}-${cacheKey}`
 
-  dir.pathRelativeToSource = '../' + Path.relative(dir.path, Path.join(__dirname, '../..'))
+  dir.pathRelativeToSource = `../` + Path.relative(dir.path, Path.join(__dirname, `../..`))
 
   if ((await jetpack.existsAsync(dir.path)) !== false) {
     dir.cacheHit = true
@@ -94,7 +94,7 @@ async function doCreateWorkspace(optsGiven: Options): Promise<Workspace> {
     await jetpack.dirAsync(dir.path)
   }
 
-  console.log('cache %s for %s', dir.cacheHit ? 'hit' : 'miss', dir.path)
+  console.log(`cache %s for %s`, dir.cacheHit ? `hit` : `miss`, dir.path)
   const ws: any = {}
 
   //

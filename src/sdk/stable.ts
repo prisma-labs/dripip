@@ -43,7 +43,7 @@ export async function runStableRelease(options: Options) {
     .run()
 
   const maybeRelease = getNextStable(context.series)
-  const changelog = Changelog.renderFromSeries(context.series, { as: 'markdown' })
+  const changelog = Changelog.renderFromSeries(context.series, { as: `markdown` })
 
   if (options.dryRun) {
     return createDryRun({
@@ -67,8 +67,8 @@ export async function runStableRelease(options: Options) {
   const publishPlan: PublishPlan = {
     release: {
       version: release.version.version,
-      distTag: 'latest',
-      extraDistTags: ['next'],
+      distTag: `latest`,
+      extraDistTags: [`next`],
     },
     options: {
       npm: options.overrides?.skipNpm !== true,
@@ -108,11 +108,11 @@ export async function runStableRelease(options: Options) {
 
 function haveMeaningfulCommitsInTheSeries(): Validator {
   return {
-    code: 'series_only_has_meaningless_commits',
-    summary: 'A stable release must have at least one semantic commit',
+    code: `series_only_has_meaningless_commits`,
+    summary: `A stable release must have at least one semantic commit`,
     run(ctx) {
       const release = getNextStable(ctx.series)
-      return release !== 'no_meaningful_change'
+      return release !== `no_meaningful_change`
       // todo
       // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
     },
@@ -121,8 +121,8 @@ function haveMeaningfulCommitsInTheSeries(): Validator {
 
 function notAlreadyStableRelease(): Validator {
   return {
-    code: 'commit_already_has_stable_release',
-    summary: 'A stable release requires the commit to have no existing stable release',
+    code: `commit_already_has_stable_release`,
+    summary: `A stable release requires the commit to have no existing stable release`,
     run(ctx) {
       return ctx.series.current.releases.stable === null
     },

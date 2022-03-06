@@ -1,8 +1,8 @@
-import { inspect } from 'util'
 import { Octokit, ReleaseByTagRes } from '../utils/octokit'
 import { Release } from '../utils/release'
 import { isPreview, isStable, PreviewVer, renderStyledVersion } from './semver'
 import { errorFromMaybeError } from './utils'
+import { inspect } from 'util'
 
 interface Repo {
   owner: string
@@ -55,14 +55,14 @@ export async function publishChangelog(input: Input) {
         draft: input.options?.draft ?? false,
         body: input.body,
       })
-      const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag: 'next' })
+      const existingPreviewRelease = await maybeGetRelease({ octokit, owner, repo, tag: `next` })
       if (existingPreviewRelease) {
         res = await octokit.repos.updateRelease({
           owner,
           repo,
           release_id: existingPreviewRelease.data.id,
           target_commitish: release.head.sha,
-          body: 'None since last stable.',
+          body: `None since last stable.`,
         })
       }
     } else if (isPreview(release.version)) {

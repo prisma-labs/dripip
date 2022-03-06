@@ -4,7 +4,7 @@ const debug = rootDebug(__filename)
 
 export interface GitHubCIEnvironment {
   runId: number
-  eventName: 'pull_request'
+  eventName: `pull_request`
   ref: null | string
   headRef: null | string
   repository: string
@@ -29,18 +29,18 @@ export interface GitHubCIEnvironment {
 export function parseGitHubCIEnvironment(): null | GitHubCIEnvironment {
   if (!isGitHubCIEnvironment()) return null
 
-  let prNum: GitHubCIEnvironment['parsed']['prNum']
+  let prNum: GitHubCIEnvironment[`parsed`][`prNum`]
 
   if (process.env.GITHUB_REF) {
     const match = process.env.GITHUB_REF.match(/refs\/pull\/(\d+)\/merge/)
 
     if (match) {
-      debug('found a pr number from github ci environment %s', match[1])
+      debug(`found a pr number from github ci environment %s`, match[1])
       prNum = parseInt(match[1]!, 10)
     }
   }
 
-  const repoPath = process.env.GITHUB_REPOSITORY!.split('/')
+  const repoPath = process.env.GITHUB_REPOSITORY!.split(`/`)
 
   const repo = {
     owner: repoPath[0]!,
@@ -56,7 +56,7 @@ export function parseGitHubCIEnvironment(): null | GitHubCIEnvironment {
 
   return {
     runId: parseInt(process.env.GITHUB_RUN_ID!, 10),
-    eventName: process.env.GITHUB_EVENT_NAME! as GitHubCIEnvironment['eventName'],
+    eventName: process.env.GITHUB_EVENT_NAME! as GitHubCIEnvironment[`eventName`],
     ref: process.env.GITHUB_REF ?? null,
     headRef: process.env.GITHUB_HEAD_REF ?? null,
     repository: process.env.GITHUB_REPOSITORY!,

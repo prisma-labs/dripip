@@ -58,7 +58,7 @@ export async function runPullRequestRelease(options: Options) {
     version: version,
     vprefix: false,
     preRelease: {
-      identifier: 'pr',
+      identifier: `pr`,
       prNum: context.currentBranch.pr!.number,
       shortSha: context.series.current.sha.slice(0, 7),
     },
@@ -71,7 +71,7 @@ export async function runPullRequestRelease(options: Options) {
       version: versionInfo.version,
     },
     options: {
-      gitTag: 'none',
+      gitTag: `none`,
     },
   }
 
@@ -100,8 +100,8 @@ export async function runPullRequestRelease(options: Options) {
 
 function branchHasOpenPR(): Validator {
   return {
-    code: 'pr_release_without_open_pr',
-    summary: 'Pull-Request releases are only supported on branches with _open_ pull-requests',
+    code: `pr_release_without_open_pr`,
+    summary: `Pull-Request releases are only supported on branches with _open_ pull-requests`,
     run(ctx) {
       return ctx.currentBranch.pr !== null
     },

@@ -6,7 +6,7 @@ interface Input {
   cwd?: string
 }
 
-export type GitSyncStatus = 'synced' | 'not_synced' | 'remote_needs_branch'
+export type GitSyncStatus = `synced` | `not_synced` | `remote_needs_branch`
 
 class Git2 {
   private dir: string
@@ -31,14 +31,14 @@ class Git2 {
     let remoteUrl: string = await isogit.getConfig({
       fs: this.fs,
       dir: this.dir,
-      path: 'remote.origin.url',
+      path: `remote.origin.url`,
     })
 
-    if (remoteUrl.startsWith('git@github.com:')) {
-      remoteUrl = remoteUrl.replace('git@github.com:', 'https://github.com/')
+    if (remoteUrl.startsWith(`git@github.com:`)) {
+      remoteUrl = remoteUrl.replace(`git@github.com:`, `https://github.com/`)
     }
-    if (!remoteUrl.endsWith('.git')) {
-      remoteUrl = remoteUrl + '.git'
+    if (!remoteUrl.endsWith(`.git`)) {
+      remoteUrl = remoteUrl + `.git`
     }
 
     let remoteInfo
@@ -53,27 +53,27 @@ class Git2 {
     }
 
     if (!remoteInfo.refs) {
-      throw new Error('Could not fetch refs')
+      throw new Error(`Could not fetch refs`)
     }
 
     if (!remoteInfo.refs.heads) {
-      throw new Error('Could not fetch ref heads')
+      throw new Error(`Could not fetch ref heads`)
     }
 
     if (
       !Object.keys(remoteInfo.refs.heads).find((remoteBranchName) => remoteBranchName === input.branchName)
     ) {
-      return 'remote_needs_branch'
+      return `remote_needs_branch`
     }
 
-    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: 'HEAD' })
+    const localBranchHeadSha = await isogit.resolveRef({ fs: this.fs, dir: this.dir, ref: `HEAD` })
     const remoteBranchHeadSha = remoteInfo.refs.heads[input.branchName]
 
     if (localBranchHeadSha === remoteBranchHeadSha) {
-      return 'synced'
+      return `synced`
     }
 
-    return 'not_synced'
+    return `not_synced`
 
     // todo https://github.com/isomorphic-git/isomorphic-git/issues/1110
   }

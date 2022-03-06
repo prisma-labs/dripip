@@ -55,7 +55,7 @@ export function compose(...ctxs: Array<Contrib | ContribCreator<any, any>>): Con
 
   beforeEach(async () => {
     for (const ctx of ctxs) {
-      Object.assign(state, typeof ctx === 'function' ? await ctx(state) : ctx)
+      Object.assign(state, typeof ctx === `function` ? await ctx(state) : ctx)
     }
   })
 

@@ -13,7 +13,7 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
         ...opts,
       }).then((result) => {
         if (result.data?.changelog) {
-          result.data.changelog = result.data.changelog.replace(/- [a-z0-9]{7}/, '__sha__')
+          result.data.changelog = result.data.changelog.replace(/- [a-z0-9]{7}/, `__sha__`)
         }
         return result
       })
@@ -22,13 +22,13 @@ const ctx = TestContext.compose(TestContext.all, (ctx) => {
 })
 
 beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture('git'), ctx.fs.path('.git'))
+  ctx.fs.copy(ctx.fixture(`git`), ctx.fs.path(`.git`))
 })
 
-it.skip('if build-num flag passed, the build number is forced to be it', async () => {
-  await ctx.commit('fix: foo')
-  await ctx.tag('0.1.0')
-  await ctx.commit('feat: foo')
+it.skip(`if build-num flag passed, the build number is forced to be it`, async () => {
+  await ctx.commit(`fix: foo`)
+  await ctx.tag(`0.1.0`)
+  await ctx.commit(`feat: foo`)
   expect(await ctx.runPullRequestRelease({ overrides: { buildNum: 2 } })).toMatchInlineSnapshot(`
     Object {
       "data": Object {
@@ -103,10 +103,10 @@ it.skip('if build-num flag passed, the build number is forced to be it', async (
   `)
 })
 
-describe.skip('preflight checks', () => {
-  it('no preview release already present', async () => {
-    await ctx.commit('fix: thing')
-    await ctx.tag('v1.2.3-next.1')
+describe.skip(`preflight checks`, () => {
+  it(`no preview release already present`, async () => {
+    await ctx.commit(`fix: thing`)
+    await ctx.tag(`v1.2.3-next.1`)
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -147,9 +147,9 @@ describe.skip('preflight checks', () => {
     `)
   })
 
-  it('no stable release already present', async () => {
-    await ctx.commit('fix: thing')
-    await ctx.tag('v1.2.3')
+  it(`no stable release already present`, async () => {
+    await ctx.commit(`fix: thing`)
+    await ctx.tag(`v1.2.3`)
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -190,9 +190,9 @@ describe.skip('preflight checks', () => {
     `)
   })
 
-  it('no stable AND preview release already present (shows graceful aggregate reporting of the cases)', async () => {
-    await ctx.tag('v1.2.3')
-    await ctx.tag('v1.2.3-next.1')
+  it(`no stable AND preview release already present (shows graceful aggregate reporting of the cases)`, async () => {
+    await ctx.tag(`v1.2.3`)
+    await ctx.tag(`v1.2.3-next.1`)
     const result = await ctx.runPullRequestRelease()
     expect(result.data.report).toMatchInlineSnapshot(`
       Object {
@@ -236,5 +236,5 @@ describe.skip('preflight checks', () => {
   // TODO maybe... this is quite the edge-case and would charge all users a
   // latency fee wherein every stable preview release requires a pr check
   // anyway just to see if this super weird case is occurring...
-  it.todo('fails semantically if trunk and pr detected because that demands conflicting reactions')
+  it.todo(`fails semantically if trunk and pr detected because that demands conflicting reactions`)
 })

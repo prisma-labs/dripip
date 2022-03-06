@@ -116,12 +116,12 @@ export async function getLocationContext({
   }
 
   if (!currentBranchName) {
-    throw new Error('Could not get current branch name')
+    throw new Error(`Could not get current branch name`)
   }
 
   // Get the pr
 
-  let pr: LocationContext['currentBranch']['pr'] = null
+  let pr: LocationContext[`currentBranch`][`pr`] = null
 
   if (githubCIEnvironment && githubCIEnvironment.parsed.prNum) {
     pr = {
@@ -131,7 +131,7 @@ export async function getLocationContext({
     const head = `${repoInfo.owner}:${currentBranchName}`
     const owner = repoInfo.owner
     const repo = repoInfo.name
-    const state = 'open'
+    const state = `open`
     let maybePR
 
     try {

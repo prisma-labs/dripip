@@ -1,4 +1,4 @@
-import { SpawnOptions, spawn } from 'child_process'
+import { spawn,SpawnOptions } from 'child_process'
 import { stripIndent } from 'common-tags'
 import * as Path from 'path'
 
@@ -41,13 +41,13 @@ export async function run(commandRaw: string, options?: RunOptions): Promise<Suc
     let stdout: null | string = null
 
     if (child.stderr) {
-      stderr = ''
-      child.stderr.on('data', bufferStderr)
+      stderr = ``
+      child.stderr.on(`data`, bufferStderr)
     }
 
     if (child.stdout) {
-      stdout = ''
-      child.stdout.on('data', bufferStdout)
+      stdout = ``
+      child.stdout.on(`data`, bufferStdout)
     }
 
     function bufferStderr(chunk: any) {
@@ -58,7 +58,7 @@ export async function run(commandRaw: string, options?: RunOptions): Promise<Suc
       stdout += String(chunk)
     }
 
-    child.once('error', (error) => {
+    child.once(`error`, (error) => {
       const richError = createCommandError({
         command: commandRaw,
         underlyingError: error,
@@ -84,7 +84,7 @@ export async function run(commandRaw: string, options?: RunOptions): Promise<Suc
       }
     })
 
-    child.once('exit', (exitCode, signal) => {
+    child.once(`exit`, (exitCode, signal) => {
       const error = isFailedExitCode(exitCode)
         ? createCommandError({
             command: commandRaw,
@@ -113,8 +113,8 @@ export async function run(commandRaw: string, options?: RunOptions): Promise<Suc
     })
 
     function cleanup() {
-      child.stderr?.removeListener('data', bufferStderr)
-      child.stdout?.removeListener('data', bufferStdout)
+      child.stderr?.removeListener(`data`, bufferStderr)
+      child.stdout?.removeListener(`data`, bufferStdout)
     }
   })
 
@@ -145,7 +145,7 @@ function createCommandError({
   stdout,
   exitCode,
   underlyingError,
-}: Omit<SuccessfulRunResult, 'error'> & {
+}: Omit<SuccessfulRunResult, `error`> & {
   underlyingError: null | Error
 }): Error {
   const error = new Error(stripIndent`
@@ -189,7 +189,7 @@ function createCommandError({
  * APIs will accept.
  */
 function parseCommandString(cmd: string): { name: string; args: string[] } {
-  const [name, ...args] = cmd.split(' ')
+  const [name, ...args] = cmd.split(` `)
 
   return {
     name: name!,
@@ -202,7 +202,7 @@ function parseCommandString(cmd: string): { name: string; args: string[] } {
  * handles null which is convenient for this module.
  */
 function isFailedExitCode(exitCode: null | number): boolean {
-  return typeof exitCode === 'number' && exitCode !== 0
+  return typeof exitCode === `number` && exitCode !== 0
 }
 
 /**
@@ -212,7 +212,7 @@ function isFailedExitCode(exitCode: null | number): boolean {
 export function isProcessFromProjectBin(packageJsonPath: string): boolean {
   const processBinPath = process.argv[1]!
   const processBinDirPath = Path.dirname(processBinPath)
-  const projectBinDirPath = Path.join(Path.dirname(packageJsonPath), 'node_modules/.bin')
+  const projectBinDirPath = Path.join(Path.dirname(packageJsonPath), `node_modules/.bin`)
   return processBinDirPath !== projectBinDirPath
 }
 

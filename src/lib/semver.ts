@@ -27,13 +27,13 @@ export type PullRequestVer = {
   minor: number
   patch: number
   preRelease: {
-    identifier: 'pr'
+    identifier: `pr`
     prNum: number
     shortSha: string
   }
 }
 
-export type MajMinPat = 'major' | 'minor' | 'patch'
+export type MajMinPat = `major` | `minor` | `patch`
 
 /**
  * Calculate the stable increment to a given version.
@@ -41,11 +41,11 @@ export type MajMinPat = 'major' | 'minor' | 'patch'
 export function incStable(bumpType: MajMinPat, v: Ver): Ver {
   const { vprefix, major, minor, patch } = v
   switch (bumpType) {
-    case 'major':
+    case `major`:
       return createStable(major + 1, 0, 0, { vprefix })
-    case 'minor':
+    case `minor`:
       return createStable(major, minor + 1, 0, { vprefix })
-    case 'patch':
+    case `patch`:
       return createStable(major, minor, patch + 1, { vprefix })
   }
 }
@@ -104,7 +104,7 @@ export function createStable(
  * Is the given version a PR one?
  */
 export function isPullRequest(v: Ver): v is PullRequestVer {
-  return typeof (v as PullRequestVer)?.preRelease?.prNum === 'number'
+  return typeof (v as PullRequestVer)?.preRelease?.prNum === `number`
 }
 
 /**
@@ -142,7 +142,7 @@ export function parse(ver: string): null | StableVer | PreviewVer {
   if (result === null) return null
 
   if (result[6]) {
-    const vprefix = result[5] === 'v'
+    const vprefix = result[5] === `v`
     const major = parseInt(result[6]!, 10)
     const minor = parseInt(result[7]!, 10)
     const patch = parseInt(result[8]!, 10)
@@ -161,7 +161,7 @@ export function parse(ver: string): null | StableVer | PreviewVer {
     }
   }
 
-  const vprefix = result[1] === 'v'
+  const vprefix = result[1] === `v`
   const major = parseInt(result[2]!, 10)
   const minor = parseInt(result[3]!, 10)
   const patch = parseInt(result[4]!, 10)
@@ -201,7 +201,7 @@ export function renderVersion(v: Ver): string {
   } else if (isStable(v)) {
     return `${v.major}.${v.minor}.${v.patch}`
   } else {
-    throw new Error('should never happen')
+    throw new Error(`should never happen`)
   }
 }
 
@@ -210,6 +210,6 @@ export function renderVersion(v: Ver): string {
  * places where a valid semver is expected since vprefix is not valid semver.
  */
 export function renderStyledVersion(v: Ver): string {
-  const vprefix = v.vprefix ? 'v' : ''
+  const vprefix = v.vprefix ? `v` : ``
   return `${vprefix}${renderVersion(v)}`
 }

@@ -3,7 +3,7 @@ import * as WS from './__lib/workspace'
 
 // make system tests deterministic. Without this they would react to users'
 // machines' ~/.npmrc file contents.
-process.env.NPM_TOKEN = 'foobar'
+process.env.NPM_TOKEN = `foobar`
 
 declare global {
   export const createContext: typeof Context.createContext

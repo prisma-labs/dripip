@@ -15,9 +15,9 @@ export function dump(arg: unknown): void {
  */
 export function indentBlock(size: number, block: string): string {
   return block
-    .split('\n')
-    .map((line) => range(size).map(constant(' ')).join('') + line)
-    .join('\n')
+    .split(`\n`)
+    .map((line) => range(size).map(constant(` `)).join(``) + line)
+    .join(`\n`)
 }
 
 export const indentBlock4 = indentBlock.bind(null, 4)

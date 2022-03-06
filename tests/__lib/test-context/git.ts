@@ -1,6 +1,6 @@
+import { TmpDirContribution } from './tmp-dir'
 import * as nodefs from 'fs'
 import isogit from 'isomorphic-git'
-import { TmpDirContribution } from './tmp-dir'
 
 const fs = nodefs
 
@@ -11,7 +11,7 @@ export const git = (ctx: TmpDirContribution) => {
   return {
     git: isogit,
     commit(message: string) {
-      return git.commit({ fs, dir, message, author: { name: 'labs' } })
+      return git.commit({ fs, dir, message, author: { name: `labs` } })
     },
     async tag(ref: string) {
       return git.annotatedTag({
@@ -20,7 +20,7 @@ export const git = (ctx: TmpDirContribution) => {
         ref,
         message: ref,
         tagger: {
-          name: 'labs',
+          name: `labs`,
         },
       })
     },
@@ -29,19 +29,19 @@ export const git = (ctx: TmpDirContribution) => {
     },
     // https://github.com/isomorphic-git/isomorphic-git/issues/129#issuecomment-390884874
     async hardReset({ dir, ref, branch }: { dir: string; ref: string; branch: string }) {
-      var re = /^HEAD~([0-9]+)$/i
-      var m = ref.match(re)
+      const re = /^HEAD~([0-9]+)$/i
+      const m = ref.match(re)
       if (m) {
-        var count = +m[1]
-        var commits = await git.log({ fs, dir, depth: count + 1 })
-        var commit = commits.pop()!.oid
+        const count = +m[1]
+        const commits = await git.log({ fs, dir, depth: count + 1 })
+        const commit = commits.pop()!.oid
         return new Promise((resolve, reject) => {
           fs.writeFile(dir + `/.git/refs/heads/${branch}`, commit, (err) => {
             if (err) {
               return reject(err)
             }
             // clear the index (if any)
-            fs.unlink(dir + '/.git/index', (err) => {
+            fs.unlink(dir + `/.git/index`, (err) => {
               if (err) {
                 return reject(err)
               }

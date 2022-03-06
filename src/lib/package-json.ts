@@ -26,15 +26,15 @@ type ValidatedPackageJson = PackageJson & { name: string }
  */
 function validate(pj: PackageJson | undefined): ValidatedPackageJson {
   if (!pj) {
-    throw new Error('Could not find package.json')
+    throw new Error(`Could not find package.json`)
   }
 
   if (pj.name === undefined) {
-    throw new Error('package.json is missing name field')
+    throw new Error(`package.json is missing name field`)
   }
 
-  if (pj.name === '') {
-    throw new Error('package.json name field is empty')
+  if (pj.name === ``) {
+    throw new Error(`package.json name field is empty`)
   }
 
   return pj as ValidatedPackageJson
@@ -44,7 +44,7 @@ function validate(pj: PackageJson | undefined): ValidatedPackageJson {
  * Read the package.json file.
  */
 export async function read(cwd: string): Promise<undefined | PackageJson> {
-  return fs.readAsync(fs.path(cwd, 'package.json'), 'json')
+  return fs.readAsync(fs.path(cwd, `package.json`), `json`)
 
   // if (!packageJson) {
   //   throw new Error(
@@ -63,14 +63,14 @@ export async function read(cwd: string): Promise<undefined | PackageJson> {
  * Read the package.json file synchronously.
  */
 export function readSync(cwd: string): undefined | PackageJson {
-  return fs.read(fs.path(cwd, 'package.json'), 'json')
+  return fs.read(fs.path(cwd, `package.json`), `json`)
 }
 
 /**
  * Write the package.json file.
  */
 export async function write(cwd: string, object: object): Promise<void> {
-  return fs.writeAsync(fs.path(cwd, 'package.json'), object)
+  return fs.writeAsync(fs.path(cwd, `package.json`), object)
 }
 
 /**
@@ -82,7 +82,7 @@ export async function update(cwd: string, updater: PackageJsonUpdater): Promise<
   const packageJson = await read(cwd)
   if (packageJson) {
     const packageJsonUpdated = await updater(packageJson)
-    await fs.writeAsync(fs.path(cwd, 'package.json'), packageJsonUpdated)
+    await fs.writeAsync(fs.path(cwd, `package.json`), packageJsonUpdated)
   }
 }
 

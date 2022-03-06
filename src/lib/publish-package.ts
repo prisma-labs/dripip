@@ -3,10 +3,10 @@
  * git tagging, pushing to the git origin, the package registry, etc.
  */
 
-import createGit from 'simple-git/promise'
 import * as Git from './git'
 import { isGitHubCIEnvironment } from './github-ci-environment'
 import * as Pacman from './pacman'
+import createGit from 'simple-git/promise'
 
 type Options = {
   /**
@@ -26,13 +26,13 @@ type Options = {
    *
    * @default 'all'
    */
-  gitTag?: 'all' | 'just_version' | 'just_dist_tags' | 'none'
+  gitTag?: `all` | `just_version` | `just_dist_tags` | `none`
 }
 
 const optionDefaults: Options = {
   gitTagVPrefix: false,
   npm: true,
-  gitTag: 'all',
+  gitTag: `all`,
 }
 
 export interface Release {
@@ -69,12 +69,12 @@ export interface PublishPlan {
  * Events that provide insight into the progress of the publishing process.
  */
 type ProgressMessage =
-  | { kind: 'extra_dist_tag_updated'; distTag: string }
-  | { kind: 'package_published' }
-  | { kind: 'package_json_reverted' }
-  | { kind: 'version_git_tag_created' }
-  | { kind: 'extra_dist_tag_git_tag_created'; distTag: string }
-  | { kind: 'extra_dist_tag_git_tag_pushed'; distTag: string }
+  | { kind: `extra_dist_tag_updated`; distTag: string }
+  | { kind: `package_published` }
+  | { kind: `package_json_reverted` }
+  | { kind: `version_git_tag_created` }
+  | { kind: `extra_dist_tag_git_tag_created`; distTag: string }
+  | { kind: `extra_dist_tag_git_tag_pushed`; distTag: string }
 
 /**
  * Run the publishing process.
@@ -101,15 +101,15 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
     // default to using npm. The reason we need to do this is that problems occur
     // when mixing tools. For example `yarn run ...` will lead to a spawn of `npm
     // publish` failing due to an authentication error.
-    const pacman = await Pacman.create({ default: 'npm' })
+    const pacman = await Pacman.create({ default: `npm` })
     await pacman.publish({ version: release.version, tag: release.distTag })
-    yield { kind: 'package_published' }
+    yield { kind: `package_published` }
 
     // todo parallel optimize?
     if (release.extraDistTags) {
       for (const distTag of release.extraDistTags) {
         await pacman.tag({ packageVersion: release.version, tagName: distTag })
-        yield { kind: 'extra_dist_tag_updated', distTag }
+        yield { kind: `extra_dist_tag_updated`, distTag }
       }
     }
   }
@@ -123,27 +123,27 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
   // user work here. This check should be in strict mode.
   const git = createGit()
   await setupGitUsernameAndEmailOnCI(git)
-  await git.checkout('package.json')
-  yield { kind: 'package_json_reverted' }
+  await git.checkout(`package.json`)
+  yield { kind: `package_json_reverted` }
 
   // Tag the git commit
   //
-  const versionTag = opts.gitTagVPrefix ? 'v' + release.version : release.version
+  const versionTag = opts.gitTagVPrefix ? `v` + release.version : release.version
 
-  if (opts.gitTag === 'all' || opts.gitTag === 'just_version') {
+  if (opts.gitTag === `all` || opts.gitTag === `just_version`) {
     await git.addAnnotatedTag(versionTag, versionTag)
     // Avoid general git push tags otherwise we could run into trying to push e.g.
     // old `next` tag (dist-tags, forced later) that was since updated on remote
     // by CI––assuming user is doing a publish from their machine (maybe stable
     // for example).
     // Ref: https://stackoverflow.com/questions/23212452/how-to-only-push-a-specific-tag-to-remote
-    await git.raw(['push', 'origin', `refs/tags/${versionTag}`])
-    yield { kind: 'version_git_tag_created' }
+    await git.raw([`push`, `origin`, `refs/tags/${versionTag}`])
+    yield { kind: `version_git_tag_created` }
   }
 
   // Tag the git commit with the given dist tag names
   //
-  if (opts.gitTag === 'all' || opts.gitTag === 'just_dist_tags') {
+  if (opts.gitTag === `all` || opts.gitTag === `just_dist_tags`) {
     // todo parallel optimize?
     const distTags = [release.distTag, ...(release.extraDistTags ?? [])]
     for (const distTag of distTags) {
@@ -151,10 +151,10 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
       // exist in the git repo. So use force to move the tag.
       // https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit
       // todo provide nice semantic descriptions for each dist tag
-      await git.raw(['tag', '--force', '--message', distTag, distTag])
-      yield { kind: 'extra_dist_tag_git_tag_created', distTag }
-      await git.raw(['push', '--force', '--tags'])
-      yield { kind: 'extra_dist_tag_git_tag_pushed', distTag }
+      await git.raw([`tag`, `--force`, `--message`, distTag, distTag])
+      yield { kind: `extra_dist_tag_git_tag_created`, distTag }
+      await git.raw([`push`, `--force`, `--tags`])
+      yield { kind: `extra_dist_tag_git_tag_pushed`, distTag }
     }
   }
 }
@@ -174,17 +174,17 @@ async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
   if (!isGitHubCIEnvironment()) return
 
   const [email, name] = await Promise.all([
-    git.raw(['config', '--get', 'user.email']),
-    git.raw(['config', '--get', 'user.name']),
+    git.raw([`config`, `--get`, `user.email`]),
+    git.raw([`config`, `--get`, `user.name`]),
   ])
 
   const promises = []
 
   if (!email) {
-    promises.push(git.addConfig('user.name', 'dripip'))
+    promises.push(git.addConfig(`user.name`, `dripip`))
   }
   if (!name) {
-    promises.push(git.addConfig('user.email', 'dripip@prisma.io'))
+    promises.push(git.addConfig(`user.email`, `dripip@prisma.io`))
   }
 
   await Promise.all(promises)

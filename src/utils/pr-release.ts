@@ -1,6 +1,6 @@
-import { spawnSync } from 'child_process'
 import { rootDebug } from '../lib/debug'
 import { numericAscending } from '../lib/utils'
+import { spawnSync } from 'child_process'
 import * as Execa from 'execa'
 
 const debug = rootDebug(__filename)
@@ -18,7 +18,7 @@ export function getPullRequestReleaseVersionForLocation(input: {
   const shortSHA = input.sha.slice(0, 7)
   const versions = getPackageVersions(input.packageName)
   const pattern = new RegExp(`0\\.0\\.0-pr\\.${input.prNum}\\.\\d+\\.${shortSHA}`)
-  debug('looking for version matching pattern %O', pattern)
+  debug(`looking for version matching pattern %O`, pattern)
   const version = versions.find((v) => v.match(pattern) !== null) ?? null
   return version
 }

@@ -1,16 +1,16 @@
-import { format, inspect } from 'util'
 import { Release } from '../lib/publish-package'
 import { casesHandled } from '../lib/utils'
 import { ValidationResult } from './context-guard'
+import { format, inspect } from 'util'
 
 type Ok<T extends string = string, D = Record<string, any>> = {
-  kind: 'ok'
+  kind: `ok`
   type: T
   data: D
 }
 
 export type Exception<C = Record<string, any>> = {
-  kind: 'exception'
+  kind: `exception`
   type: string
   data: {
     summary: string
@@ -71,18 +71,18 @@ export function output(message: Message, opts: OutputOptions): void {
   if (opts.json) {
     outputMessage(message)
   } else {
-    if (message.kind === 'exception') {
-      let s = ''
+    if (message.kind === `exception`) {
+      let s = ``
       s += `An exception occurred: ${message.type}\n`
       s += `\n`
       s += message.data.summary
       if (message.data.context && Object.keys(message.data.context).length > 0) {
         s += `\n`
-        s += format('%j', message.data.context)
+        s += format(`%j`, message.data.context)
       }
       outputRaw(s)
-    } else if (message.kind === 'ok') {
-      let s = ''
+    } else if (message.kind === `ok`) {
+      let s = ``
       s += inspect(message.data)
       // todo pretty printing
       outputRaw(s)
@@ -96,13 +96,13 @@ export function output(message: Message, opts: OutputOptions): void {
  * See output version docs.
  */
 export function createOk<T extends string>(type: T, data: Record<string, any>): Ok<T> {
-  return { kind: 'ok', type, data }
+  return { kind: `ok`, type, data }
 }
 
-type DryRun = Ok<'dry_run'>
+type DryRun = Ok<`dry_run`>
 
 export function createDryRun(data: Record<string, any>): DryRun {
-  return createOk('dry_run', data)
+  return createOk(`dry_run`, data)
 }
 
 /**
@@ -119,7 +119,7 @@ export function createException(
   }
 ): Exception {
   return {
-    kind: 'exception',
+    kind: `exception`,
     type,
     data: {
       summary,
@@ -129,11 +129,11 @@ export function createException(
 }
 
 export function createDidNotPublish(data: { reasons: ValidationResult[] }) {
-  return createOk('did_not_publish', data)
+  return createOk(`did_not_publish`, data)
 }
 
 export function createDidPublish(data: { release: Release }) {
-  return createOk('did_publish', data)
+  return createOk(`did_publish`, data)
 }
 
 /**
