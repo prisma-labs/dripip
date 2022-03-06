@@ -2,7 +2,14 @@ import * as proc from '../../src/lib/proc'
 import { errorFromMaybeError } from '../../src/lib/utils'
 import * as WS from '../__lib/workspace'
 import { Octokit } from '@octokit/rest'
+import * as Path from 'path'
 import { format } from 'util'
+
+export const getFixture = (fixtureName: `git`): { path: string } => {
+  return {
+    path: Path.join(__dirname, `__fixtures`, fixtureName),
+  }
+}
 
 /**
  * Reset the environment before each test, allowing each test to modify it to

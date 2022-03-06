@@ -80,6 +80,7 @@
     "jest-watch-suspend": "1.1.2",
     "jest-watch-toggle-config": "2.0.1",
     "jest-watch-typeahead": "1.0.0",
+    "konn": "^0.7.0",
     "prettier": "2.5.1",
     "strip-ansi": "6.0.0",
     "tmp": "0.2.1",

@@ -1,28 +1,31 @@
-import * as TestContext from '../../tests/__lib/test-context'
 import { runPullRequestRelease } from './pr'
-import * as nodefs from 'fs'
+import { konn, providers } from 'konn'
+import { getFixture } from 'tests/__lib/helpers'
+import { git } from 'tests/__providers__/git'
 
-const fs = nodefs
-const ctx = TestContext.compose(TestContext.all, (ctx) => {
-  return {
-    runPullRequestRelease() {
-      return runPullRequestRelease({
-        cwd: ctx.dir,
-        json: true,
-        dryRun: true,
-        progress: false,
-        readFromCIEnvironment: false,
-      })
-    },
-  }
-})
-
-beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture(`git`), ctx.fs.path(`.git`))
-})
+const ctx = konn()
+  .useBeforeAll(providers.dir())
+  .useBeforeAll(git())
+  .beforeAll((ctx) => {
+    return {
+      runPullRequestRelease: () => {
+        return runPullRequestRelease({
+          cwd: ctx.fs.cwd(),
+          json: true,
+          dryRun: true,
+          progress: false,
+          readFromCIEnvironment: false,
+        })
+      },
+    }
+  })
+  .beforeEach((ctx) => {
+    ctx.fs.copy(getFixture(`git`).path, ctx.fs.path(`.git`))
+  })
+  .done()
 
 it.skip(`preflight check that user is on branch with open pr`, async () => {
-  await ctx.git.checkout({ fs, dir: ctx.dir, ref: `no-open-pr` })
+  await ctx.git.checkout({ ref: `no-open-pr` })
   const msg = await ctx.runPullRequestRelease()
   expect(msg).toMatchInlineSnapshot(`
     Object {
@@ -53,7 +56,7 @@ it.skip(`preflight check that user is on branch with open pr`, async () => {
 })
 
 it.skip(`makes a release for the current commit, updating pr dist tag, and version format`, async () => {
-  await ctx.git.checkout({ fs, dir: ctx.dir, ref: `open-pr` })
+  await ctx.git.checkout({ ref: `open-pr` })
   const msg = await ctx.runPullRequestRelease()
   expect(msg).toMatchInlineSnapshot(`
     Object {
