@@ -65,7 +65,7 @@ export const getLocationContext = async ({
   options?: Options
 }): Promise<LocationContext> => {
   const git = createGit({ cwd: options?.cwd })
-  const readFromCIEnvironment = options?.readFromCIEnvironment
+  const readFromCIEnvironment = options?.readFromCIEnvironment ?? true
 
   let githubCIEnvironment = null
 
@@ -110,7 +110,6 @@ export const getLocationContext = async ({
   // const branchesSummary = await git.branch({})
 
   let currentBranchName = await git.getCurrentBranchName()
-  console.log({ githubCIEnvironment, readFromCIEnvironment })
 
   if (!currentBranchName && githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
     currentBranchName = githubCIEnvironment.parsed.branchName

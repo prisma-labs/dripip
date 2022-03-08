@@ -199,7 +199,6 @@ yargs(process.argv.slice(2))
     // eslint-disable-next-line
     async (flags) => {
       const context = await getLocationContext({ octokit })
-      console.log(context)
 
       if (context.currentBranch.pr) {
         const message = await runPullRequestRelease({
