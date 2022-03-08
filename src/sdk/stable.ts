@@ -9,6 +9,29 @@ import { octokit } from '../utils/octokit'
 import { createDidNotPublish, createDidPublish, createDryRun } from '../utils/output'
 import { getNextStable, Release } from '../utils/release'
 
+const haveMeaningfulCommitsInTheSeries = (): Validator => {
+  return {
+    code: `series_only_has_meaningless_commits`,
+    summary: `A stable release must have at least one semantic commit`,
+    run(ctx) {
+      const release = getNextStable(ctx.series)
+      return release !== `no_meaningful_change`
+      // todo
+      // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
+    },
+  }
+}
+
+const notAlreadyStableRelease = (): Validator => {
+  return {
+    code: `commit_already_has_stable_release`,
+    summary: `A stable release requires the commit to have no existing stable release`,
+    run(ctx) {
+      return ctx.series.current.releases.stable === null
+    },
+  }
+}
+
 export interface Options {
   cwd?: string
   dryRun: boolean
@@ -23,7 +46,7 @@ export interface Options {
   readFromCIEnvironment?: boolean
 }
 
-export async function runStableRelease(options: Options) {
+export const runStableRelease = async (options: Options) => {
   const cwd = options.cwd ?? process.cwd()
   const readFromCIEnvironment = options.readFromCIEnvironment ?? true
   const context = await getContext({
@@ -34,7 +57,7 @@ export async function runStableRelease(options: Options) {
     },
   })
 
-  const report = check({ context: context })
+  const report = check({ context })
     .errorUnless(npmAuthSetup())
     .errorUnless(isTrunk())
     .errorUnless(branchSynced())
@@ -100,31 +123,4 @@ export async function runStableRelease(options: Options) {
   }
 
   return createDidPublish({ release: { notes: changelog, ...publishPlan.release } })
-}
-
-//
-// Validators
-//
-
-function haveMeaningfulCommitsInTheSeries(): Validator {
-  return {
-    code: `series_only_has_meaningless_commits`,
-    summary: `A stable release must have at least one semantic commit`,
-    run(ctx) {
-      const release = getNextStable(ctx.series)
-      return release !== `no_meaningful_change`
-      // todo
-      // hint:   //             'All commits are either meta or not conforming to conventional commit. No release will be made.',
-    },
-  }
-}
-
-function notAlreadyStableRelease(): Validator {
-  return {
-    code: `commit_already_has_stable_release`,
-    summary: `A stable release requires the commit to have no existing stable release`,
-    run(ctx) {
-      return ctx.series.current.releases.stable === null
-    },
-  }
 }

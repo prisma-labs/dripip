@@ -16,6 +16,9 @@ export const git = () =>
       return {
         git: {
           isomorphic: git,
+          log: () => {
+            return git.log({ fs, dir })
+          },
           checkout: (params: { ref: string }) => {
             return git.checkout({ fs, dir, ...params })
           },
@@ -33,37 +36,23 @@ export const git = () =>
               },
             })
           },
-          branch: (ref: string) => {
-            return git.branch({ fs, dir, checkout: true, ref })
+          branch: (params: { ref: string }) => {
+            return git.branch({ fs, dir, checkout: true, ...params })
           },
           // https://github.com/isomorphic-git/isomorphic-git/issues/129#issuecomment-390884874
-          hardReset: async ({ dir, ref, branch }: { dir: string; ref: string; branch: string }) => {
-            const re = /^HEAD~([0-9]+)$/i
+          hardReset: async (params: { ref: string; branch: string }) => {
+            const { ref, branch } = params
+            const re = /head~[0-9]+/
             const m = ref.match(re)
-            if (m) {
-              // guaranteed by regex match
-              // eslint-disable-next-line
-              const count = +m[1]!
-              const commits = await git.log({ fs, dir, depth: count + 1 })
-              const lastCommit = commits.pop()
-              if (!lastCommit) throw new Error(`No commits were found.`)
-              return new Promise((resolve, reject) => {
-                fs.writeFile(dir + `/.git/refs/heads/${branch}`, lastCommit.oid, (err) => {
-                  if (err) {
-                    return reject(err)
-                  }
-                  // clear the index (if any)
-                  fs.unlink(dir + `/.git/index`, (err) => {
-                    if (err) {
-                      return reject(err)
-                    }
-                    // checkout the branch into the working tree
-                    git.checkout({ dir, fs, ref: branch }).then(resolve).catch(reject)
-                  })
-                })
-              })
-            }
-            return Promise.reject(`Wrong ref ${ref}`)
+            if (!m) throw new Error(`Wrong ref ${ref}`)
+            // guaranteed by regex match
+            // eslint-disable-next-line
+            const count = +m[1]!
+            const commits = await git.log({ fs, dir, depth: count + 1 })
+            const lastCommit = commits.pop()
+            if (!lastCommit) throw new Error(`No commits were found.`)
+            ctx.fs.write(dir + `/.git/refs/heads/${branch}`, lastCommit.oid)
+            ctx.fs.remove(dir + `/.git/index`)
           },
         },
       }

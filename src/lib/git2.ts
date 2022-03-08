@@ -28,11 +28,17 @@ class Git2 {
    * Ref: https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git
    */
   async checkSyncStatus(input: { branchName: string }): Promise<GitSyncStatus> {
-    let remoteUrl: string = await isogit.getConfig({
+    const maybeRemoteUrl: unknown = await isogit.getConfig({
       fs: this.fs,
       dir: this.dir,
       path: `remote.origin.url`,
     })
+
+    if (!maybeRemoteUrl) {
+      throw new Error(`Could not find remoteUrl from the git config.`)
+    }
+
+    let remoteUrl = maybeRemoteUrl as string
 
     if (remoteUrl.startsWith(`git@github.com:`)) {
       remoteUrl = remoteUrl.replace(`git@github.com:`, `https://github.com/`)
