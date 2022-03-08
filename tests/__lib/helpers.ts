@@ -2,14 +2,13 @@ import * as proc from '../../src/lib/proc'
 import { errorFromMaybeError } from '../../src/lib/utils'
 import * as WS from '../__lib/workspace'
 import { Octokit } from '@octokit/rest'
-import * as Path from 'path'
 import { format } from 'util'
 
 /**
  * Reset the environment before each test, allowing each test to modify it to
  * its needs.
  */
-export function resetEnvironmentBeforeEachTest() {
+export const resetEnvironmentBeforeEachTest = () => {
   const originalEnvironment = Object.assign({}, process.env)
   beforeEach(() => {
     process.env = Object.assign({}, originalEnvironment)
@@ -19,7 +18,7 @@ export function resetEnvironmentBeforeEachTest() {
 /**
  * Helper for creating a specialized workspace
  */
-export function createContext(name: string) {
+export const createContext = (name: string) => {
   const ws = addOctokitToWorkspace(
     addDripipToWorkspace(
       WS.createWorkspace({
@@ -99,7 +98,7 @@ type DripipRunnerOptions = proc.RunOptions & {
   /**
    * Return the raw proc result
    *
-   * @default false
+   * @defaultValue false
    */
   raw?: boolean
   /**
@@ -146,8 +145,8 @@ function createDripipRunner(cwd: string, pathToProject: string) {
           }\n\nThe underlying cli result was:\n\n${format(result)}`
         )
       }
-    })
-  }
+    });
+  };
 }
 
 export { createDripipRunner }

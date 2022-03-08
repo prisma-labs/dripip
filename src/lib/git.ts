@@ -72,7 +72,7 @@ const parseGitTags = (tagsString: null | string): string[] => {
 /**
  * Get tags at the given commit or HEAD by default.
  */
-export async function gitGetTags(git: Simple, opts?: { ref?: string }): Promise<string[]> {
+export const gitGetTags = async (git: Simple, opts?: { ref?: string }): Promise<string[]> => {
   const ref = opts?.ref ?? `HEAD`
   const tagsString: string | null = await git.tag({ '--points-at': ref })
   const tags = parseGitTags(tagsString)
@@ -82,7 +82,7 @@ export async function gitGetTags(git: Simple, opts?: { ref?: string }): Promise<
 /**
  * Get all tags in the git repo.
  */
-export async function gitGetTagsInRepo(git: Simple): Promise<string[]> {
+export const gitGetTagsInRepo = async (git: Simple): Promise<string[]> => {
   const tagsString: string | null = await git.raw([`tag`])
   if (tagsString === null) return []
   const tags = tagsString
@@ -96,7 +96,7 @@ export async function gitGetTagsInRepo(git: Simple): Promise<string[]> {
  * Reset a git repository to its last commit, removing staged files, cleaning
  * dirty working directory, etc.
  */
-export async function gitReset(git: Simple): Promise<void> {
+export const gitReset = async (git: Simple): Promise<void> => {
   await Promise.all([
     git.raw([`clean`, `-d`, `-x`, `-f`]),
     gitDeleteAllTagsInRepo(git),
