@@ -15,6 +15,7 @@ const ctx = konn()
           dryRun: true,
           progress: false,
           changelog: true,
+          readFromCIEnvironment: false,
           ...opts,
         }).then((result) => {
           if (result.data?.changelog) {

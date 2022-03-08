@@ -25,6 +25,7 @@ const ctx = konn()
           progress: false,
           changelog: true,
           ...opts,
+          readFromCIEnvironment: false,
         })
       },
     }
