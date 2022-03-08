@@ -15,12 +15,12 @@ export interface Options {
    * When building the context should the CI environment be checked for data?
    * Useful to boost performance.
    *
-   * @default true
+   * @defaultValue true
    */
   readFromCIEnvironment: boolean
   overrides?: {
     /**
-     * @default null
+     * @defaultValue null
      */
     trunk?: null | string
   }
@@ -47,7 +47,7 @@ export interface Context extends LocationContext {
   series: Rel.Series
 }
 
-export async function getContext(options: Options): Promise<Context> {
+export const getContext = async (options: Options): Promise<Context> => {
   const locationContext = await getLocationContext({ octokit, options })
   const series = await Rel.getCurrentSeries({ cwd: options.cwd })
   return { series, ...locationContext }
@@ -57,15 +57,15 @@ export async function getContext(options: Options): Promise<Context> {
  * Get location-oriented contextual information. Does not consider the release
  * series but things like current branch, repo, pr etc.
  */
-export async function getLocationContext({
+export const getLocationContext = async ({
   octokit,
   options,
 }: {
   octokit: any
   options?: Options
-}): Promise<LocationContext> {
+}): Promise<LocationContext> => {
   const git = createGit({ cwd: options?.cwd })
-  const readFromCIEnvironment = options?.readFromCIEnvironment
+  const readFromCIEnvironment = options?.readFromCIEnvironment ?? true
 
   let githubCIEnvironment = null
 
@@ -80,7 +80,7 @@ export async function getLocationContext({
   repoInfo = githubCIEnvironment?.parsed.repo
 
   if (!repoInfo) {
-    repoInfo = await Git.parseGitHubRepoInfoFromGitConfig()
+    repoInfo = await Git.parseGitHubRepoInfoFromGitConfig({ cwd: options?.cwd })
   }
 
   // Get which branch is trunk, overridable

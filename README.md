@@ -149,10 +149,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Get all git commits and tags
-        run: git fetch --prune --unshallow --tags
-      - uses: actions/setup-node@v1
-      - run: yarn --frozen-lockfile
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+      - run: yarn --immutable
       - run: yarn dripip preview-or-pr
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}

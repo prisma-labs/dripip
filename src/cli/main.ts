@@ -196,6 +196,7 @@ yargs(process.argv.slice(2))
           description: `skip the step of publishing the package to npm`,
         },
       }),
+    // eslint-disable-next-line
     async (flags) => {
       const context = await getLocationContext({ octokit })
 

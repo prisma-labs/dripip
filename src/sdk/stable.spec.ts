@@ -7,39 +7,36 @@
 //   })
 // }
 
-import * as TestContext from '../../tests/__lib/test-context'
+import { fixture } from '../../tests/__providers__/fixture'
+import { git } from '../../tests/__providers__/git'
 import { Options, runStableRelease } from './stable'
-import * as nodefs from 'fs'
+import { konn, providers } from 'konn'
 
-const fs = nodefs
-const ctx = TestContext.compose(TestContext.all, (ctx) => {
-  return {
-    runStableRelease(opts?: Partial<Options>) {
-      return runStableRelease({
-        cwd: ctx.dir,
-        json: true,
-        dryRun: true,
-        progress: false,
-        changelog: true,
-        ...opts,
-      })
-    },
-  }
-})
+const ctx = konn()
+  .useBeforeAll(providers.dir())
+  .useBeforeAll(git())
+  .beforeAll((ctx) => {
+    return {
+      runStableRelease: (opts?: Partial<Options>) => {
+        return runStableRelease({
+          cwd: ctx.fs.cwd(),
+          json: true,
+          dryRun: true,
+          progress: false,
+          changelog: true,
+          ...opts,
+          readFromCIEnvironment: false,
+        })
+      },
+    }
+  })
+  .useBeforeEach(fixture({ use: `git-repo-dripip-system-tests`, into: `.git` }))
+  .done()
 
-let dir: string
-
-beforeEach(() => {
-  dir = ctx.dir
-})
-
-beforeEach(async () => {
-  ctx.fs.copy(ctx.fixture(`git`), ctx.fs.path(`.git`))
-})
-
-describe.skip(`preflight requirements include that`, () => {
+describe(`preflight requirements include that`, () => {
   it(`the branch is trunk`, async () => {
-    await ctx.git.branch({ fs, dir, checkout: true, ref: `foo` })
+    await ctx.git.commit(`feat: foo`)
+    await ctx.git.branch({ ref: `foo` })
     const result = await ctx.runStableRelease()
     // todo doesn't make sense to show both of these errors at once,
     // only check for sync once on-trunk established
@@ -65,7 +62,7 @@ describe.skip(`preflight requirements include that`, () => {
   // potentially not the latest commit of trunk. Think of a CI situation with
   // race-condition PR merges.
   it(`the branch is synced with remote (needs push)`, async () => {
-    await ctx.commit(`some work`)
+    await ctx.git.commit(`some work`)
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -81,7 +78,7 @@ describe.skip(`preflight requirements include that`, () => {
   })
 
   it(`the branch is synced with remote (needs pull)`, async () => {
-    await ctx.hardReset({ dir, ref: `head~1`, branch: `master` })
+    await ctx.git.hardReset({ ref: `head~1`, branch: `main` })
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -97,8 +94,8 @@ describe.skip(`preflight requirements include that`, () => {
   })
 
   it(`the branch is synced with remote (diverged)`, async () => {
-    await ctx.hardReset({ dir, ref: `head~1`, branch: `master` })
-    await ctx.commit(`foo`)
+    await ctx.git.hardReset({ ref: `head~1`, branch: `main` })
+    await ctx.git.commit(`foo`)
     const result = await ctx.runStableRelease()
     expect(result.data.report.errors).toMatchInlineSnapshot(`
       Array [
@@ -114,7 +111,8 @@ describe.skip(`preflight requirements include that`, () => {
   })
 
   it(`check that the commit does not already have a stable release present`, async () => {
-    await ctx.git.tag({ fs, dir, ref: `1.0.0` })
+    await ctx.git.commit(`fix: 1`)
+    await ctx.git.tag(`1.0.0`)
     const result = await ctx.runStableRelease()
     expect(result.data.report.stops).toMatchInlineSnapshot(`
       Array [

@@ -1,7 +1,7 @@
 import { validateNPMAuthSetup } from '../lib/npm-auth'
 import { Validator } from './context-guard'
 
-export function isTrunk(): Validator {
+export const isTrunk = (): Validator => {
   return {
     code: `must_be_on_trunk`,
     summary: `You must be on the trunk branch`,
@@ -11,7 +11,7 @@ export function isTrunk(): Validator {
   }
 }
 
-export function branchSynced(): Validator {
+export const branchSynced = (): Validator => {
   return {
     code: `branch_not_synced_with_remote`,
     summary: `Your branch must be synced with the remote`,
@@ -30,7 +30,7 @@ export function branchSynced(): Validator {
   }
 }
 
-export function npmAuthSetup(): Validator {
+export const npmAuthSetup = (): Validator => {
   return {
     code: `npm_auth_not_setup`,
     summary: `You must have npm auth setup to publish to the registry`,

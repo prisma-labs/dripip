@@ -2,6 +2,7 @@ import * as proc from '../../src/lib/proc'
 import { errorFromMaybeError } from '../../src/lib/utils'
 import * as WS from '../__lib/workspace'
 import { Octokit } from '@octokit/rest'
+import * as Path from 'path'
 import { format } from 'util'
 
 /**

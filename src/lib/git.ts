@@ -7,13 +7,60 @@ import parseGitConfig from 'parse-git-config'
 import parseGitHubURL from 'parse-github-url'
 import doCreateGit from 'simple-git/promise'
 
+/**
+ * Extract the github repo name and owner from the git config. If anything goes
+ * wrong during extraction a specific error about it will be thrown.
+ */
+export const parseGitHubRepoInfoFromGitConfig = async (params?: {
+  cwd?: string
+}): Promise<BasicGitHubRepoInfo> => {
+  const { cwd = process.cwd() } = params ?? {}
+  // Inspiration from how `$ hub pr show` works
+  // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
+
+  const gitConfig = await parseGitConfig({ path: `${cwd}/.git/config` })
+  if (gitConfig === null) {
+    throw new Error(`Could not parse your git config`)
+  }
+
+  const gitOrigin = gitConfig[`remote "origin"`]
+  if (gitOrigin === undefined) {
+    throw new Error(`Could not find a configured origin in your git config`)
+  }
+
+  const gitOriginURL: string = gitOrigin[`url`]
+  if (gitOriginURL === undefined) {
+    throw new Error(`Could not find a URL in your remote origin config in your git config`)
+  }
+
+  const githubRepoURL = parseGitHubURL(gitOriginURL)
+  if (githubRepoURL === null) {
+    throw new Error(`Could not parse the URL in your remote origin config in your git config`)
+  }
+  if (githubRepoURL.owner === null) {
+    throw new Error(
+      `Could not parse out the GitHub owner from the URL in your remote origin config in your git config`
+    )
+  }
+  if (githubRepoURL.name === null) {
+    throw new Error(
+      `Could not parse out the GitHub repo name from the URL in your remote origin config in your git config`
+    )
+  }
+
+  return {
+    name: githubRepoURL.name,
+    owner: githubRepoURL.owner,
+  }
+}
+
 export type Simple = ReturnType<typeof doCreateGit>
 
-export function createGit(): Simple {
+export const createGit = (): Simple => {
   return doCreateGit()
 }
 
-function parseGitTags(tagsString: null | string): string[] {
+const parseGitTags = (tagsString: null | string): string[] => {
   if (tagsString === null) return []
   const tags = tagsString
     .trim()
@@ -62,7 +109,7 @@ export async function gitReset(git: Simple): Promise<void> {
  */
 export async function gitResetToInitialCommit(git: Simple): Promise<void> {
   await git.raw([`clean`, `-d`, `-x`, `-f`])
-  const trunkBranch = `master`
+  const trunkBranch = `main`
   await git.raw(`checkout ${trunkBranch}`.split(` `))
   await git.raw(`rev-list --max-parents=0 HEAD`.split(` `)).then((initialCommitSHA) => {
     git.raw([`reset`, `--hard`, initialCommitSHA.trim()])
@@ -160,7 +207,7 @@ export async function gitDeleteAllTagsInRepo(git: Simple): Promise<void> {
 //     }
 //   }
 //
-//   const githubRepo = await parseGitHubRepoInfoFromGitConfig()
+//   const githubRepo = await pars eGitHubRepoInfoFromGitConfig()
 
 //   // TODO Refactor this to have instance passed as arg.
 //   const octoOps = {} as Octokit.Options
@@ -231,58 +278,14 @@ export interface BasicGitHubRepoInfo {
 }
 
 /**
- * Extract the github repo name and owner from the git config. If anything goes
- * wrong during extraction a specific error about it will be thrown.
- */
-export async function parseGitHubRepoInfoFromGitConfig(): Promise<BasicGitHubRepoInfo> {
-  // Inspiration from how `$ hub pr show` works
-  // https://github.com/github/hub/blob/a5fbf29be61a36b86c7f0ff9e9fd21090304c01f/commands/pr.go#L327
-
-  const gitConfig = await parseGitConfig()
-  if (gitConfig === null) {
-    throw new Error(`Could not parse your git config`)
-  }
-
-  const gitOrigin = gitConfig[`remote "origin"`]
-  if (gitOrigin === undefined) {
-    throw new Error(`Could not find a configured origin in your git config`)
-  }
-
-  const gitOriginURL: string = gitOrigin[`url`]
-  if (gitOriginURL === undefined) {
-    throw new Error(`Could not find a URL in your remote origin config in your git config`)
-  }
-
-  const githubRepoURL = parseGitHubURL(gitOriginURL)
-  if (githubRepoURL === null) {
-    throw new Error(`Could not parse the URL in your remote origin config in your git config`)
-  }
-  if (githubRepoURL.owner === null) {
-    throw new Error(
-      `Could not parse out the GitHub owner from the URL in your remote origin config in your git config`
-    )
-  }
-  if (githubRepoURL.name === null) {
-    throw new Error(
-      `Could not parse out the GitHub repo name from the URL in your remote origin config in your git config`
-    )
-  }
-
-  return {
-    name: githubRepoURL.name,
-    owner: githubRepoURL.owner,
-  }
-}
-
-/**
  * Determine if the current branch is trunk or not. Currently a simple check
- * against if current branch is master or not but TODO in the future will
+ * against if current branch is main or not but TODO in the future will
  * account for checking against the remote Git repo for if the so-called `base`
- * branch of the repo is set to something else than `master`.
+ * branch of the repo is set to something else than `main`.
  */
 export async function isTrunk(git: Simple): Promise<boolean> {
   const branchSummary = await git.branch({})
-  return branchSummary.current === `master`
+  return branchSummary.current === `main`
 }
 
 /**

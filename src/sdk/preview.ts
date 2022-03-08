@@ -24,7 +24,7 @@ export interface Options {
   readFromCIEnvironment?: boolean
 }
 
-export async function runPreviewRelease(options: Options) {
+export const runPreviewRelease = async (options: Options) => {
   const cwd = options.cwd ?? process.cwd()
   const readFromCIEnvironment = options.readFromCIEnvironment ?? true
   const context = await getContext({
