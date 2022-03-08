@@ -21,7 +21,10 @@ class Git2 {
    * Get the name of the currently checked out branch.
    */
   getCurrentBranchName() {
-    return isogit.currentBranch({ fs: this.fs, dir: this.dir })
+    return isogit.currentBranch({
+      fs: this.fs,
+      dir: this.dir,
+    })
   }
   /**
    * Check how the local branch is not in sync or is with the remote.
