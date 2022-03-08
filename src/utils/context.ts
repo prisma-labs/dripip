@@ -110,6 +110,7 @@ export const getLocationContext = async ({
   // const branchesSummary = await git.branch({})
 
   let currentBranchName = await git.getCurrentBranchName()
+  console.log({ githubCIEnvironment, readFromCIEnvironment })
 
   if (!currentBranchName && githubCIEnvironment && githubCIEnvironment.parsed.branchName) {
     currentBranchName = githubCIEnvironment.parsed.branchName
