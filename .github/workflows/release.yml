@@ -8,6 +8,10 @@ on:
         type: boolean
         required: false
         description: Is this a stable release? False by default.
+      extraFlags:
+        type: string
+        required: false
+        description: Extra CLI flags to append to the executed CLI command.
     secrets:
       npmToken:
         required: true
@@ -31,8 +35,6 @@ jobs:
       - run: |
           yarn_version=$(yarn --version)
           yarn_version_major=${yarn_version:0:1}
-          echo ${yarn_version}
-          echo ${yarn_version_major}
 
           if [ "${yarn_version_major}" = '1' ]; then
             yarn install --immutable
@@ -46,7 +48,7 @@ jobs:
           else
             sub_command='stable'
           fi
-          yarn dripip --json ${preview_or_pr} > result.json
+          yarn dripip ${sub_command} --json ${extraFlags} > result.json
           jq '.' < result.json
         env:
           NPM_TOKEN: ${{secrets.npmToken}}
