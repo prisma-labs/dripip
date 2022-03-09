@@ -32,7 +32,8 @@ jobs:
           node-version: 16.x
           cache: 'yarn'
       # TODO Do not assume yarn is what the project is using
-      - run: |
+      - name: Install Dependencies
+        run: |
           yarn_version=$(yarn --version)
           yarn_version_major=${yarn_version:0:1}
 
@@ -42,7 +43,8 @@ jobs:
             yarn install --frozen-lockfile
           fi
       # TODO Do not assume that dripip is locally installed.
-      - run: |
+      - name: Publish Release
+        run: |
           yarn_version=$(yarn --version)
           yarn_version_major=${yarn_version:0:1}
           if [ "${yarn_version_major}" = '1' ]; then
