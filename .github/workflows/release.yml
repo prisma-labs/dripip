@@ -1,0 +1,53 @@
+# https://www.notion.so/prismaio/Prisma-Development-Slack-App-49969876d7a1449991336ed2e5c1e87c
+name: Dripip
+
+on:
+  workflow_call:
+    inputs:
+      isStable:
+        type: boolean
+        required: false
+        description: Is this a stable release? False by default.
+    secrets:
+      npmToken:
+        required: true
+        description: The NPM token that will be used to publish the package to the npm registry.
+      githubToken:
+        required: true
+        description: The GitHub token that will be used to create a GitHub release on the repository.
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+      # TODO Do not assume yarn is what the project is using
+      - run: |
+          yarn_version=$(yarn --version)
+          yarn_version_major=${yarn_version:0:1}
+          echo ${yarn_version}
+          echo ${yarn_version_major}
+
+          if [ "${yarn_version_major}" = '1' ]; then
+            yarn install --immutable
+          else
+            yarn install --frozen-lockfile
+          fi
+      # TODO Do not assume that dripip is locally installed.
+      - run: |
+          if [ '${{inputs.isStable}}' = 'true' ]; then
+            sub_command='preview-or-pr'
+          else
+            sub_command='preview'
+          fi
+          yarn dripip --json ${preview_or_pr} > result.json
+          jq '.' < result.json
+        env:
+          NPM_TOKEN: ${{secrets.npmToken}}
+          GITHUB_TOKEN: ${{secrets.githubToken}}
