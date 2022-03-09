@@ -133,7 +133,22 @@ For example checkout what's coming up in dripip right now by visiting https://gi
 
 ### Usage inside GitHub Actions
 
-We are interested in building a `dripip` GitHub Action. Until it ships, here are the things you need to do.
+There is a reusable GitHub workflow for running `dripip` releases. It can be used like this:
+
+```yml
+name: trunk
+on:
+  push:
+    branches: [main]
+jobs:
+  release-canary:
+    uses: prisma-labs/dripip/.github/workflows/release.yml@master
+    secrets:
+      npmToken: ${{secrets.NPM_TOKEN}}
+      githubToken: ${{secrets.GITHUB_TOKEN}}
+```
+
+If this does not work for you here is a more manual approach.
 
 1. Have `dripip` installed as a dev dependency
 1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
@@ -158,11 +173,6 @@ jobs:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
-
-Real World Usage:
-
-- [`dripip`](https://github.com/prisma-labs/dripip/blob/master/.github/workflows/main.yml)
-- [`nexus`](https://github.com/graphql-nexus/nexus/blob/master/.github/workflows/trunk.yml)
 
 ## CLI
 
