@@ -44,7 +44,7 @@ jobs:
           if [ '${{inputs.isStable}}' = 'true' ]; then
             sub_command='preview-or-pr'
           else
-            sub_command='preview'
+            sub_command='stable'
           fi
           yarn dripip --json ${preview_or_pr} > result.json
           jq '.' < result.json
