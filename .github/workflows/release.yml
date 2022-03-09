@@ -43,12 +43,21 @@ jobs:
           fi
       # TODO Do not assume that dripip is locally installed.
       - run: |
+          yarn_version=$(yarn --version)
+          yarn_version_major=${yarn_version:0:1}
+          if [ "${yarn_version_major}" = '1' ]; then
+            silent_flag='--silent'
+          else
+            silent_flag=''
+          fi
+
           if [ '${{inputs.isStable}}' = 'true' ]; then
             sub_command='preview-or-pr'
           else
             sub_command='stable'
           fi
-          yarn dripip ${sub_command} --json ${{inputs.extraFlags}}
+
+          yarn ${silent_flag} dripip ${sub_command} --json ${{inputs.extraFlags}}
         env:
           NPM_TOKEN: ${{secrets.npmToken}}
           GITHUB_TOKEN: ${{secrets.githubToken}}
