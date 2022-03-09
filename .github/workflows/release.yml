@@ -48,7 +48,7 @@ jobs:
           else
             sub_command='stable'
           fi
-          yarn dripip ${sub_command} --json ${inputs.extraFlags}
+          yarn dripip ${sub_command} --json ${{inputs.extraFlags}}
         env:
           NPM_TOKEN: ${{secrets.npmToken}}
           GITHUB_TOKEN: ${{secrets.githubToken}}
