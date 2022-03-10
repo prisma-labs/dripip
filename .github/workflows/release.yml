@@ -54,9 +54,9 @@ jobs:
           fi
 
           if [ '${{inputs.isStable}}' = 'true' ]; then
-            sub_command='preview-or-pr'
-          else
             sub_command='stable'
+          else
+            sub_command='preview-or-pr'
           fi
 
           yarn ${silent_flag} dripip ${sub_command} --json ${{inputs.extraFlags}}
