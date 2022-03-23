@@ -12,19 +12,19 @@ type Options = {
   /**
    * Should publishing to npm take place?
    *
-   * @default true
+   * @defaultValue true
    */
   npm?: boolean
   /**
    * Should the semver git tag have a "v" prefix.
    *
-   * @default false
+   * @defaultValue false
    */
   gitTagVPrefix?: boolean
   /**
    * Should each given dist tag have a corresponding git tag made?
    *
-   * @default 'all'
+   * @defaultValue 'all'
    */
   gitTag?: `all` | `just_version` | `just_dist_tags` | `none`
 }
@@ -169,8 +169,11 @@ export async function* publishPackage(input: PublishPlan): AsyncGenerator<Progre
  * It can happen that no user name or email is setup on a machine for git.
  * Certain git commands fail in that case like creating annotated tags. Ref:
  * https://stackoverflow.com/questions/11656761/git-please-tell-me-who-you-are-error.
+ *
+ * TODO refactor using https://github.com/isomorphic-git/isomorphic-git/issues/236#issuecomment-533889774
+ * To move away from simple-git.
  */
-async function setupGitUsernameAndEmailOnCI(git: Git.Simple) {
+const setupGitUsernameAndEmailOnCI = async (git: Git.Simple) => {
   if (!isGitHubCIEnvironment()) return
 
   const [email, name] = await Promise.all([
