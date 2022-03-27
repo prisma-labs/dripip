@@ -32,7 +32,7 @@
     "test:system": "jest --testTimeout 15000 --testPathPattern '.*/tests/.*' --verbose",
     "test": "jest  --testTimeout 15000 --verbose",
     "build:docs:toc": "doctoc README.md",
-    "build:docs": "yarn build:docs:commands && yarn build:docs:toc",
+    "build:docs": "yarn build:docs:toc",
     "prepack": "yarn build"
   },
   "dependencies": {

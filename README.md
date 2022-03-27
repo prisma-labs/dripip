@@ -7,6 +7,7 @@ Opinionated CLI for continuous delivery of npm packages.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [Installation](#installation)
 - [Overview](#overview)
   - [Pull-Request Releases](#pull-request-releases)
@@ -16,6 +17,7 @@ Opinionated CLI for continuous delivery of npm packages.
   - [Release Notes (aka. Changelogs)](#release-notes-aka-changelogs)
 - [Recipes](#recipes)
   - [Usage inside GitHub Actions](#usage-inside-github-actions)
+  - [Auditable and Sharable Stable Releases](#auditable-and-sharable-stable-releases)
 - [CLI](#cli)
 - [`dripip get-current-commit-version`](#dripip-get-current-commit-version)
 - [`dripip get-current-pr-num`](#dripip-get-current-pr-num)
@@ -133,7 +135,14 @@ For example checkout what's coming up in dripip right now by visiting https://gi
 
 ### Usage inside GitHub Actions
 
-There is a reusable GitHub workflow for running `dripip` releases. It can be used like this:
+There is a Dripip GitHub action.
+
+It has these prerequisites:
+
+1. Have `dripip` installed as a dev dependency
+1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
+
+It can be used like this:
 
 ```yml
 name: trunk
@@ -142,36 +151,38 @@ on:
     branches: [main]
 jobs:
   release-canary:
-    uses: prisma-labs/dripip/.github/workflows/release.yml@master
-    secrets:
-      npmToken: ${{secrets.NPM_TOKEN}}
-      githubToken: ${{secrets.GITHUB_TOKEN}}
-```
-
-If this does not work for you here is a more manual approach.
-
-1. Have `dripip` installed as a dev dependency
-1. Upload an `NPM_TOKEN` to your repo ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets))
-1. Expose `GITHUB_TOKEN` to `dripip` ([gh docs](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token))
-1. Expose `NPM_TOKEN` to `dripip`
-1. Checkout all repo commits and tags
-
-Example Workflow Configuration:
-
-```yml
-jobs:
-  publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: prisma-labs/dripip@master
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v2
-      - run: yarn --immutable
-      - run: yarn dripip preview-or-pr
-        env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          npmToken: ${{secrets.NPM_TOKEN}}
+          githubToken: ${{secrets.DRIPIP_GITHUB_TOKEN}}
+```
+
+> If the action does not work for your use-case please open an issue about what your needs are. Meanwhile look at the `action.yml` source and inline a variant of it that works in your own GitHub workflow.
+
+### Auditable and Sharable Stable Releases
+
+A nice way to do stable releases is use GitHub workflow dispatch. This keeps stable releases manual but moves the usage onto GitHub actions via Workflow Dispatch UI. This has the following benefits:
+
+1. Anyone on your team can cut a stable release without need for working local setup.
+2. Every stable release has an auditable CI run associated to it.
+
+It can be done like this:
+
+```yml
+# .github/workflows/release.yml
+name: Release
+on: workflow_dispatch
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: prisma-labs/dripip@master
+        with:
+          isStable: true
+          npmToken: ${{secrets.NPM_TOKEN}}
+          githubToken: ${{secrets.DRIPIP_GITHUB_TOKEN}}
 ```
 
 ## CLI
