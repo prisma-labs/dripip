@@ -23,12 +23,12 @@ export const parseGitHubRepoInfoFromGitConfig = async (params?: {
     throw new Error(`Could not parse your git config`)
   }
 
-  const gitOrigin = gitConfig[`remote "origin"`]
+  const gitOrigin = gitConfig[`remote "origin"`] as { url: string | undefined } | undefined
   if (gitOrigin === undefined) {
     throw new Error(`Could not find a configured origin in your git config`)
   }
 
-  const gitOriginURL: string = gitOrigin[`url`]
+  const gitOriginURL = gitOrigin[`url`]
   if (gitOriginURL === undefined) {
     throw new Error(`Could not find a URL in your remote origin config in your git config`)
   }

@@ -88,6 +88,6 @@ class Git2 {
   }
 }
 
-export function createGit(input?: Input) {
+export const createGit = (input?: Input) => {
   return new Git2(input)
 }
