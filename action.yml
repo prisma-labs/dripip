@@ -3,7 +3,7 @@ description: Use Dripip to automate package releases in your CI.
 inputs:
   isStable:
     required: false
-    description: Is this a stable release? False by default.
+    description: Is this a stable release? Values can be 'true' or 'false'. By default is 'false'.
   extraFlags:
     required: false
     description: Extra CLI flags to append to the executed CLI command.
