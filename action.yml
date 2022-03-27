@@ -2,11 +2,9 @@ name: dripip
 description: Use Dripip to automate package releases in your CI.
 inputs:
   isStable:
-    # type: boolean
     required: false
     description: Is this a stable release? False by default.
   extraFlags:
-    # type: string
     required: false
     description: Extra CLI flags to append to the executed CLI command.
   npmToken:
@@ -30,6 +28,7 @@ runs:
     - name: Install Dependencies
       shell:  bash
       run: |
+        corepack enable
         yarn_version=$(yarn --version)
         yarn_version_major=${yarn_version:0:1}
 
