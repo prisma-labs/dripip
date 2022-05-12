@@ -2772,7 +2772,7 @@ __metadata:
     parse-github-url: ^1.0.2
     prettier: 2.6.2
     request: ^2.88.2
-    simple-git: ^2.23.0
+    simple-git: ^3.0.0
     strip-ansi: 6.0.1
     tmp: 0.2.1
     ts-jest: 27.1.4
@@ -6182,14 +6182,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^2.23.0":
-  version: 2.48.0
-  resolution: "simple-git@npm:2.48.0"
+"simple-git@npm:^3.0.0":
+  version: 3.7.1
+  resolution: "simple-git@npm:3.7.1"
   dependencies:
     "@kwsites/file-exists": ^1.1.1
     "@kwsites/promise-deferred": ^1.1.1
-    debug: ^4.3.2
-  checksum: ba84b942ad5cebb9d43df2f147e414e348584f40023121896959f22d05e260ae71b862a93db5c473413f8d218f2122f2964d22f6b7bd77cc12dabc7e73b066be
+    debug: ^4.3.3
+  checksum: df5361e892cadf73f0bfad2b34f3609809465c4ba1c8f3f95b2650e8a40c366c78a1a99c5e4f0eafc2acd33a85a9660d834690bb6331ef11bc1c064f526cd4a8
   languageName: node
   linkType: hard
 
