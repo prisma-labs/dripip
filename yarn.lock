@@ -973,15 +973,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/rest@npm:^18.12.0":
-  version: 18.12.0
-  resolution: "@octokit/rest@npm:18.12.0"
+"@octokit/rest@npm:^19.0.0":
+  version: 19.0.0
+  resolution: "@octokit/rest@npm:19.0.0"
   dependencies:
     "@octokit/core": ^3.5.1
     "@octokit/plugin-paginate-rest": ^2.16.8
     "@octokit/plugin-request-log": ^1.0.4
     "@octokit/plugin-rest-endpoint-methods": ^5.12.0
-  checksum: c18bd6676a60b66819b016b0f969fcd04d8dfa04d01b7af9af9a7410ff028c621c995185e29454c23c47906da506c1e01620711259989a964ebbfd9106f5b715
+  checksum: 420a9401d339e00246094bf816b62f2d2f5b10e5ffb9c947b10b88cdd50daaca93c2ecf17a07ee03192826cb9a86f72a12be1cbd0dab2e0b41250ade2a2948b9
   languageName: node
   linkType: hard
 
@@ -2741,7 +2741,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dripip@workspace:."
   dependencies:
-    "@octokit/rest": ^18.12.0
+    "@octokit/rest": ^19.0.0
     "@prisma-labs/prettier-config": 0.1.0
     "@swc/core": 1.2.198
     "@swc/helpers": 0.3.17

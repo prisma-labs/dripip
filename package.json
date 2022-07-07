@@ -36,7 +36,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@octokit/rest": "^18.12.0",
+    "@octokit/rest": "^19.0.0",
     "@types/debug": "^4.1.7",
     "@types/parse-git-config": "^3.0.1",
     "@types/parse-github-url": "^1.0.0",
