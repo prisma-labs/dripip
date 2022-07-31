@@ -29,14 +29,23 @@ runs:
       shell:  bash
       run: |
         corepack enable
-        yarn_version=$(yarn --version)
-        yarn_version_major=${yarn_version:0:1}
 
-        if [ "${yarn_version_major}" = '1' ]; then
-          yarn install --immutable
+        if [ -f "pnpm-lock.yaml" ]; then
+          pnpm install
+        elif [ -f "package-lock.json" ]; then
+          npm install
         else
-          yarn install --frozen-lockfile
+          yarn_version=$(yarn --version)
+          yarn_version_major=${yarn_version:0:1}
+
+          if [ "${yarn_version_major}" = '1' ]; then
+            yarn install --immutable
+          else
+            yarn install --frozen-lockfile
+          fi
         fi
+
+        
     # TODO Do not assume that dripip is locally installed.
     - name: Publish Release
       shell:  bash
