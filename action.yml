@@ -23,8 +23,6 @@ runs:
     - uses: actions/setup-node@v3
       with:
         node-version: 16.x
-        cache: 'yarn'
-    # TODO Do not assume yarn is what the project is using
     - name: Install Dependencies
       shell:  bash
       run: |
