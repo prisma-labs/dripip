@@ -45,7 +45,6 @@ runs:
           echo "Could not detect which package manager is being used."
           exit 1
         fi
-
         
     # TODO Do not assume that dripip is locally installed.
     - name: Publish Release
@@ -54,18 +53,28 @@ runs:
         NPM_TOKEN: ${{inputs.npmToken}}
         GITHUB_TOKEN: ${{inputs.githubToken}}
       run: |
-        yarn_version=$(yarn --version)
-        yarn_version_major=${yarn_version:0:1}
-        if [ "${yarn_version_major}" = '1' ]; then
-          silent_flag='--silent'
-        else
-          silent_flag=''
-        fi
-
         if [ '${{inputs.isStable}}' = 'true' ]; then
           sub_command='stable'
         else
           sub_command='preview-or-pr'
         fi
 
-        yarn ${silent_flag} dripip ${sub_command} --json ${{inputs.extraFlags}}
+        if [ -f "pnpm-lock.yaml" ]; then
+          pnpm dripip ${sub_command} --json ${{inputs.extraFlags}}
+        elif [ -f "package-lock.json" ]; then
+          npx dripip ${sub_command} --json ${{inputs.extraFlags}}
+        elif [ -f "yarn.lock" ]; then
+          yarn_version=$(yarn --version)
+          yarn_version_major=${yarn_version:0:1}
+
+          if [ "${yarn_version_major}" = '1' ]; then
+            silent_flag='--silent'
+          else
+            silent_flag=''
+          fi
+
+          yarn ${silent_flag} dripip ${sub_command} --json ${{inputs.extraFlags}}
+        else
+          echo "Could not detect which package manager is being used."
+          exit 1
+        fi
