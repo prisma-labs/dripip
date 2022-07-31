@@ -34,7 +34,7 @@ runs:
           pnpm install
         elif [ -f "package-lock.json" ]; then
           npm install
-        else
+        elif [ -f "yarn.lock" ]; then
           yarn_version=$(yarn --version)
           yarn_version_major=${yarn_version:0:1}
 
@@ -43,6 +43,9 @@ runs:
           else
             yarn install --frozen-lockfile
           fi
+        else
+          echo "Could not detect which package manager is being used."
+          exit 1
         fi
 
         
