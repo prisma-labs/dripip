@@ -1,0 +1,8 @@
+ignore$
+(?:^|/)(?i)COPYRIGHT
+(?:^|/)(?i)LICEN[CS]E
+(?:^|/)vendor/
+/git/
+^\.github/
+\.lock$
+\.pack$
