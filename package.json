@@ -44,7 +44,7 @@
     "chalk": "^4.1.0",
     "common-tags": "^1.8.2",
     "debug": "^4.3.3",
-    "execa": "5",
+    "execa": "7",
     "fs-jetpack": "^4.3.1",
     "isomorphic-git": "^1.8.0",
     "parse-git-config": "^3.0.0",
