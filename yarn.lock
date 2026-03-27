@@ -1237,17 +1237,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node14@npm:1.0.2":
-  version: 1.0.2
-  resolution: "@tsconfig/node14@npm:1.0.2"
-  checksum: 6260dd461728c200921b4848cd9e1df2bfb2c1ee6c1b6dadbc9bf81afadff8ddf11c6312e08c07de89f6c40163916ff8307f6008bf6c76a4d72a2833dae7bf7c
-  languageName: node
-  linkType: hard
-
 "@tsconfig/node14@npm:^1.0.0":
   version: 1.0.1
   resolution: "@tsconfig/node14@npm:1.0.1"
   checksum: 976345e896c0f059867f94f8d0f6ddb8b1844fb62bf36b727de8a9a68f024857e5db97ed51d3325e23e0616a5e48c034ff51a8d595b3fe7e955f3587540489be
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node16@npm:16.1.0":
+  version: 16.1.0
+  resolution: "@tsconfig/node16@npm:16.1.0"
+  checksum: a0a176492e3802a5340eda1e61eabc8d4767e46496bc080ce9c381993ce8c5fb3df8f65267c3a9af4335bc00a85028845f795ea27545f63d62b93ab6675cf8fa
   languageName: node
   linkType: hard
 
@@ -2746,7 +2746,7 @@ __metadata:
     "@swc/core": 1.2.198
     "@swc/helpers": 0.3.17
     "@swc/jest": 0.2.21
-    "@tsconfig/node14": 1.0.2
+    "@tsconfig/node16": 16.1.0
     "@types/common-tags": 1.8.1
     "@types/debug": ^4.1.7
     "@types/eslint": 8.4.3
