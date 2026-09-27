@@ -2242,6 +2242,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chalk@npm:^6.0.0":
+  version: 6.0.1
+  resolution: "chalk@npm:6.0.1"
+  checksum: 285b106e7cb6251af1f948f277c4836ce04ab4d945949dea1473e838041cae6029ff01fb218596505707a310811204f10cb2b75f992e76475275dc5fa0ca4a7f
+  languageName: node
+  linkType: hard
+
 "char-regex@npm:^1.0.2":
   version: 1.0.2
   resolution: "char-regex@npm:1.0.2"
@@ -2758,7 +2765,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 5.27.1
     "@typescript-eslint/parser": 5.27.1
     chaindown: ^0.1.0-next.2
-    chalk: ^4.1.0
+    chalk: ^6.0.0
     common-tags: ^1.8.2
     debug: ^4.3.3
     doctoc: 1.4.0
